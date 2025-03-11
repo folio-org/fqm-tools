@@ -1,4 +1,5 @@
 name: Generate field lists
+run-name: '[${{ github.actor }}] Generate field list of ${{ github.event.inputs.entity-types }} entity types'
 
 on:
   workflow_dispatch:
@@ -19,8 +20,9 @@ on:
         default: 'master'
 
 jobs:
-  eslint:
+  dump:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
@@ -28,6 +30,7 @@ jobs:
       - run: bun install --frozen-lockfile
 
       - name: Clone mod-fqm-manager
+        if: ${{ github.event.inputs.entity-types == 'all' }}
         run: |
           (
             mkdir external &&
@@ -38,7 +41,7 @@ jobs:
           )
 
       - name: Dump entity types
-        run: bun scripts/dump-entity-type-information.ts $(date -I) ${{ github.event.inputs.entity-types }}
+        run: bun scripts/dump-entity-type-information.ts "$(date -I) entity types" ${{ github.event.inputs.entity-types }}
         env:
           FQM_USERNAME: ${{ secrets.USERNAME }}
           FQM_PASSWORD: ${{ secrets.PASSWORD }}
