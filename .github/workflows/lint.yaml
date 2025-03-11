@@ -14,5 +14,11 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bun eslint
-      - run: bun run lint
+      - run: bun run lint --output-file eslint_report.json --format json
+        continue-on-error: true
+
+      - uses: ataylorme/eslint-annotate-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-warning: true
+          report-json: eslint_report.json
