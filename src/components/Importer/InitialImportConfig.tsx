@@ -1,6 +1,6 @@
 import { EntityType } from '@/types';
 import { json } from '@codemirror/lang-json';
-import { Autocomplete, Button, DialogActions, DialogContent, Grid, TextField } from '@mui/material';
+import { Autocomplete, Button, DialogActions, DialogContent, Grid2 as Grid, TextField } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { Schema } from 'genson-js/dist';
 import json5 from 'json5';
@@ -22,7 +22,7 @@ export default function InitialImportConfig({
     <>
       <DialogContent>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Autocomplete
               freeSolo
               options={entityType.sources?.map((s) => s.alias) ?? []}
@@ -48,7 +48,7 @@ export default function InitialImportConfig({
               )}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <label>JSON schema</label>
             <CodeMirror
               value={state.schemaRaw}

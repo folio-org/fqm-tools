@@ -1,8 +1,9 @@
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
-import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
+import JSONTable from './JSONTable';
 
 enum State {
   NOT_STARTED,
@@ -13,32 +14,36 @@ enum State {
   ERROR_QUERY,
 }
 
-export default function CheckFlattening({
+export default function QueryValues({
   socket,
   entityType,
 }: Readonly<{
   socket: Socket;
   entityType: EntityType | null;
 }>) {
-  const [state, setState] = useState<{ state: State; result?: string }>({ state: State.NOT_STARTED });
-  const [includeHidden, setIncludeHidden] = useState(false);
+  const [started, setStarted] = useState(new Date().getTime());
+  const [ended, setEnded] = useState(new Date().getTime());
+  const [state, setState] = useState<{ state: State; result?: { value: string; label?: string }[] | string }>({
+    state: State.NOT_STARTED,
+  });
+
+  const [field, setField] = useState<string>('id');
 
   const run = useCallback(
-    (entityType: EntityType) => {
+    (entityType: EntityType, field: string) => {
       setState({ state: State.STARTED });
 
-      socket.emit('check-entity-type-validity', { entityType, includeHidden });
+      socket.emit('run-query-values', { entityType, field });
       socket.on(
-        'check-entity-type-validity-result',
+        'run-query-values-result',
         (result: {
-          queried: boolean;
-          persisted: boolean;
+          persisted?: boolean;
           queryError?: string;
           persistError?: string;
-          queryResults?: string;
+          queryResults?: { value: string; label?: string }[];
         }) => {
           if (result.queryError || result.persistError || result.queryResults) {
-            socket.off('check-entity-type-validity-result');
+            socket.off('run-query-values-result');
           }
 
           if (result.queryError) {
@@ -47,13 +52,16 @@ export default function CheckFlattening({
             setState({ state: State.ERROR_PERSIST, result: result.persistError });
           } else if (result.queryResults) {
             setState({ state: State.DONE, result: result.queryResults });
+            console.log(result.queryResults);
+            setEnded(new Date().getTime());
           } else {
             setState({ state: State.PERSISTED });
+            setStarted(new Date().getTime());
           }
         },
       );
     },
-    [socket, includeHidden],
+    [socket],
   );
 
   if (entityType === null) {
@@ -62,20 +70,31 @@ export default function CheckFlattening({
 
   return (
     <>
-      <Typography>
-        Checks that <code>mod-fqm-manager</code> can successfully parse and flatten the JSON representation of the
-        entity type. Note that translations will not be updated here until the entity type is saved and the module is
-        restarted.
-      </Typography>
+      <Typography>Queries values for a field.</Typography>
 
-      <FormControlLabel
-        label="Include hidden columns"
-        control={<Checkbox checked={includeHidden} onChange={(e) => setIncludeHidden(e.target.checked)} />}
-      />
+      <Box sx={{ display: 'flex', m: 2, gap: '1em' }}>
+        <Autocomplete
+          freeSolo
+          options={entityType.columns?.map((c) => c.name) ?? []}
+          value={field}
+          onChange={(_e, nv) => setField(nv ?? '')}
+          sx={{ fontFamily: 'monospace' }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              sx={{ width: '60ch', fontFamily: 'monospace' }}
+              onChange={(e) => setField((e.currentTarget as HTMLInputElement).value)}
+              size="small"
+              label="Field"
+              required
+            />
+          )}
+        />
 
-      <Button variant="outlined" onClick={() => run(entityType)}>
-        Run
-      </Button>
+        <Button variant="outlined" onClick={() => run(entityType, field)}>
+          Run
+        </Button>
+      </Box>
 
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
         {state.state === State.NOT_STARTED ? (
@@ -99,14 +118,10 @@ export default function CheckFlattening({
         ) : (
           <Done color="success" />
         )}{' '}
-        Query <code>/entity-types/{entityType.id}</code>
+        Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
       </Typography>
-
-      {!!state.result && <pre>{state.result}</pre>}
-
-      <Alert severity="info">
-        Translations may not show correctly until the application is restarted, due to caching.
-      </Alert>
+      {!!state.result &&
+        (typeof state.result === 'string' ? <pre>{state.result}</pre> : <JSONTable data={state.result} />)}
     </>
   );
 }

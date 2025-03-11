@@ -26,7 +26,8 @@ export default function JSONTable({ data }: Readonly<{ data: Record<string, unkn
         } else {
           try {
             JSON.parse(row[key] as string);
-          } catch (e) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (e: unknown) {
             jsonKeys[key] = false;
             break;
           }

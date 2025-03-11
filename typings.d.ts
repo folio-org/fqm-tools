@@ -15,3 +15,6 @@ declare module 'react-table-column-resizer' {
 
   export default function ColumnResizer(props: Props): JSX.Element;
 }
+
+declare module 'prettier/plugins/estree.mjs';
+declare module 'prettier/plugins/typescript.mjs';
