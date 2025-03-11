@@ -3,7 +3,7 @@
   "extends": [
     "config:best-practices"
   ],
-  "packageFules": [
+  "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automergeType": "branch",
