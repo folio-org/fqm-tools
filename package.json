@@ -51,20 +51,20 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.5",
-    "@types/fast-stats": "^0.0.35",
-    "@types/node": "^20.17.24",
-    "@types/papaparse": "^5.3.15",
+    "@types/bun": "1.2.5",
+    "@types/fast-stats": "0.0.35",
+    "@types/node": "20.17.24",
+    "@types/papaparse": "5.3.15",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "@types/uuid": "^9.0.8",
-    "@eslint/eslintrc": "^3.3.0",
-    "eslint": "^9.22.0",
-    "eslint-config-prettier": "^10.1.1",
-    "eslint-config-next": "^15.2.2",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.4.3",
-    "typescript": "^5.8.2"
+    "@types/uuid": "9.0.8",
+    "@eslint/eslintrc": "3.3.0",
+    "eslint": "9.22.0",
+    "eslint-config-prettier": "10.1.1",
+    "eslint-config-next": "15.2.2",
+    "husky": "9.1.7",
+    "lint-staged": "15.4.3",
+    "typescript": "5.8.2"
   },
   "lint-staged": {
     "*.{json,json5,css,md}": "prettier --write",
