@@ -1,8 +1,9 @@
-name: Build
+name: Lint
 
 on:
+  # linting already happens in build.yaml, however, running it like this adds annotations to the
+  #   PR's file tab inline with the code
   - pull_request
-  - push
 
 jobs:
   eslint:
@@ -13,4 +14,4 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bun run build
+      - run: bun run lint
