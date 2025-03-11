@@ -10,7 +10,7 @@ on:
         default: 'eureka-snapshot'
         type: environment
       entity-types:
-        description: 'Entity types to dump; either "public", "all", or a list of space-separated IDs'
+        description: 'Entity types to dump: "public", "all", or a list of space-separated IDs'
         required: true
         default: 'public'
         type: string
