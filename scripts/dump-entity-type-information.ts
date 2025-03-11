@@ -242,7 +242,7 @@ async function getOperators(column: EntityTypeField): Promise<string> {
     case 'number':
     case 'date':
     case 'object':
-      return '=, !=, >, >=, <, <≤, empty';
+      return '=, !=, >, >=, <, <=, empty';
     case 'boolean':
       return '=, !=, empty';
     default:
