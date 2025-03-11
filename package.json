@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint",
     "speed:benchmark": "src/scripts/speed-comparison/benchmark.ts",
     "speed:chart": "src/scripts/speed-comparison/chart.ts"
   },
