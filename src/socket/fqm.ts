@@ -53,7 +53,7 @@ export async function authenticate(fqmConnection: FqmConnection) {
     };
   }
 
-  console.log('Successfully grabbed authentication token', token);
+  console.log('Successfully grabbed authentication token');
 }
 
 export async function verifyFqmConnection(fqmConnection: FqmConnection) {
@@ -72,7 +72,7 @@ export async function verifyFqmConnection(fqmConnection: FqmConnection) {
 
     if (response.status !== 200) {
       const text = await response.text();
-      if (text.includes('Token missing')) {
+      if (text.includes('Token missing') || text.includes('Unauthorized')) {
         await authenticate(fqmConnection);
         return verifyFqmConnection(fqmConnection);
       }
@@ -88,9 +88,9 @@ export async function verifyFqmConnection(fqmConnection: FqmConnection) {
   }
 }
 
-export async function fetchAllEntityTypes(fqmConnection: FqmConnection, includeHidden = false) {
+export async function fetchAllEntityTypes(fqmConnection: FqmConnection) {
   const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types?includeHidden=${includeHidden ? 'true' : 'false'}`,
+    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types`,
     {
       headers: {
         'x-okapi-tenant': fqmConnection.tenant,
@@ -101,9 +101,9 @@ export async function fetchAllEntityTypes(fqmConnection: FqmConnection, includeH
 
   if (response.status !== 200) {
     const text = await response.text();
-    if (text.includes('Token missing')) {
+    if (text.includes('Token missing') || text.includes('Unauthorized')) {
       await authenticate(fqmConnection);
-      return fetchAllEntityTypes(fqmConnection, includeHidden);
+      return fetchAllEntityTypes(fqmConnection);
     }
     throw new Error(`Got ${response.status} ${response.statusText} (${text})`);
   }
@@ -124,7 +124,7 @@ export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId
 
   if (response.status !== 200) {
     const text = await response.text();
-    if (text.includes('Token missing')) {
+    if (text.includes('Token missing') || text.includes('Unauthorized')) {
       await authenticate(fqmConnection);
       return fetchEntityType(fqmConnection, entityTypeId, includeHidden);
     }
@@ -173,7 +173,7 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
 
   if (response.status !== 200) {
     const text = await response.text();
-    if (text.includes('Token missing')) {
+    if (text.includes('Token missing') || text.includes('Unauthorized')) {
       await authenticate(fqmConnection);
       return runQuery(fqmConnection, entityType, query);
     }
@@ -197,7 +197,7 @@ export async function runQueryForValues(fqmConnection: FqmConnection, entityType
 
   if (response.status !== 200) {
     const text = await response.text();
-    if (text.includes('Token missing')) {
+    if (text.includes('Token missing') || text.includes('Unauthorized')) {
       await authenticate(fqmConnection);
       return runQueryForValues(fqmConnection, entityType, field);
     }
@@ -281,7 +281,7 @@ export async function migrate(
 
   if (response.status !== 200) {
     const text = await response.text();
-    if (text.includes('Token missing')) {
+    if (text.includes('Token missing') || text.includes('Unauthorized')) {
       await authenticate(fqmConnection);
       return migrate(fqmConnection, entityTypeId, fqlQuery, fields);
     }

@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/src/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
 import { useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
 

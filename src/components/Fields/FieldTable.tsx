@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/src/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
 import { Box } from '@mui/material';
 import { SetStateAction } from 'react';
 import ColumnResizer from 'react-table-column-resizer';

@@ -1,5 +1,5 @@
-import { ResultRowPretty } from '@/src/scripts/dump-entity-type-information';
-import { Mapping } from '@/src/scripts/get-column-mapping';
+import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { Mapping } from '@/scripts/get-column-mapping';
 import { Grid } from '@mui/material';
 import { parse } from 'papaparse';
 import { useState } from 'react';

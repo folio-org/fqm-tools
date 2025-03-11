@@ -1,8 +1,8 @@
 import FieldResults from '@/src/components/Fields/FieldResults';
 import FieldTable from '@/src/components/Fields/FieldTable';
 import Uploader from '@/src/components/Fields/Uploader';
-import { ResultRowPretty } from '@/src/scripts/dump-entity-type-information';
-import { Mapping } from '@/src/scripts/get-column-mapping';
+import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { Mapping } from '@/scripts/get-column-mapping';
 import { Container } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 

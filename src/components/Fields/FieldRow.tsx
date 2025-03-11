@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/src/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
 import { useEffect, useMemo, useState } from 'react';
 import FieldEditor from './FieldEditor';
 

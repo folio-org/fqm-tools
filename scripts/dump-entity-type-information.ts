@@ -6,11 +6,11 @@ import { unparse } from 'papaparse';
 
 if (process.argv.length < 3) {
   console.error('Usage:');
-  console.error('  bun scripts/dump-entity-type-information.ts <label>');
+  console.error('  bun scripts/dump-entity-type-information.ts <label> public');
   console.error('    Dumps all publicly available entity types to the dump/<label> directory');
   console.error('  bun scripts/dump-entity-type-information.ts <label> <entityTypeId>...');
   console.error('    Dumps the specified entity types to the dump/<label> directory');
-  console.error('  bun scripts/dump-entity-type-information.ts <label> local');
+  console.error('  bun scripts/dump-entity-type-information.ts <label> all');
   console.error('    Dumps all entity types to the dump, based on the IDs in the current checkout');
   process.exit(1);
 }
@@ -55,8 +55,8 @@ const FQM_CONNECTION: FqmConnection = {
 };
 
 let entityTypes: { id: string; label?: string }[];
-if (process.argv[3] === 'local') {
-  const ENTITY_TYPE_FILE_PATH = '../src/main/resources/entity-types/';
+if (process.argv[3] === 'all') {
+  const ENTITY_TYPE_FILE_PATH = '../external/mod-fqm-manager/src/main/resources/entity-types/';
   console.log('Looking for entity types in', ENTITY_TYPE_FILE_PATH);
   entityTypes = (
     await Promise.all(
@@ -73,15 +73,15 @@ if (process.argv[3] === 'local') {
         }),
     )
   ).filter((e) => e !== null);
-} else if (process.argv.length > 3) {
-  entityTypes = process.argv.slice(3).map((id) => ({ id }));
-} else {
+} else if (process.argv[3] === 'public') {
   const response = JSON.parse(await fetchAllEntityTypes(FQM_CONNECTION));
   if (Array.isArray(response)) {
     entityTypes = response;
   } else {
     entityTypes = response.entityTypes;
   }
+} else {
+  entityTypes = process.argv.slice(3).map((id) => ({ id }));
 }
 
 const dir = `./dump/${process.argv[2]}`;
