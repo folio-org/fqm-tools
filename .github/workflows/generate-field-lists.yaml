@@ -40,7 +40,7 @@ jobs:
           )
 
       - name: Dump entity types
-        run: bun scripts/dump-entity-type-information.ts $(date -I) ${{ github.event.inputs.entity-types }}
+        run: bun scripts/dump-entity-type-information.ts "$(date -I) entity types" ${{ github.event.inputs.entity-types }}
         env:
           FQM_USERNAME: ${{ secrets.USERNAME }}
           FQM_PASSWORD: ${{ secrets.PASSWORD }}

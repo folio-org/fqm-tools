@@ -56,7 +56,7 @@ const FQM_CONNECTION: FqmConnection = {
 
 let entityTypes: { id: string; label?: string }[];
 if (process.argv[3] === 'all') {
-  const ENTITY_TYPE_FILE_PATH = '../external/mod-fqm-manager/src/main/resources/entity-types/';
+  const ENTITY_TYPE_FILE_PATH = './external/mod-fqm-manager/src/main/resources/entity-types/';
   console.log('Looking for entity types in', ENTITY_TYPE_FILE_PATH);
   entityTypes = (
     await Promise.all(
