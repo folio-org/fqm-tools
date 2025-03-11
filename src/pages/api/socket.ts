@@ -24,7 +24,7 @@ import { Server } from 'socket.io';
 import { v4 as uuid } from 'uuid';
 import { Socket } from 'node:net';
 
-export const ENTITY_TYPE_FILE_PATH = '../src/main/resources/entity-types/';
+export const ENTITY_TYPE_FILE_PATH = 'submodules/mod-fqm-manager/src/main/resources/entity-types/';
 
 let fqmConnection: FqmConnection;
 let pg: postgres.Sql | null = null;
@@ -37,7 +37,7 @@ interface SocketWithServer extends Socket {
 export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<unknown>) {
   const socket = res.socket as SocketWithServer;
 
-  dotenv.config({ path: '../.env' });
+  dotenv.config({ path: ['../.env', './.env'] });
 
   console.log('Socket server is initializing');
   const io = new Server(socket?.server);
@@ -124,7 +124,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     });
 
     socket.on('get-translations', async () => {
-      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
+      socket.emit(
+        'translations',
+        JSON.parse((await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
+      );
     });
 
     socket.on('create-entity-type', async (name) => {
@@ -155,13 +158,18 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
     socket.on('refresh-entity-types', async () => {
       findEntityTypes();
-      socket.emit('translations', JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString()));
+      socket.emit(
+        'translations',
+        JSON.parse((await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
+      );
     });
 
     socket.on(
       'update-translations',
       async ({ entityType, newTranslations }: { entityType: EntityType; newTranslations: Record<string, string> }) => {
-        const curTranslations = JSON.parse((await readFile('../translations/mod-fqm-manager/en.json')).toString());
+        const curTranslations = JSON.parse(
+          (await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString(),
+        );
 
         const updatedTranslationSet = { ...curTranslations, ...newTranslations };
 
@@ -231,7 +239,10 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
             {} as Record<string, string>,
           );
 
-        await writeFile('../translations/mod-fqm-manager/en.json', JSON.stringify(sorted, null, 2) + '\n');
+        await writeFile(
+          'submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json',
+          JSON.stringify(sorted, null, 2) + '\n',
+        );
         console.log('Updated translations');
         socket.emit('translations', sorted);
       },

@@ -41,7 +41,7 @@ export default function EntityTypeManager({
 
   return (
     <>
-      <Typography sx={{ mt: 1, mb: 1 }}>
+      <Typography component="div" sx={{ mt: 1, mb: 1 }}>
         Editing:{' '}
         <Select size="small" value={selected} onChange={(e) => setSelected(e.target.value)}>
           <MenuItem key="new" value="new">
