@@ -23,8 +23,14 @@ import postgres from 'postgres';
 import { Server } from 'socket.io';
 import { v4 as uuid } from 'uuid';
 import { Socket } from 'node:net';
+import { existsSync } from 'node:fs';
 
-export const ENTITY_TYPE_FILE_PATH = 'submodules/mod-fqm-manager/src/main/resources/entity-types/';
+export const ENTITY_TYPE_FILE_PATH = 'external/mod-fqm-manager/src/main/resources/entity-types/';
+
+if (!existsSync('external/mod-fqm-manager')) {
+  console.error('external/mod-fqm-manager does not exist! Either clone a submodule there or create a symlink.');
+  process.exit(1);
+}
 
 let fqmConnection: FqmConnection;
 let pg: postgres.Sql | null = null;
@@ -126,7 +132,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
     socket.on('get-translations', async () => {
       socket.emit(
         'translations',
-        JSON.parse((await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
+        JSON.parse((await readFile('external/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
       );
     });
 
@@ -160,7 +166,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       findEntityTypes();
       socket.emit(
         'translations',
-        JSON.parse((await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
+        JSON.parse((await readFile('external/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString()),
       );
     });
 
@@ -168,7 +174,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
       'update-translations',
       async ({ entityType, newTranslations }: { entityType: EntityType; newTranslations: Record<string, string> }) => {
         const curTranslations = JSON.parse(
-          (await readFile('submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString(),
+          (await readFile('external/mod-fqm-manager/translations/mod-fqm-manager/en.json')).toString(),
         );
 
         const updatedTranslationSet = { ...curTranslations, ...newTranslations };
@@ -240,7 +246,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
           );
 
         await writeFile(
-          'submodules/mod-fqm-manager/translations/mod-fqm-manager/en.json',
+          'external/mod-fqm-manager/translations/mod-fqm-manager/en.json',
           JSON.stringify(sorted, null, 2) + '\n',
         );
         console.log('Updated translations');
