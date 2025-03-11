@@ -1,0 +1,3 @@
+[submodule "submodules/mod-fqm-manager"]
+	path = submodules/mod-fqm-manager
+	url = git@github.com:folio-org/mod-fqm-manager.git
