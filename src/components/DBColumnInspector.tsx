@@ -1,10 +1,10 @@
 import { DataTypeValue, EntityType } from '@/types';
 import { Grid2 as Grid, Typography } from '@mui/material';
-import { pascalCase, snakeCase } from 'change-case';
-import { compile, JSONSchema } from 'json-schema-to-typescript';
-import { format } from 'prettier';
-import prettierPluginESTree from 'prettier/plugins/estree.mjs';
-import prettierPluginTS from 'prettier/plugins/typescript.mjs';
+import { snakeCase } from 'change-case';
+// import { compile, JSONSchema } from 'json-schema-to-typescript';
+// import { format } from 'prettier';
+// import prettierPluginESTree from 'prettier/plugins/estree.mjs';
+// import prettierPluginTS from 'prettier/plugins/typescript.mjs';
 import { useCallback, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
@@ -44,19 +44,22 @@ export default function DBColumnInspector({
           setAnalysis({
             ...result,
             resultRaw: result.result,
-            result: await format(
-              await compile(
-                result.result as JSONSchema,
-                `${pascalCase(db)}${pascalCase(table)}${pascalCase(column)}Schema`,
-                {
-                  additionalProperties: false,
-                  bannerComment: '',
-                  format: false,
-                  ignoreMinAndMaxItems: true,
-                },
-              ),
-              { parser: 'typescript', plugins: [prettierPluginTS, prettierPluginESTree] },
-            ),
+            // todo: figure out why we can't reference prettier from the bundle.
+            //       maybe shove this on the backside of the socket if needed?
+            result: JSON.stringify(result.result, null, 2),
+            // result: await format(
+            //   await compile(
+            //     result.result as JSONSchema,
+            //     `${pascalCase(db)}${pascalCase(table)}${pascalCase(column)}Schema`,
+            //     {
+            //       additionalProperties: false,
+            //       bannerComment: '',
+            //       format: false,
+            //       ignoreMinAndMaxItems: true,
+            //     },
+            //   ),
+            //   { parser: 'typescript', plugins: [prettierPluginTS, prettierPluginESTree] },
+            // ),
           });
         } else {
           setAnalysis(result);
