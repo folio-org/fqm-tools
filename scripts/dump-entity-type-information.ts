@@ -179,6 +179,9 @@ function getDataType(dataType: DataType): string {
   switch (dataType.dataType) {
     case DataTypeValue.arrayType:
     case DataTypeValue.jsonbArrayType:
+      if (!dataType.itemDataType) {
+        return 'unknown[]';
+      }
       return getDataType(dataType.itemDataType!) + '[]';
     case DataTypeValue.booleanType:
       return 'boolean';

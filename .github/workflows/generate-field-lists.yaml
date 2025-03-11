@@ -1,4 +1,5 @@
 name: Generate field lists
+run-name: '[${{ github.actor }}] Generate field list of ${{ github.event.inputs.entity-types }} entity types'
 
 on:
   workflow_dispatch:
