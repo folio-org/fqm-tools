@@ -7,7 +7,8 @@ import json5 from 'json5';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EntityTypeFieldEditor from '../EntityTypeFieldEditor';
 import { END_PAGE, State } from './JSONSchemaImporter';
-import { inferColumnFromSchema, inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing';
+import { inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing/translations';
+import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
 
 export default function ImportStep({
   entityType,
@@ -46,7 +47,7 @@ export default function ImportStep({
         console.error('Invalid JSON', e);
       }
     }
-    const { issues, column } = inferColumnFromSchema(entityType, state.source, prop, resolvedSchema);
+    const { issues, column } = inferFieldFromSchema(state.source, prop, resolvedSchema);
     const translations = inferTranslationsFromColumn(column, entityType.name);
     setProvisionalIssues(issues);
     setProvisionalColumn(column ?? null);
