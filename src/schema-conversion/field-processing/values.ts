@@ -1,8 +1,8 @@
 import { DataType, DataTypeValue } from '@/types';
 import { sentenceCase } from 'change-case';
-import { Schema } from 'genson-js/dist';
+import { JSONSchema7 } from 'json-schema';
 
-export function getValues(dataType: DataType, schema: Schema) {
+export function getValues(dataType: DataType, schema: JSONSchema7) {
   if ('enum' in schema) {
     return (schema.enum as string[]).map((v) => ({ value: v, label: sentenceCase(v) }));
   }

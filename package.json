@@ -12,6 +12,7 @@
     "speed:chart": "scripts/speed-comparison/chart.ts"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.9.3",
     "@codemirror/lang-java": "^6.0.1",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.8.0",
@@ -33,6 +34,7 @@
     "fast-stats": "^0.0.7",
     "genson-js": "^0.0.8",
     "iso8601-duration": "^2.1.2",
+    "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^15.0.4",
     "json5": "^2.2.3",
     "ky": "^1.7.5",

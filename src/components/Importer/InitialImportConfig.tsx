@@ -2,7 +2,7 @@ import { EntityType } from '@/types';
 import { json } from '@codemirror/lang-json';
 import { Autocomplete, Button, DialogActions, DialogContent, Grid2 as Grid, TextField } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
-import { Schema } from 'genson-js/dist';
+import { JSONSchema7 } from 'json-schema';
 import json5 from 'json5';
 import { Dispatch, SetStateAction } from 'react';
 import { END_PAGE, State } from './JSONSchemaImporter';
@@ -68,19 +68,19 @@ export default function InitialImportConfig({
 
             try {
               // use json5 for a little more niceness
-              const schema = json5.parse(state.schemaRaw) as Schema;
+              const schema = json5.parse(state.schemaRaw) as JSONSchema7;
               const properties = schema.properties;
 
               if (!properties) {
                 throw new Error('No properties found in schema');
               }
 
-              const flattenedProperties = flattenProperties(properties);
+              const flattenedProperties = flattenProperties(properties as Record<string, JSONSchema7>);
 
               setState((s) => ({
                 ...s,
-                schema: { ...schema, properties: flattenedProperties } as Schema & {
-                  properties: NonNullable<Schema['properties']>;
+                schema: { ...schema, properties: flattenedProperties } as JSONSchema7 & {
+                  properties: NonNullable<JSONSchema7['properties']>;
                 },
               }));
             } catch (e) {
@@ -101,10 +101,10 @@ export default function InitialImportConfig({
   );
 }
 
-function flattenProperties(props: Record<string, Schema>) {
+function flattenProperties(props: Record<string, JSONSchema7>) {
   let changed = false;
 
-  const result: Record<string, Schema> = {};
+  const result: Record<string, JSONSchema7> = {};
 
   for (const [key, prop] of Object.entries(props)) {
     if (prop.type !== 'object') {
@@ -114,7 +114,7 @@ function flattenProperties(props: Record<string, Schema>) {
 
     for (const [innerKey, innerProp] of Object.entries(prop.properties ?? {})) {
       changed = true;
-      result[`${key}'->'${innerKey}`] = innerProp;
+      result[`${key}'->'${innerKey}`] = innerProp as JSONSchema7;
     }
   }
 

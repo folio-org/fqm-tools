@@ -1,6 +1,7 @@
 import { EntityType, PostgresConnection } from '@/types';
+import { createCompoundSchema, mergeSchemas, Schema } from 'genson-js';
+import { JSONSchema7 } from 'json-schema';
 import postgres, { JSONValue } from 'postgres';
-import { mergeSchemas, createCompoundSchema, Schema } from 'genson-js';
 import { Socket } from 'socket.io';
 
 export async function verifyPostgresConnection(postgresConnection: PostgresConnection) {
@@ -115,7 +116,7 @@ export async function analyzeJsonb(
 
   let aborted = false;
 
-  let schema: Promise<Schema | null> = Promise.resolve(null);
+  let schema: Promise<JSONSchema7 | null> = Promise.resolve(null);
 
   let done = 0;
 
@@ -153,7 +154,7 @@ export async function analyzeJsonb(
       schema = schema.then((last) => {
         const thisBatch = createCompoundSchema(jsons);
         console.log(new Date().toISOString(), 'processing records', scanned, 'to', scanned + 500);
-        return last ? mergeSchemas([last, thisBatch]) : thisBatch;
+        return last ? mergeSchemas([last as Schema, thisBatch as Schema]) : thisBatch;
       });
 
       done = Math.min(total, scanned + 500);

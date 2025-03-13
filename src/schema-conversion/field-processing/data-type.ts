@@ -1,9 +1,9 @@
 import { DataType, DataTypeValue, EntityTypeField } from '@/types';
 import { snakeCase } from 'change-case';
 import debug from 'debug';
-import { Schema } from 'genson-js/dist';
-import { getNestedGetter } from './getters';
+import { JSONSchema7 } from 'json-schema';
 import { inferFieldFromSchema } from './field';
+import { getNestedGetter } from './getters';
 
 const log = {
   debug: debug('fqm-tools:field-processing:data-type:debug'),
@@ -33,7 +33,7 @@ const UUID_PATTERNS = [
 ];
 
 /** Schema must not be a $ref, overridden, or anything else fancy to use this */
-function getSimpleTypeFromSimpleSchema(schema: Schema): SimpleGuessedType {
+function getSimpleTypeFromSimpleSchema(schema: JSONSchema7): SimpleGuessedType {
   switch (Array.isArray(schema.type) ? schema.type.join(',') : schema.type) {
     case 'string,null':
     case 'string':
@@ -68,7 +68,7 @@ function getSimpleTypeFromSimpleSchema(schema: Schema): SimpleGuessedType {
   }
 }
 
-function getSimpleTypeOf(schema: Schema): SimpleGuessedType {
+function getSimpleTypeOf(schema: JSONSchema7): SimpleGuessedType {
   log.debug('Getting simple type of %o', schema);
 
   if ('x-fqm-datatype' in schema) {
@@ -102,7 +102,7 @@ function getSimpleTypeOf(schema: Schema): SimpleGuessedType {
   return getSimpleTypeFromSimpleSchema(schema);
 }
 
-export function getDataType(source: string, schema: Schema, path: string): [DataType, string[]] {
+export function getDataType(source: string, schema: JSONSchema7, path: string): [DataType, string[]] {
   const resolvedType = getSimpleTypeOf(schema);
   const issues: string[] = [];
 
@@ -145,7 +145,7 @@ export function getDataType(source: string, schema: Schema, path: string): [Data
         return [{ dataType, itemDataType: { dataType: DataTypeValue.stringType } }, issues];
       }
 
-      const [innerDataType, innerErrors] = getDataType(source, schema.items, path);
+      const [innerDataType, innerErrors] = getDataType(source, schema.items as JSONSchema7, path);
       issues.push(...innerErrors.map((e) => `in array: ${e}`));
 
       return [{ dataType, itemDataType: innerDataType }, issues];
@@ -156,7 +156,7 @@ export function getDataType(source: string, schema: Schema, path: string): [Data
           const { issues: innerIssues, column: result } = inferFieldFromSchema(
             source,
             `${path}->'${prop}'`,
-            propSchema,
+            propSchema as JSONSchema7,
           );
 
           issues.push(...innerIssues.map((e) => `in object property ${prop}: ${e}`));

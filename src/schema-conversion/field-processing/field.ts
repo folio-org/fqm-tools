@@ -1,7 +1,7 @@
 import { DataTypeValue, EntityTypeField } from '@/types';
 import { snakeCase } from 'change-case';
 import debug from 'debug';
-import { Schema } from 'genson-js/dist';
+import { JSONSchema7 } from 'json-schema';
 import { getDataType } from './data-type';
 import { getGetters } from './getters';
 import { getValues } from './values';
@@ -14,7 +14,7 @@ const log = {
 export function inferFieldFromSchema(
   source: string,
   prop: string,
-  propSchema: Schema,
+  propSchema: JSONSchema7,
 ): { issues: string[]; column?: EntityTypeField } {
   log.debug('Examining ', prop, propSchema);
 
