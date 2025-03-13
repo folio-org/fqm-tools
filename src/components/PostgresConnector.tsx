@@ -70,7 +70,7 @@ export default function PostgresConnector({
                 label="Port"
                 type="number"
                 fullWidth
-                inputProps={{ min: 0, max: 65535, step: 1 }}
+                slotProps={{ htmlInput: { min: 0, max: 65535, step: 1 } }}
                 value={postgresConnection.port}
                 onChange={(e) => setPostgresConnection({ ...postgresConnection, port: parseInt(e.target.value) })}
                 required

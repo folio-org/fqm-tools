@@ -71,7 +71,7 @@ export default function EntityTypeFieldEditor({
             fullWidth
             value={field.name}
             onChange={(e) => onChange({ ...field, name: e.target.value })}
-            inputProps={{ style: { fontFamily: 'monospace' } }}
+            slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
           />
         </Grid>
         {!isNested ? (
@@ -109,7 +109,7 @@ export default function EntityTypeFieldEditor({
               fullWidth
               value={field.property}
               onChange={(e) => onChange({ ...field, property: e.target.value })}
-              inputProps={{ style: { fontFamily: 'monospace' } }}
+              slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
             />
           </Grid>
         )}
@@ -303,7 +303,7 @@ export default function EntityTypeFieldEditor({
                   <TextField
                     label="Path"
                     fullWidth
-                    inputProps={{ style: { fontFamily: 'monospace' } }}
+                    slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                     value={field.valueSourceApi.path}
                     onChange={(e) =>
                       onChange({
@@ -317,7 +317,7 @@ export default function EntityTypeFieldEditor({
                   <TextField
                     label="Value JSON path"
                     fullWidth
-                    inputProps={{ style: { fontFamily: 'monospace' } }}
+                    slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                     value={field.valueSourceApi.valueJsonPath}
                     onChange={(e) =>
                       onChange({
@@ -331,7 +331,7 @@ export default function EntityTypeFieldEditor({
                   <TextField
                     label="Label JSON path"
                     fullWidth
-                    inputProps={{ style: { fontFamily: 'monospace' } }}
+                    slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                     value={field.valueSourceApi.labelJsonPath}
                     onChange={(e) =>
                       onChange({
@@ -421,7 +421,7 @@ export default function EntityTypeFieldEditor({
                           label="Value"
                           fullWidth
                           size="small"
-                          inputProps={{ style: { fontFamily: 'monospace' } }}
+                          slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                           value={value.value}
                           onChange={(e) =>
                             onChange({

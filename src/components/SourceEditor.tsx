@@ -71,7 +71,7 @@ export default function SourceEditor({
             fullWidth
             value={source.alias}
             onChange={(e) => onChange({ ...source, alias: e.target.value })}
-            inputProps={{ style: { fontFamily: 'monospace' } }}
+            slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
           />
         </Grid>
         <Grid size={{ xs: 5 }}>
@@ -144,7 +144,7 @@ export default function SourceEditor({
                     join: { ...(source.join ?? {}), type: e.target.value } as EntityTypeSource['join'],
                   })
                 }
-                inputProps={{ style: { fontFamily: 'monospace' } }}
+                slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
               />
             </Grid>
             <Grid size={{ xs: 3 }}>
@@ -186,7 +186,7 @@ export default function SourceEditor({
                     join: { ...(source.join ?? {}), condition: e.target.value } as EntityTypeSource['join'],
                   })
                 }
-                inputProps={{ style: { fontFamily: 'monospace' } }}
+                slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
               />
             </Grid>
           </>

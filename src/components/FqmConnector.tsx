@@ -70,7 +70,7 @@ export default function FqmConnector({
                 label="Port"
                 type="number"
                 fullWidth
-                inputProps={{ min: 0, max: 65535, step: 1 }}
+                slotProps={{ htmlInput: { min: 0, max: 65535, step: 1 } }}
                 value={fqmConnection.port}
                 onChange={(e) => setFqmConnection({ ...fqmConnection, port: parseInt(e.target.value) })}
                 required
@@ -90,7 +90,7 @@ export default function FqmConnector({
                 label="Fetch limit"
                 type="number"
                 fullWidth
-                inputProps={{ min: 1, step: 1 }}
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
                 value={fqmConnection.limit}
                 onChange={(e) => setFqmConnection({ ...fqmConnection, limit: parseInt(e.target.value) })}
                 required

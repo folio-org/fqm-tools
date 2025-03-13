@@ -1,0 +1,37 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun test --coverage --reporter=junit --reporter-outfile=./test-results.xml
+
+      - name: Publish unit test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          check_name: Unit Test Results
+          files: './test-results.xml'
+
+      - name: Run Sonar scan
+        uses: sonarsource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=folio-org
+            -Dsonar.projectKey=org.folio:fqm-tools
+            -Dsonar.projectName=fqm-tools
+            -Dsonar.sources=src,scripts
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.exclusions=**/*.md,LICENSE,artifacts/**,ci/**,node_modules/**,**/tests/**,**/test/**,**/*-test.*,**/*.test.*,karma.conf.*,jest.config.*,**/*.css,**/*.json

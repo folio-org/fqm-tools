@@ -28,7 +28,9 @@ export default function NewEntityTypeDialog({
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 helperText="Directories will be created as needed"
-                inputProps={{ ...params.inputProps, pattern: '.+.json5', title: 'Include the .json5 suffix' }}
+                slotProps={{
+                  htmlInput: { ...params.inputProps, pattern: '.+.json5', title: 'Include the .json5 suffix' },
+                }}
               />
             )}
           />
