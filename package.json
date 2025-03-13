@@ -28,6 +28,7 @@
     "chart.js": "^4.4.8",
     "chartjs-chart-error-bars": "^4.4.4",
     "chartjs-to-image": "^1.2.2",
+    "debug": "^4.4.0",
     "dotenv": "^16.4.7",
     "fast-stats": "^0.0.7",
     "genson-js": "^0.0.8",
@@ -51,19 +52,21 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "3.3.0",
     "@types/bun": "1.2.5",
+    "@types/debug": "^4.1.12",
     "@types/fast-stats": "0.0.35",
     "@types/node": "22.13.10",
     "@types/papaparse": "5.3.15",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "@types/uuid": "9.0.8",
-    "@eslint/eslintrc": "3.3.0",
     "eslint": "9.22.0",
-    "eslint-config-prettier": "10.1.1",
     "eslint-config-next": "15.2.2",
+    "eslint-config-prettier": "10.1.1",
     "husky": "9.1.7",
     "lint-staged": "15.4.3",
+    "supports-color": "^10.0.0",
     "typescript": "5.8.2"
   },
   "lint-staged": {
