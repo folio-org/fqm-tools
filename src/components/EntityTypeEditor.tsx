@@ -118,15 +118,17 @@ export default function EntityTypeManager({
                   fullWidth
                   value={entityType.id}
                   disabled
-                  inputProps={{ style: { fontFamily: 'monospace' } }}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setEntityType({ ...entityType, id: uuid() })}>
-                          <Refresh />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
+                  slotProps={{
+                    htmlInput: { style: { fontFamily: 'monospace' } },
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setEntityType({ ...entityType, id: uuid() })}>
+                            <Refresh />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
                   }}
                 />
               </Grid>
@@ -137,7 +139,7 @@ export default function EntityTypeManager({
                   fullWidth
                   value={entityType.name}
                   onChange={(e) => setEntityType({ ...entityType, name: e.target.value })}
-                  inputProps={{ style: { fontFamily: 'monospace' } }}
+                  slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                 />
               </Grid>
               <Grid size={{ xs: 6 }} container sx={{ justifyContent: 'space-around' }}>
