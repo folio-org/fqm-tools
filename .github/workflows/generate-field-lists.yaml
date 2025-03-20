@@ -1,5 +1,5 @@
 name: Generate field lists
-run-name: '[${{ github.actor }}] Generate field list of ${{ github.event.inputs.entity-types }} entity types'
+run-name: '[${{ github.actor }}] Generate field list of ${{ github.event.inputs.entity-types }} entity types from ${{ github.event.inputs.environment }}'
 
 on:
   workflow_dispatch:
@@ -14,6 +14,11 @@ on:
         required: true
         default: 'public'
         type: string
+      include-hidden-fields:
+        description: 'Include hidden fields (API only) in the output'
+        required: false
+        default: true
+        type: boolean
       fqm-branch:
         description: Branch of FQM to use, if dumping all entity types
         required: false
@@ -48,6 +53,7 @@ jobs:
           FQM_HOST: ${{ vars.HOST }}
           FQM_PORT: '443'
           FQM_TENANT: ${{ vars.TENANT }}
+          FQM_INCLUDE_HIDDEN_FIELDS: ${{ github.event.inputs.include-hidden-fields }}
 
       - name: Upload result
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
