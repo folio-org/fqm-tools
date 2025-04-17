@@ -3,7 +3,7 @@ import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
 import { getDataType } from './data-type';
 
-const entityTypeConfig = {} as EntityTypeGenerationConfig['entityTypes'][0];
+const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][0];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
 
 describe('getDataType', () => {
@@ -133,4 +133,61 @@ describe('getDataType', () => {
       expect(dataType.properties).toEqual([]);
     },
   );
+
+  it('handles nested array-object properties', () => {
+    const [dataType, issues] = getDataType(
+      {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            foo: { type: 'string' },
+            bar: { type: 'string', format: 'uuid' },
+            bad: { 'folio:isVirtual': true } as unknown as JSONSchema7,
+          },
+        },
+      },
+      '',
+      entityTypeConfig,
+      config,
+    );
+
+    expect(issues).toContain(
+      'in array: in object property bad: It looks like this is a virtual property (folio:isVirtual=true); ignoring?',
+    );
+    expect(dataType as object).toEqual({
+      dataType: 'jsonbArrayType',
+      itemDataType: {
+        dataType: 'objectType',
+        properties: [
+          {
+            dataType: {
+              dataType: 'stringType',
+            },
+            filterValueGetter:
+              "( SELECT array_agg(lower(elems.value->>'foo')) FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
+            name: 'foo',
+            property: 'foo',
+            queryable: true,
+            valueFunction: 'lower(:value)',
+            valueGetter: "( SELECT array_agg(elems.value->>'foo') FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
+            visibleByDefault: false,
+          },
+          {
+            dataType: {
+              dataType: 'rangedUUIDType',
+            },
+            filterValueGetter:
+              "( SELECT array_agg(lower(elems.value->>'bar')) FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
+            name: 'bar',
+            property: 'bar',
+            queryable: true,
+            valueFunction: 'lower(:value)',
+            valueGetter: "( SELECT array_agg(elems.value->>'bar') FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
+            visibleByDefault: false,
+          },
+        ],
+      },
+    });
+  });
 });

@@ -39,4 +39,24 @@ describe('createEntityTypeFromConfig', () => {
 
     expect(result).toEqual(expected);
   });
+
+  it('fails on non-object schema', () => {
+    expect(() => {
+      createEntityTypeFromConfig(
+        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        { type: 'string' } as JSONSchema7,
+        {} as EntityTypeGenerationConfig,
+      );
+    }).toThrowError(/Schema .+ must be an object with properties!/);
+  });
+
+  it('fails on empty object schema', () => {
+    expect(() => {
+      createEntityTypeFromConfig(
+        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        { type: 'object' } as JSONSchema7,
+        {} as EntityTypeGenerationConfig,
+      );
+    }).toThrowError(/Schema .+ must be an object with properties!/);
+  });
 });

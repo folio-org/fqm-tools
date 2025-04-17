@@ -184,9 +184,5 @@ export function getDataType(
         .filter((f) => f !== null);
       return [{ dataType: DataTypeValue.objectType, properties }, issues];
     }
-    default:
-      log.warn('Unknown type', resolvedType, schema);
-      issues.push(`Unknown type: ${resolvedType}`);
-      return [{ dataType: DataTypeValue.stringType }, issues];
   }
 }
