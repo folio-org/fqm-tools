@@ -50,10 +50,11 @@ function UploadTarget({
     >
       {({ getRootProps, getInputProps, isDragActive }) => (
         <Grid
-          item
-          xs={12}
-          md={4}
-          lg={lgWidth}
+          size={{
+            xs: 12,
+            md: 4,
+            lg: lgWidth,
+          }}
           sx={{
             display: 'flex',
             flexDirection: 'column',

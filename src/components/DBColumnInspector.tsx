@@ -1,5 +1,5 @@
 import { DataTypeValue, EntityType } from '@/types';
-import { Grid2 as Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { snakeCase } from 'change-case';
 // import { compile, JSONSchema } from 'json-schema-to-typescript';
 // import { format } from 'prettier';

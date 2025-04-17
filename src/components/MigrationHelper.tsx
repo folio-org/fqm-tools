@@ -1,7 +1,7 @@
 import { EntityType } from '@/types';
 import { java } from '@codemirror/lang-java';
 import { json } from '@codemirror/lang-json';
-import { Button, Container, FormControlLabel, Grid2 as Grid, Switch } from '@mui/material';
+import { Button, Container, FormControlLabel, Grid, Switch } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { constantCase } from 'change-case';
 import json5 from 'json5';

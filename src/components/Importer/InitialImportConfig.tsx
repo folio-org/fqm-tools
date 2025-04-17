@@ -1,6 +1,6 @@
 import { EntityType } from '@/types';
 import { json } from '@codemirror/lang-json';
-import { Autocomplete, Button, DialogActions, DialogContent, Grid2 as Grid, TextField } from '@mui/material';
+import { Autocomplete, Button, DialogActions, DialogContent, Grid, TextField } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { JSONSchema7 } from 'json-schema';
 import json5 from 'json5';

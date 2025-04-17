@@ -1,6 +1,6 @@
 import { DataType, DataTypeValue, EntityType, EntityTypeSource } from '@/types';
 import { LanguageSupport } from '@codemirror/language';
-import { Button, FormControl, Grid2 as Grid, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button, FormControl, Grid, InputLabel, MenuItem, Select } from '@mui/material';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 
 export default function NestedDataTypeEditor({

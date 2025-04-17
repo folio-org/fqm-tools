@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, Grid2 as Grid, TextField } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Button, Grid, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { FqmConnection } from '../../types';
