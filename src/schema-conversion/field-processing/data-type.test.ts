@@ -1,7 +1,10 @@
-import { DataTypeValue } from '@/types';
+import { DataTypeValue, EntityTypeGenerationConfig } from '@/types';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
 import { getDataType } from './data-type';
+
+const entityTypeConfig = {} as EntityTypeGenerationConfig['entityTypes'][0];
+const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
 
 describe('getDataType', () => {
   it.each([
@@ -11,7 +14,7 @@ describe('getDataType', () => {
     ['integer', DataTypeValue.integerType],
     ['number', DataTypeValue.numberType],
   ] as [string | string[], DataTypeValue][])('converts primitive %s to %s', (type, expected) => {
-    const [dataType, issues] = getDataType('source', { type } as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType({ type } as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues).toBeEmpty();
     expect(dataType.dataType).toBe(expected);
@@ -31,7 +34,7 @@ describe('getDataType', () => {
     },
     { type: 'string', pattern: '^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$' },
   ])('converts %o to rangedUUIDType', (schema) => {
-    const [dataType, issues] = getDataType('source', schema as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues.filter((s) => !s.startsWith('Unknown reference type'))).toBeEmpty();
     expect(dataType.dataType).toBe(DataTypeValue.rangedUUIDType);
@@ -43,7 +46,7 @@ describe('getDataType', () => {
     { type: 'string', format: 'date-time' },
     { type: 'string', format: 'date' },
   ])('converts %o to dateType', (schema) => {
-    const [dataType, issues] = getDataType('source', schema as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues).toBeEmpty();
     expect(dataType.dataType).toBe(DataTypeValue.dateType);
@@ -53,9 +56,10 @@ describe('getDataType', () => {
 
   it('ignores unknown pattern/format', () => {
     const [dataType, issues] = getDataType(
-      'source',
       { type: 'string', format: 'something funky', pattern: '{[]$[][^}[][//' } as JSONSchema7,
       'outer',
+      entityTypeConfig,
+      config,
     );
 
     expect(issues).toBeEmpty();
@@ -65,7 +69,12 @@ describe('getDataType', () => {
   });
 
   it('safely fails on unknown type', () => {
-    const [dataType, issues] = getDataType('source', { type: 'unknown' } as unknown as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(
+      { type: 'unknown' } as unknown as JSONSchema7,
+      'outer',
+      entityTypeConfig,
+      config,
+    );
 
     expect(issues).toEqual(['Unknown type: unknown']);
     expect(dataType.dataType).toBe(DataTypeValue.stringType);
@@ -74,7 +83,12 @@ describe('getDataType', () => {
   });
 
   it('safely fails on unknown ref', () => {
-    const [dataType, issues] = getDataType('source', { $ref: 'unknown' } as unknown as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(
+      { $ref: 'unknown' } as unknown as JSONSchema7,
+      'outer',
+      entityTypeConfig,
+      config,
+    );
 
     expect(issues).toEqual(['Unknown reference: "unknown"']);
     expect(dataType.dataType).toBe(DataTypeValue.stringType);
@@ -83,11 +97,11 @@ describe('getDataType', () => {
   });
 
   it.each([
-    [{ type: 'string', 'x-fqm-datatype': 'integerType' }, DataTypeValue.integerType],
-    [{ type: 'array', 'x-fqm-datatype': 'integerType' }, DataTypeValue.integerType],
-    [{ type: 'object', 'x-fqm-datatype': 'integerType' }, DataTypeValue.integerType],
+    [{ type: 'string', 'x-fqm-data-type': 'integerType' }, DataTypeValue.integerType],
+    [{ type: 'array', 'x-fqm-data-type': 'integerType' }, DataTypeValue.integerType],
+    [{ type: 'object', 'x-fqm-data-type': 'integerType' }, DataTypeValue.integerType],
   ])('handles overrides to primitive on %o', (schema, expected) => {
-    const [dataType, issues] = getDataType('source', schema as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues).toBeEmpty();
     expect(dataType.dataType).toBe(expected);
@@ -97,10 +111,10 @@ describe('getDataType', () => {
 
   it.each([
     [{ type: 'array' }, DataTypeValue.jsonbArrayType],
-    [{ type: 'string', 'x-fqm-datatype': 'arrayType' }, DataTypeValue.arrayType],
-    [{ type: 'string', 'x-fqm-datatype': 'jsonbArrayType' }, DataTypeValue.jsonbArrayType],
+    [{ type: 'string', 'x-fqm-data-type': 'arrayType' }, DataTypeValue.arrayType],
+    [{ type: 'string', 'x-fqm-data-type': 'jsonbArrayType' }, DataTypeValue.jsonbArrayType],
   ])('handles empty arrays and equivalent overrides on %o', (schema, expected) => {
-    const [dataType, issues] = getDataType('source', schema as JSONSchema7, 'outer');
+    const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues).toEqual(['Array type with unknown item type; defaulting to string']);
     expect(dataType.dataType).toBe(expected);
@@ -108,10 +122,10 @@ describe('getDataType', () => {
     expect(dataType.properties).toBeUndefined();
   });
 
-  it.each([{ type: 'object' }, { type: 'string', 'x-fqm-datatype': 'objectType' }])(
+  it.each([{ type: 'object' }, { type: 'string', 'x-fqm-data-type': 'objectType' }])(
     'handles empty object types and equivalent overrides on %o',
     (schema) => {
-      const [dataType, issues] = getDataType('source', schema as JSONSchema7, 'outer');
+      const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
       expect(issues).toBeEmpty();
       expect(dataType.dataType).toBe(DataTypeValue.objectType);

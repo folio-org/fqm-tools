@@ -1,9 +1,9 @@
-import { DataType, DataTypeValue, EntityTypeField } from '@/types';
+import { DataType, DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/types';
 import { snakeCase } from 'change-case';
 import debug from 'debug';
 import { JSONSchema7 } from 'json-schema';
 import { inferFieldFromSchema } from './field';
-import { getNestedGetter } from './getters';
+import { getNestedGetter, stripGetters } from './getters';
 
 const log = {
   debug: debug('fqm-tools:field-processing:data-type:debug'),
@@ -21,14 +21,15 @@ enum SimpleGuessedType {
   OBJECT = 'object',
   UNKNOWN = 'unknown',
   UNKNOWN_REF = 'unknown-ref',
-  // via x-fqm-datatype
+  // via x-fqm-data-type
   OVERRIDDEN = 'overridden',
 }
 
 // found from other modules, commonly used instead of format: uuid or $ref to a uuid
 const UUID_PATTERNS = [
-  '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
   '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+  '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$',
+  '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
   '^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$',
 ];
 
@@ -71,17 +72,17 @@ function getSimpleTypeFromSimpleSchema(schema: JSONSchema7): SimpleGuessedType {
 function getSimpleTypeOf(schema: JSONSchema7): SimpleGuessedType {
   log.debug('Getting simple type of %o', schema);
 
-  if ('x-fqm-datatype' in schema) {
-    log.debug('Found custom datatype', schema['x-fqm-datatype']);
+  if ('x-fqm-data-type' in schema) {
+    log.debug('Found custom datatype', schema['x-fqm-data-type']);
 
     // these get special handling, so we want to use our simple types instead
     // everything else, we will let getDataType handle.
     if (
-      schema['x-fqm-datatype'] === DataTypeValue.arrayType ||
-      schema['x-fqm-datatype'] === DataTypeValue.jsonbArrayType
+      schema['x-fqm-data-type'] === DataTypeValue.arrayType ||
+      schema['x-fqm-data-type'] === DataTypeValue.jsonbArrayType
     ) {
       return SimpleGuessedType.ARRAY;
-    } else if (schema['x-fqm-datatype'] === DataTypeValue.objectType) {
+    } else if (schema['x-fqm-data-type'] === DataTypeValue.objectType) {
       return SimpleGuessedType.OBJECT;
     }
 
@@ -102,7 +103,13 @@ function getSimpleTypeOf(schema: JSONSchema7): SimpleGuessedType {
   return getSimpleTypeFromSimpleSchema(schema);
 }
 
-export function getDataType(source: string, schema: JSONSchema7, path: string): [DataType, string[]] {
+export function getDataType(
+  schema: JSONSchema7,
+  path: string,
+  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  config: EntityTypeGenerationConfig,
+  parentIsArrayType = false,
+): [DataType, string[]] {
   const resolvedType = getSimpleTypeOf(schema);
   const issues: string[] = [];
 
@@ -112,7 +119,7 @@ export function getDataType(source: string, schema: JSONSchema7, path: string): 
     issues.push(`Unknown type: ${schema.type}`);
   } else if (resolvedType === SimpleGuessedType.OVERRIDDEN) {
     return [
-      { dataType: DataTypeValue[(schema as { 'x-fqm-datatype': string })['x-fqm-datatype'] as DataTypeValue] },
+      { dataType: DataTypeValue[(schema as { 'x-fqm-data-type': string })['x-fqm-data-type'] as DataTypeValue] },
       issues,
     ];
   }
@@ -134,8 +141,8 @@ export function getDataType(source: string, schema: JSONSchema7, path: string): 
       return [{ dataType: DataTypeValue.integerType }, issues];
     case SimpleGuessedType.ARRAY: {
       let dataType = DataTypeValue.jsonbArrayType;
-      if ('x-fqm-datatype' in schema) {
-        dataType = schema['x-fqm-datatype'] as DataTypeValue;
+      if ('x-fqm-data-type' in schema) {
+        dataType = schema['x-fqm-data-type'] as DataTypeValue;
       }
 
       if (!schema.items) {
@@ -145,7 +152,7 @@ export function getDataType(source: string, schema: JSONSchema7, path: string): 
         return [{ dataType, itemDataType: { dataType: DataTypeValue.stringType } }, issues];
       }
 
-      const [innerDataType, innerErrors] = getDataType(source, schema.items as JSONSchema7, path);
+      const [innerDataType, innerErrors] = getDataType(schema.items as JSONSchema7, path, entityType, config, true);
       issues.push(...innerErrors.map((e) => `in array: ${e}`));
 
       return [{ dataType, itemDataType: innerDataType }, issues];
@@ -153,10 +160,11 @@ export function getDataType(source: string, schema: JSONSchema7, path: string): 
     case SimpleGuessedType.OBJECT: {
       const properties: EntityTypeField[] = Object.entries(schema.properties ?? {})
         .map(([prop, propSchema]) => {
-          const { issues: innerIssues, column: result } = inferFieldFromSchema(
-            source,
+          const { issues: innerIssues, field: result } = inferFieldFromSchema(
             `${path}->'${prop}'`,
             propSchema as JSONSchema7,
+            entityType,
+            config,
           );
 
           issues.push(...innerIssues.map((e) => `in object property ${prop}: ${e}`));
@@ -167,8 +175,8 @@ export function getDataType(source: string, schema: JSONSchema7, path: string): 
           }
 
           return {
-            ...result,
-            ...getNestedGetter(source, prop, path, result.dataType),
+            ...stripGetters(result),
+            ...getNestedGetter(entityType.source, prop, path, result.dataType, parentIsArrayType),
             name: snakeCase(prop),
             property: prop,
           };

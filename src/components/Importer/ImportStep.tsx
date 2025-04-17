@@ -9,6 +9,7 @@ import EntityTypeFieldEditor from '../EntityTypeFieldEditor';
 import { END_PAGE, State } from './JSONSchemaImporter';
 import { inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing/translations';
 import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
+import { JSONSchema7 } from 'json-schema';
 
 export default function ImportStep({
   entityType,
@@ -22,7 +23,7 @@ export default function ImportStep({
   onClose: () => void;
 }>) {
   const prop = Object.keys(state.schema!.properties)[state.page];
-  const propSchema = state.schema!.properties[prop];
+  const propSchema = state.schema!.properties[prop] as JSONSchema7;
 
   const [overrides, setOverrides] = useState<Record<string, string>>({});
 
@@ -47,10 +48,29 @@ export default function ImportStep({
         console.error('Invalid JSON', e);
       }
     }
-    const { issues, column } = inferFieldFromSchema(state.source, prop, resolvedSchema);
-    const translations = inferTranslationsFromColumn(column, entityType.name);
+    const { issues, field } = inferFieldFromSchema(
+      prop,
+      resolvedSchema,
+      {
+        name: '',
+        schema: '',
+        permissions: [],
+        source: state.source,
+        sort: ['', ''],
+      },
+      {
+        entityTypes: [],
+        sources: [],
+        metadata: {
+          module: '???',
+          team: '',
+          domain: '',
+        },
+      },
+    );
+    const translations = inferTranslationsFromColumn(field, entityType.name);
     setProvisionalIssues(issues);
-    setProvisionalColumn(column ?? null);
+    setProvisionalColumn(field ?? null);
     setProvisionalTranslations(translations);
   }, [prop, overrides, propSchema, entityType, state.source, setState]);
 

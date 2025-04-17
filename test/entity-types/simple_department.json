@@ -1,0 +1,140 @@
+{
+  "id": "67d474eb-bf09-51b0-aae1-e834d6f4504a",
+  "name": "simple_department",
+  "private": true,
+  "sources": [
+    {
+      "type": "db",
+      "alias": "department",
+      "target": "marinara"
+    }
+  ],
+  "requiredPermissions": ["perm1", "perm2"],
+  "columns": [
+    {
+      "name": "id",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "isIdColumn": true,
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.id"
+    },
+    {
+      "name": "name",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->>'name'",
+      "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'name'::text))",
+      "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+      "valueSourceApi": {
+        "path": "departments",
+        "labelJsonPath": "$.departments.*.name",
+        "valueJsonPath": "$.departments.*.id"
+      }
+    },
+    {
+      "name": "code",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->>'code'",
+      "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'code'::text))",
+      "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))"
+    },
+    {
+      "name": "source",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->>'source'"
+    },
+    {
+      "name": "usage_number",
+      "dataType": {
+        "dataType": "integerType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": "(:department.jsonb->>'usageNumber')::integer",
+      "valueFunction": "(:value)::integer"
+    },
+    {
+      "name": "metadata_created_date",
+      "dataType": {
+        "dataType": "dateType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'createdDate'"
+    },
+    {
+      "name": "metadata_created_by_user_id",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'createdByUserId'"
+    },
+    {
+      "name": "metadata_created_by_username",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'createdByUsername'"
+    },
+    {
+      "name": "metadata_updated_date",
+      "dataType": {
+        "dataType": "dateType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'updatedDate'"
+    },
+    {
+      "name": "metadata_updated_by_user_id",
+      "dataType": {
+        "dataType": "rangedUUIDType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'updatedByUserId'"
+    },
+    {
+      "name": "metadata_updated_by_username",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": true,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb->'metadata'->>'updatedByUsername'"
+    },
+    {
+      "name": "jsonb",
+      "dataType": {
+        "dataType": "stringType"
+      },
+      "queryable": false,
+      "visibleByDefault": false,
+      "valueGetter": ":department.jsonb::text"
+    }
+  ],
+  "defaultSort": [
+    {
+      "columnName": "id",
+      "direction": "ASC"
+    }
+  ]
+}

@@ -53,6 +53,7 @@ const FQM_CONNECTION: FqmConnection = {
   user: process.env.FQM_USERNAME,
   password: process.env.FQM_PASSWORD,
 };
+console.log('FQM connection', FQM_CONNECTION);
 
 let entityTypes: { id: string; label?: string }[];
 if (process.argv[3] === 'all') {
@@ -90,7 +91,9 @@ await mkdir(dir, { recursive: true });
 for (const { id, label } of entityTypes) {
   console.log('Dumping information for entity type', label ?? id);
 
-  const entityType = JSON.parse(await fetchEntityType(FQM_CONNECTION, id, true)) as EntityType;
+  const entityType = JSON.parse(
+    await fetchEntityType(FQM_CONNECTION, id, process.env['FQM_INCLUDE_HIDDEN_FIELDS'] === 'true'),
+  ) as EntityType;
   const filename = `${dir}/${(label ?? entityType.name).replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`;
 
   const data: ResultRow[] = [];
