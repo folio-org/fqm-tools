@@ -7,7 +7,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
-  Grid2 as Grid,
+  Grid,
   IconButton,
   InputLabel,
   MenuItem,

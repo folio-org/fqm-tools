@@ -1,16 +1,7 @@
 import { formatSql } from '@/src/utils/sqlUtils';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { Refresh, UnfoldLess, UnfoldMore } from '@mui/icons-material';
-import {
-  Alert,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  Grid2 as Grid,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from '@mui/material';
+import { Alert, Button, Checkbox, FormControlLabel, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
