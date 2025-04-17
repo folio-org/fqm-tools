@@ -8,7 +8,7 @@ interface GetterOverrides {
   valueFunction?: string | null;
 }
 
-function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides) {
+export function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides) {
   const result = { ...getters };
 
   for (const [key, value] of Object.entries(overrides) as [keyof GetterOverrides, string | null][]) {
@@ -22,14 +22,8 @@ function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: Get
   return result;
 }
 
-export function getGetters(
-  prop: string,
-  schema: JSONSchema7,
-  dataType: DataType,
-  entityType: EntityTypeGenerationConfig['entityTypes'][0],
-  config: EntityTypeGenerationConfig,
-): Partial<EntityTypeField> {
-  let overrides: GetterOverrides = {};
+export function getGetterOverrides(schema: JSONSchema7): GetterOverrides {
+  const overrides: GetterOverrides = {};
 
   if ('x-fqm-value-getter' in schema) {
     overrides.valueGetter = schema['x-fqm-value-getter'] as string | null;
@@ -40,6 +34,27 @@ export function getGetters(
   if ('x-fqm-value-function' in schema) {
     overrides.valueFunction = schema['x-fqm-value-function'] as string | null;
   }
+
+  return overrides;
+}
+
+const CAST_OPTIONS = { [DataTypeValue.integerType]: 'integer', [DataTypeValue.numberType]: 'float' } as Record<
+  DataTypeValue,
+  string | undefined
+>;
+
+function getCast(dataType: DataTypeValue) {
+  return CAST_OPTIONS[dataType];
+}
+
+export function getGetters(
+  prop: string,
+  schema: JSONSchema7,
+  dataType: DataType,
+  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  config: EntityTypeGenerationConfig,
+): Partial<EntityTypeField> {
+  let overrides: GetterOverrides = getGetterOverrides(schema);
 
   if (dataType.dataType === DataTypeValue.arrayType && dataType.itemDataType?.dataType !== DataTypeValue.objectType) {
     return handleGetterOverrides(
@@ -53,20 +68,12 @@ export function getGetters(
 
   const fullPath = `->'${prop}'`.replace(/->([^>]+)$/, '->>$1');
 
-  if (dataType.dataType === DataTypeValue.integerType) {
+  const cast = getCast(dataType.dataType);
+  if (cast) {
     return handleGetterOverrides(
       {
-        valueGetter: `(:${entityType.source}.jsonb${fullPath})::integer`,
-        valueFunction: '(:value)::integer',
-      },
-      overrides,
-    );
-  }
-  if (dataType.dataType === DataTypeValue.numberType) {
-    return handleGetterOverrides(
-      {
-        valueGetter: `(:${entityType.source}.jsonb${fullPath})::float`,
-        valueFunction: '(:value)::float',
+        valueGetter: `(:${entityType.source}.jsonb${fullPath})::${cast}`,
+        valueFunction: `(:value)::${cast}`,
       },
       overrides,
     );
@@ -89,34 +96,39 @@ export function getGetters(
   );
 }
 
-export function getNestedGetter(
+export function getNestedGetters(
   source: string,
   prop: string,
   path: string,
   innerDataType: DataType,
   parentIsArrayType: boolean,
 ) {
+  const cast = getCast(innerDataType.dataType);
+
+  if (cast) {
+    if (!parentIsArrayType) {
+      return {
+        valueGetter: `(:${source}.jsonb${path}->>'${prop}')::${cast}`,
+        valueFunction: `(:value)::${cast}`,
+      };
+    }
+
+    return {
+      valueGetter: `(SELECT array_agg((elems.value->>'${prop}')::${cast}) FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
+      valueFunction: `(:value)::${cast}`,
+    };
+  }
+
+  // todo: we might want the lower from the array case?
   if (!parentIsArrayType) {
     return {
       valueGetter: `:${source}.jsonb${path}->>'${prop}'`,
     };
   }
 
-  if (innerDataType.dataType === DataTypeValue.integerType) {
-    return {
-      valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::integer) FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
-      valueFunction: '(:value)::integer',
-    };
-  }
-  if (innerDataType.dataType === DataTypeValue.numberType) {
-    return {
-      valueGetter: `( SELECT array_agg((elems.value->>'${prop}')::float) FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
-      valueFunction: '(:value)::float',
-    };
-  }
   return {
-    valueGetter: `( SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
-    filterValueGetter: `( SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
+    valueGetter: `(SELECT array_agg(elems.value->>'${prop}') FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
+    filterValueGetter: `(SELECT array_agg(lower(elems.value->>'${prop}')) FROM jsonb_array_elements(:${source}.jsonb${path}) AS elems)`,
     valueFunction: 'lower(:value)',
   };
 }

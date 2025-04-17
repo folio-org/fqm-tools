@@ -3,7 +3,7 @@ import { snakeCase } from 'change-case';
 import debug from 'debug';
 import { JSONSchema7 } from 'json-schema';
 import { inferFieldFromSchema } from './field';
-import { getNestedGetter, stripGetters } from './getters';
+import { getNestedGetters, stripGetters } from './getters';
 
 const log = {
   debug: debug('fqm-tools:field-processing:data-type:debug'),
@@ -176,7 +176,7 @@ export function getDataType(
 
           return {
             ...stripGetters(result),
-            ...getNestedGetter(entityType.source, prop, path, result.dataType, parentIsArrayType),
+            ...getNestedGetters(entityType.source, prop, path, result.dataType, parentIsArrayType),
             name: snakeCase(prop),
             property: prop,
           };
