@@ -59,4 +59,74 @@ describe('createEntityTypeFromConfig', () => {
       );
     }).toThrowError(/Schema .+ must be an object with properties!/);
   });
+
+  it('fails on missing source', async () => {
+    const schema = await $RefParser.dereference(path.resolve('test/schemas/department.json'));
+
+    expect(() =>
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+        } as EntityTypeGenerationConfig['entityTypes'][0],
+        schema as JSONSchema7,
+        { metadata: { module: 'foo' }, sources: [] } as unknown as EntityTypeGenerationConfig,
+      ),
+    ).toThrowError(/Source department not found in source list/);
+  });
+
+  it('generates jsonb field by default', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+        } as EntityTypeGenerationConfig['entityTypes'][0],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).columns![0],
+    ).toHaveProperty('name', 'jsonb');
+  });
+
+  it('does not generate jsonb if disabled', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+          includeJsonbField: false,
+        } as EntityTypeGenerationConfig['entityTypes'][0],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).columns,
+    ).toBeEmpty();
+  });
 });

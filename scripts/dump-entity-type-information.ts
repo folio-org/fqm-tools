@@ -53,7 +53,6 @@ const FQM_CONNECTION: FqmConnection = {
   user: process.env.FQM_USERNAME,
   password: process.env.FQM_PASSWORD,
 };
-console.log('FQM connection', FQM_CONNECTION);
 
 let entityTypes: { id: string; label?: string }[];
 if (process.argv[3] === 'all') {
