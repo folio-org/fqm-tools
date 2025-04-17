@@ -1,23 +1,10 @@
 import { EntityType, EntityTypeField } from '@/types';
 import { Dialog, DialogTitle } from '@mui/material';
-import { JSONSchema7 } from 'json-schema';
 import { useState } from 'react';
 import FinishImport from './FinishImport';
 import ImportStep from './ImportStep';
 import InitialImportConfig from './InitialImportConfig';
-
-export const START_PAGE = -1;
-export const END_PAGE = -2;
-
-export interface State {
-  page: number;
-  source: string;
-  schemaRaw: string;
-  schema?: JSONSchema7 & { properties: NonNullable<JSONSchema7['properties']> };
-  columns: EntityTypeField[];
-  translations: Record<string, string>;
-  warnings: string[];
-}
+import { END_PAGE, START_PAGE, State } from './JSONSchemaImporterStates';
 
 export default function JSONSchemaImporter({
   entityType,

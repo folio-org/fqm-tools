@@ -154,7 +154,7 @@ export async function analyzeJsonb(
       schema = schema.then((last) => {
         const thisBatch = createCompoundSchema(jsons);
         console.log(new Date().toISOString(), 'processing records', scanned, 'to', scanned + 500);
-        return last ? mergeSchemas([last as Schema, thisBatch as Schema]) : thisBatch;
+        return last ? mergeSchemas([last as Schema, thisBatch]) : thisBatch;
       });
 
       done = Math.min(total, scanned + 500);

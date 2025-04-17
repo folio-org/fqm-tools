@@ -5,7 +5,7 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { JSONSchema7 } from 'json-schema';
 import json5 from 'json5';
 import { Dispatch, SetStateAction } from 'react';
-import { END_PAGE, State } from './JSONSchemaImporter';
+import { END_PAGE, State } from './JSONSchemaImporterStates';
 
 export default function InitialImportConfig({
   entityType,
@@ -68,7 +68,7 @@ export default function InitialImportConfig({
 
             try {
               // use json5 for a little more niceness
-              const schema = json5.parse(state.schemaRaw) as JSONSchema7;
+              const schema = json5.parse(state.schemaRaw);
               const properties = schema.properties;
 
               if (!properties) {

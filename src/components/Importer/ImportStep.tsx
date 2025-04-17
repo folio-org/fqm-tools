@@ -1,15 +1,15 @@
+import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
+import { inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing/translations';
 import { EntityType, EntityTypeField } from '@/types';
 import { json } from '@codemirror/lang-json';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
 import { Alert, Button, DialogActions, DialogContent, Typography } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
+import { JSONSchema7 } from 'json-schema';
 import json5 from 'json5';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import EntityTypeFieldEditor from '../EntityTypeFieldEditor';
-import { END_PAGE, State } from './JSONSchemaImporter';
-import { inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing/translations';
-import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
-import { JSONSchema7 } from 'json-schema';
+import { END_PAGE, State } from './JSONSchemaImporterStates';
 
 export default function ImportStep({
   entityType,
