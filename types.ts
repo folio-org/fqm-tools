@@ -88,6 +88,7 @@ export interface EntityType {
   customFieldEntityTypeId?: string;
   fromClause?: string;
   sources?: EntityTypeSource[];
+  requiredPermissions?: string[];
   columns?: EntityTypeField[];
   defaultSort?: { columnName: string; direction: string }[];
   sourceView?: string;
@@ -99,4 +100,27 @@ export interface Schema {
   routines: Record<string, string[]>;
   typeMapping: Record<string, string>;
   isView: Record<string, boolean>;
+}
+
+export interface EntityTypeGenerationConfig {
+  metadata: {
+    team: string;
+    domain: string;
+    module: string;
+  };
+  sources: {
+    name: string;
+    // todo: convert this to raw DB tables and compute view names intelligently
+    view: string;
+  }[];
+  entityTypes: {
+    name: string;
+    private?: boolean;
+    schema: string;
+    permissions: string[];
+    source: string;
+    sort: [string, string];
+    useRmbIndexStyle?: boolean;
+    includeJsonbField?: boolean;
+  }[];
 }

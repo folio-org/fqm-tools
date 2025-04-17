@@ -12,6 +12,7 @@
     "speed:chart": "scripts/speed-comparison/chart.ts"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.9.3",
     "@codemirror/lang-java": "^6.0.1",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.8.0",
@@ -28,10 +29,12 @@
     "chart.js": "^4.4.8",
     "chartjs-chart-error-bars": "^4.4.4",
     "chartjs-to-image": "^1.2.2",
+    "debug": "^4.4.0",
     "dotenv": "^16.4.7",
     "fast-stats": "^0.0.7",
     "genson-js": "^0.0.8",
     "iso8601-duration": "^2.1.2",
+    "json-schema": "^0.4.0",
     "json-schema-to-typescript": "^15.0.4",
     "json5": "^2.2.3",
     "ky": "^1.7.5",
@@ -51,19 +54,21 @@
     "uuid": "^11.0.0"
   },
   "devDependencies": {
-    "@types/bun": "1.2.9",
+    "@eslint/eslintrc": "3.3.0",
+    "@types/bun": "1.2.5",
+    "@types/debug": "^4.1.12",
     "@types/fast-stats": "0.0.35",
     "@types/node": "22.13.14",
     "@types/papaparse": "5.3.15",
     "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
-    "@eslint/eslintrc": "3.3.1",
-    "eslint": "9.23.0",
-    "eslint-config-prettier": "10.1.2",
-    "eslint-config-next": "15.2.4",
+    "eslint": "9.22.0",
+    "eslint-config-prettier": "10.1.1",
+    "eslint-config-next": "15.2.3",
     "husky": "9.1.7",
-    "lint-staged": "15.5.1",
-    "typescript": "5.8.3"
+    "lint-staged": "15.5.0",
+    "supports-color": "^10.0.0",
+    "typescript": "5.8.2"
   },
   "lint-staged": {
     "*.{json,json5,css,md}": "prettier --write",
