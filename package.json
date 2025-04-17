@@ -12,7 +12,7 @@
     "speed:chart": "scripts/speed-comparison/chart.ts"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^11.9.3",
+    "@apidevtools/json-schema-ref-parser": "^12.0.1",
     "@codemirror/lang-java": "^6.0.1",
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lang-sql": "^6.8.0",
@@ -68,7 +68,7 @@
     "husky": "9.1.7",
     "lint-staged": "15.5.1",
     "supports-color": "10.0.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   },
   "lint-staged": {
     "*.{json,json5,css,md}": "prettier --write",
