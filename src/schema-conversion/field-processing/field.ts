@@ -21,9 +21,18 @@ export function inferFieldFromSchema(
 ): { issues: string[]; field?: EntityTypeField } {
   log.debug('Examining ', prop, propSchema);
 
-  if ('folio:isVirtual' in propSchema && propSchema['folio:isVirtual']) {
+  if ('x-fqm-ignore' in propSchema) {
+    if (propSchema['x-fqm-ignore']) {
+      return {
+        issues: [],
+      };
+    }
+  } else if ('folio:isVirtual' in propSchema && propSchema['folio:isVirtual']) {
     return {
-      issues: ['It looks like this is a virtual property (folio:isVirtual=true); ignoring?'],
+      issues: [
+        'It looks like this is a virtual property (folio:isVirtual=true); ignoring? Set `x-fqm-ignore`' +
+          ' to true to specify if this field should be included or not and silence this warning.',
+      ],
     };
   }
 

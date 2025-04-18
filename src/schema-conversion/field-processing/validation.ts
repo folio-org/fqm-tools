@@ -1,6 +1,7 @@
 import { JSONSchema7 } from 'json-schema';
 
 const ALLOWED_CUSTOM_PROPERTIES = [
+  'x-fqm-ignore',
   'x-fqm-data-type',
   'x-fqm-value-getter',
   'x-fqm-filter-value-getter',
