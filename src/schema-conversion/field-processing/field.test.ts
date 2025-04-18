@@ -2,10 +2,40 @@ import { DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/ty
 import { getGetters, getNestedGetters } from './getters';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
-import { markNestedArrayOfObjectsNonQueryable } from './field';
+import { inferFieldFromSchema, markNestedArrayOfObjectsNonQueryable } from './field';
 
 const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][0];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
+
+describe('inferFieldFromSchema', () => {
+  it.each([false, true])(
+    'treats x-fqm-ignore=true and folio:isVirtual=%s as a signal to ignore the field with no warning',
+    (virtual) => {
+      const propSchema = { 'x-fqm-ignore': true, 'folio:isVirtual': virtual } as JSONSchema7;
+      const result = inferFieldFromSchema('prop', propSchema, entityTypeConfig, config);
+      expect(result.issues).toBeEmpty();
+      expect(result.field).toBeFalsy();
+    },
+  );
+
+  it.each([false, true])(
+    'treats x-fqm-ignore=false and folio:isVirtual=%s as a signal to NOT ignore the field with no warning',
+    (virtual) => {
+      const propSchema = { 'x-fqm-ignore': false, 'folio:isVirtual': virtual, type: 'string' } as JSONSchema7;
+      const result = inferFieldFromSchema('prop', propSchema, entityTypeConfig, config);
+      expect(result.issues).toBeEmpty();
+      expect(result.field).toBeTruthy();
+    },
+  );
+
+  it('warns and returns nothing for folio:isVirtual=true and x-fqm-ignore not set', () => {
+    const propSchema = { 'folio:isVirtual': true } as JSONSchema7;
+    const result = inferFieldFromSchema('prop', propSchema, entityTypeConfig, config);
+    expect(result.issues).toHaveLength(1);
+    expect(result.issues[0]).toMatch(/virtual property.+x-fqm-ignore.+silence/);
+    expect(result.field).toBeFalsy();
+  });
+});
 
 describe('getGetters', () => {
   it.each([

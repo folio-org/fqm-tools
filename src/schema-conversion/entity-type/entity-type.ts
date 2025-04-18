@@ -14,27 +14,35 @@ export default function createEntityTypeFromConfig(
   entityType: EntityTypeGenerationConfig['entityTypes'][0],
   schema: JSONSchema7,
   config: EntityTypeGenerationConfig,
-): EntityType {
+): { entityType: EntityType; issues: string[] } {
   if (schema.type !== 'object' || !schema.properties) {
     throw new Error(`Schema ${entityType.schema} must be an object with properties!`);
   }
 
+  const issues: string[] = [];
+
+  const baseColumns = Object.entries(schema.properties)
+    .map(([name, prop]) => {
+      const result = inferFieldFromSchema(name, prop as JSONSchema7, entityType, config);
+      issues.push(...result.issues);
+      return result.field;
+    })
+    .filter((f): f is NonNullable<EntityTypeField> => !!f);
+
   return {
-    // ensures the same entity type gets to keep the same UUID across runs
-    id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
-    name: entityType.name,
-    private: entityType.private ?? false,
-    sources: [getSourceDefinition(entityType.source, config.sources)],
-    requiredPermissions: entityType.permissions,
-    defaultSort: [getSort(entityType.sort)],
-    columns: markNestedArrayOfObjectsNonQueryable(
-      unpackObjectColumns([
-        ...Object.entries(schema.properties)
-          .map(([name, prop]) => inferFieldFromSchema(name, prop as JSONSchema7, entityType, config).field)
-          .filter((f): f is NonNullable<EntityTypeField> => !!f),
-        ...getJsonbField(entityType),
-      ]),
-    ),
+    entityType: {
+      // ensures the same entity type gets to keep the same UUID across runs
+      id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
+      name: entityType.name,
+      private: entityType.private ?? false,
+      sources: [getSourceDefinition(entityType.source, config.sources)],
+      requiredPermissions: entityType.permissions,
+      defaultSort: [getSort(entityType.sort)],
+      columns: markNestedArrayOfObjectsNonQueryable(
+        unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)]),
+      ),
+    },
+    issues,
   };
 }
 

@@ -32,6 +32,6 @@ jobs:
             -Dsonar.organization=folio-org
             -Dsonar.projectKey=org.folio:fqm-tools
             -Dsonar.projectName=fqm-tools
-            -Dsonar.sources=src,scripts
+            -Dsonar.sources=src
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.exclusions=**/*.md,LICENSE,artifacts/**,ci/**,node_modules/**,**/tests/**,**/test/**,**/*-test.*,**/*.test.*,karma.conf.*,jest.config.*,**/*.css,**/*.json

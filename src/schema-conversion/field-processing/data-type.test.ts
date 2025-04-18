@@ -153,7 +153,7 @@ describe('getDataType', () => {
     );
 
     expect(issues).toContain(
-      'in array: in object property bad: It looks like this is a virtual property (folio:isVirtual=true); ignoring?',
+      'in array: in object property bad: It looks like this is a virtual property (folio:isVirtual=true); ignoring? Set `x-fqm-ignore` to true to specify if this field should be included or not and silence this warning.',
     );
     expect(dataType as object).toEqual({
       dataType: 'jsonbArrayType',

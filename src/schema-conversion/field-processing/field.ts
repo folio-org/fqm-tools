@@ -6,6 +6,7 @@ import { getDataType } from './data-type';
 import { getGetters } from './getters';
 import { getValues } from './values';
 import { getIsIdColumn, getExtraProperties } from './extra-properties';
+import { validateField } from './validation';
 
 const log = {
   debug: debug('fqm-tools:field-processing:field:debug'),
@@ -20,15 +21,26 @@ export function inferFieldFromSchema(
 ): { issues: string[]; field?: EntityTypeField } {
   log.debug('Examining ', prop, propSchema);
 
-  if ('folio:isVirtual' in propSchema && propSchema['folio:isVirtual']) {
+  if ('x-fqm-ignore' in propSchema) {
+    if (propSchema['x-fqm-ignore']) {
+      return {
+        issues: [],
+      };
+    }
+  } else if ('folio:isVirtual' in propSchema && propSchema['folio:isVirtual']) {
     return {
-      issues: ['It looks like this is a virtual property (folio:isVirtual=true); ignoring?'],
+      issues: [
+        'It looks like this is a virtual property (folio:isVirtual=true); ignoring? Set `x-fqm-ignore`' +
+          ' to true to specify if this field should be included or not and silence this warning.',
+      ],
     };
   }
 
   const issues: string[] = [];
 
   const name = snakeCase(prop);
+
+  issues.push(...validateField(prop, propSchema));
 
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`, entityType, config);
   issues.push(...dtIssues);
