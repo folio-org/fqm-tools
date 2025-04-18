@@ -57,24 +57,32 @@ for (const { dir, config } of configs) {
   for (const entityType of config.entityTypes) {
     console.log(`- Processing ${entityType.name}`);
 
-    const result = createEntityTypeFromConfig(
-      entityType,
-      await $RefParser.dereference(path.resolve(dir, entityType.schema)),
-      config,
-    );
-
-    for (const issue of result.issues) {
-      console.warn(
-        `::warning title=${config.metadata.domain}::${config.metadata.module} (team ${config.metadata.team})::⚠️ ${issue}`,
+    try {
+      const result = createEntityTypeFromConfig(
+        entityType,
+        await $RefParser.dereference(path.resolve(dir, entityType.schema)),
+        config,
       );
-    }
 
-    await mkdir(path.resolve(args.values.out, config.metadata.domain, config.metadata.module), { recursive: true });
-    await Bun.write(
-      Bun.file(
-        path.resolve(args.values.out, config.metadata.domain, config.metadata.module, `${entityType.name}.json`),
-      ),
-      json5.stringify(result.entityType, null, 2),
-    );
+      for (const issue of result.issues) {
+        console.warn(
+          `::warning title=${config.metadata.domain}::${config.metadata.module} (team ${config.metadata.team})::⚠️ ${issue}`,
+        );
+      }
+
+      await mkdir(path.resolve(args.values.out, config.metadata.domain, config.metadata.module), { recursive: true });
+      await Bun.write(
+        Bun.file(
+          path.resolve(args.values.out, config.metadata.domain, config.metadata.module, `${entityType.name}.json`),
+        ),
+        json5.stringify(result.entityType, null, 2),
+      );
+    } catch (e) {
+      // critical errors like schema not existing/object, etc., that cannot be recovered from/skipped
+      console.error(
+        `::error title=${config.metadata.domain}::${config.metadata.module} (team ${config.metadata.team})::❌ ${e}`,
+      );
+      continue;
+    }
   }
 }

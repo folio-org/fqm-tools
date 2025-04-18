@@ -37,7 +37,8 @@ describe('createEntityTypeFromConfig', () => {
     const result = createEntityTypeFromConfig(inputConfig.entityTypes[0], schema as JSONSchema7, inputConfig);
     const expected = await Bun.file('test/entity-types/simple_department.json').json();
 
-    expect(result).toEqual(expected);
+    expect(result.entityType).toEqual(expected);
+    expect(result.issues).toBeEmpty();
   });
 
   it('fails on non-object schema', () => {
@@ -100,7 +101,7 @@ describe('createEntityTypeFromConfig', () => {
             },
           ],
         } as unknown as EntityTypeGenerationConfig,
-      ).columns![0],
+      ).entityType.columns![0],
     ).toHaveProperty('name', 'jsonb');
   });
 
@@ -126,7 +127,7 @@ describe('createEntityTypeFromConfig', () => {
             },
           ],
         } as unknown as EntityTypeGenerationConfig,
-      ).columns,
+      ).entityType.columns,
     ).toBeEmpty();
   });
 });
