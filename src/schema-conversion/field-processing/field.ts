@@ -6,6 +6,7 @@ import { getDataType } from './data-type';
 import { getGetters } from './getters';
 import { getValues } from './values';
 import { getIsIdColumn, getExtraProperties } from './extra-properties';
+import { validateField } from './validation';
 
 const log = {
   debug: debug('fqm-tools:field-processing:field:debug'),
@@ -29,6 +30,8 @@ export function inferFieldFromSchema(
   const issues: string[] = [];
 
   const name = snakeCase(prop);
+
+  issues.push(...validateField(prop, propSchema));
 
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`, entityType, config);
   issues.push(...dtIssues);

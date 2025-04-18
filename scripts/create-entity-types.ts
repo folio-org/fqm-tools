@@ -2,8 +2,9 @@ import createEntityTypeFromConfig from '@/src/schema-conversion/entity-type/enti
 import { EntityTypeGenerationConfig } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { TOML } from 'bun';
+import { mkdir } from 'fs/promises';
+import json5 from 'json5';
 import path from 'path';
-import { exit } from 'process';
 import { parseArgs } from 'util';
 
 const args = parseArgs({
@@ -37,25 +38,43 @@ if (args.values.help) {
   process.exit(0);
 }
 
+const configs: { dir: string; config: EntityTypeGenerationConfig }[] = [];
+
 for (const dir of args.positionals) {
   const file = Bun.file(path.resolve(dir, 'fqm-config.toml'));
   if (!(await file.exists())) {
     console.error(`::error title=Unable to open config::${file.name} does not exist.`);
+    continue;
   }
+
+  configs.push({ dir, config: TOML.parse(await file.text()) as EntityTypeGenerationConfig });
 }
 
-exit(1);
+for (const { dir, config } of configs) {
+  console.log(
+    `Processing ${config.metadata.domain}::${config.metadata.module} (team ${config.metadata.team}) from ${dir}`,
+  );
+  for (const entityType of config.entityTypes) {
+    console.log(`- Processing ${entityType.name}`);
 
-// const config = TOML.parse(
-//   await .text(),
-// ) as EntityTypeGenerationConfig;
-
-const results = await Promise.all(
-  config.entityTypes.map(async (entityType) =>
-    createEntityTypeFromConfig(
+    const result = createEntityTypeFromConfig(
       entityType,
-      await $RefParser.dereference(path.resolve(baseDir, entityType.schema)),
+      await $RefParser.dereference(path.resolve(dir, entityType.schema)),
       config,
-    ),
-  ),
-);
+    );
+
+    for (const issue of result.issues) {
+      console.warn(
+        `::warning title=${config.metadata.domain}::${config.metadata.module} (team ${config.metadata.team})::⚠️ ${issue}`,
+      );
+    }
+
+    await mkdir(path.resolve(args.values.out, config.metadata.domain, config.metadata.module), { recursive: true });
+    await Bun.write(
+      Bun.file(
+        path.resolve(args.values.out, config.metadata.domain, config.metadata.module, `${entityType.name}.json`),
+      ),
+      json5.stringify(result.entityType, null, 2),
+    );
+  }
+}
