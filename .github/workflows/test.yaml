@@ -12,6 +12,7 @@ jobs:
       - uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2
 
       - run: bun install --frozen-lockfile
+      - run: bun scripts/create-entity-types.ts test1 test2
 
       - run: bun test --coverage --reporter=junit --reporter-outfile=./test-results.xml
 
