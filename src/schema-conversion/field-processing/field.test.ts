@@ -1,7 +1,8 @@
-import { DataTypeValue, EntityTypeGenerationConfig } from '@/types';
+import { DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/types';
 import { getGetters, getNestedGetters } from './getters';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
+import { markNestedArrayOfObjectsNonQueryable } from './field';
 
 const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][0];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
@@ -115,6 +116,110 @@ describe('getGetters', () => {
       filterValueGetter: "lower(${tenant_id}_mod_foo.f_unaccent(:sauce.jsonb->>'prop'::text))",
       valueFunction: 'lower(${tenant_id}_mod_foo.f_unaccent(:value))',
     });
+  });
+});
+describe('markNestedArrayOfObjectsNonQueryable', () => {
+  it('marks nested array of objects as non-queryable', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: {
+          dataType: DataTypeValue.arrayType,
+          itemDataType: {
+            dataType: DataTypeValue.objectType,
+            properties: [
+              {
+                name: 'nestedField',
+                dataType: { dataType: DataTypeValue.stringType },
+                queryable: true,
+              },
+            ],
+          },
+        },
+        queryable: true,
+      },
+    ];
+
+    const result = markNestedArrayOfObjectsNonQueryable(columns);
+
+    expect(result[0].dataType.itemDataType?.properties?.[0].queryable).toBe(false);
+  });
+
+  it('does not modify non-array or non-object fields', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: { dataType: DataTypeValue.stringType },
+        queryable: true,
+      },
+    ];
+
+    const result = markNestedArrayOfObjectsNonQueryable(columns);
+
+    expect(result).toEqual(columns);
+  });
+
+  it('handles deeply nested array->object structures', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: {
+          dataType: DataTypeValue.arrayType,
+          itemDataType: {
+            dataType: DataTypeValue.objectType,
+            properties: [
+              {
+                name: 'nestedArray',
+                dataType: {
+                  dataType: DataTypeValue.arrayType,
+                  itemDataType: {
+                    dataType: DataTypeValue.objectType,
+                    properties: [
+                      {
+                        name: 'deepField',
+                        dataType: { dataType: DataTypeValue.stringType },
+                        queryable: true,
+                      },
+                    ],
+                  },
+                },
+                queryable: true,
+              },
+            ],
+          },
+        },
+        queryable: true,
+      },
+    ];
+
+    const result = markNestedArrayOfObjectsNonQueryable(columns);
+
+    expect(result[0].dataType.itemDataType?.properties?.[0].dataType.itemDataType?.properties?.[0].queryable).toBe(
+      false,
+    );
+  });
+
+  it('does not modify fields without array->object structure', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: {
+          dataType: DataTypeValue.objectType,
+          properties: [
+            {
+              name: 'nestedField',
+              dataType: { dataType: DataTypeValue.stringType },
+              queryable: true,
+            },
+          ],
+        },
+        queryable: true,
+      },
+    ];
+
+    const result = markNestedArrayOfObjectsNonQueryable(columns);
+
+    expect(result).toEqual(columns);
   });
 });
 

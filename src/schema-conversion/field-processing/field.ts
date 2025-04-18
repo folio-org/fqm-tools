@@ -1,4 +1,4 @@
-import { DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/types';
+import { DataType, DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/types';
 import { snakeCase } from 'change-case';
 import debug from 'debug';
 import { JSONSchema7 } from 'json-schema';
@@ -38,7 +38,7 @@ export function inferFieldFromSchema(
     field: {
       name,
       dataType,
-      queryable: ![DataTypeValue.arrayType, DataTypeValue.objectType].includes(dataType.dataType),
+      queryable: DataTypeValue.objectType !== dataType.dataType,
       visibleByDefault: false,
       ...getIsIdColumn(name, propSchema),
       ...getGetters(prop, propSchema, dataType, entityType, config),
@@ -70,6 +70,43 @@ export function unpackObjectColumns(columns: EntityTypeField[]): EntityTypeField
   } else {
     return columns;
   }
+}
+
+function recursiveFieldApplier(
+  dataType: DataType,
+  path: ('array' | 'object')[],
+  func: (field: EntityTypeField, path: ('array' | 'object')[]) => EntityTypeField,
+): DataType {
+  const result = { ...dataType };
+
+  if ('properties' in dataType && dataType.properties) {
+    result.properties = dataType.properties
+      .map((field) => func(field, [...path, 'object']))
+      .map(({ dataType, ...f }) => ({ ...f, dataType: recursiveFieldApplier(dataType, [...path, 'object'], func) }));
+  }
+  if ('itemDataType' in dataType && dataType.itemDataType) {
+    result.itemDataType = recursiveFieldApplier(dataType.itemDataType, [...path, 'array'], func);
+  }
+
+  return result;
+}
+
+export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[]): EntityTypeField[] {
+  // temporarily mark all nested array of objects as non-queryable; see MODFQMMGR-740
+  return columns.map((column) => ({
+    ...column,
+    dataType: recursiveFieldApplier(column.dataType, [], (field, path) => {
+      // this will always be array->object as object->array gets flattened in unpackObjectColumns
+      if (path.includes('array') && path.includes('object')) {
+        return {
+          ...field,
+          queryable: false,
+        };
+      } else {
+        return field;
+      }
+    }),
+  }));
 }
 
 export function getJsonbField(entityType: EntityTypeGenerationConfig['entityTypes'][0]) {

@@ -1,7 +1,12 @@
 import { EntityType, EntityTypeField, EntityTypeGenerationConfig, EntityTypeSource } from '@/types';
 import { JSONSchema7 } from 'json-schema';
 import { v5 } from 'uuid';
-import { getJsonbField, inferFieldFromSchema, unpackObjectColumns } from '../field-processing/field';
+import {
+  getJsonbField,
+  inferFieldFromSchema,
+  markNestedArrayOfObjectsNonQueryable,
+  unpackObjectColumns,
+} from '../field-processing/field';
 
 export const NAMESPACE_UUID = 'dac5ff9d-28e2-4ce8-b498-958f5d2ad3da';
 
@@ -22,12 +27,14 @@ export default function createEntityTypeFromConfig(
     sources: [getSourceDefinition(entityType.source, config.sources)],
     requiredPermissions: entityType.permissions,
     defaultSort: [getSort(entityType.sort)],
-    columns: unpackObjectColumns([
-      ...Object.entries(schema.properties)
-        .map(([name, prop]) => inferFieldFromSchema(name, prop as JSONSchema7, entityType, config).field)
-        .filter((f): f is NonNullable<EntityTypeField> => !!f),
-      ...getJsonbField(entityType),
-    ]),
+    columns: markNestedArrayOfObjectsNonQueryable(
+      unpackObjectColumns([
+        ...Object.entries(schema.properties)
+          .map(([name, prop]) => inferFieldFromSchema(name, prop as JSONSchema7, entityType, config).field)
+          .filter((f): f is NonNullable<EntityTypeField> => !!f),
+        ...getJsonbField(entityType),
+      ]),
+    ),
   };
 }
 

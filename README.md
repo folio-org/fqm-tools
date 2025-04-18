@@ -10,14 +10,19 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Custom schema properties
 
-| Property                    | Description                                       | Type | Required | Default |
-| --------------------------- | ------------------------------------------------- | ---- | -------- | ------- |
+<!-- this table will be made into something coherent in FQMTOOL-5 -->
+
+| Property                    | Description                                       | Type                                                                                                                  | Required | Default |
+| --------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
 | `x-fqm-data-type`           |
 | `x-fqm-value-getter`        | using `null` will remove guessed from entity type |
 | `x-fqm-filter-value-getter` | using `null` will remove guessed from entity type |
 | `x-fqm-value-function`      | using `null` will remove guessed from entity type |
 | `x-fqm-is-id-column`        | default `name === 'id'`                           |
 | `x-fqm-value-source-api`    |
+| `x-fqm-visible-by-default`  | default no                                        |
+| `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`     | default `all` unless object, then `results-only`. temporarily also `results-only` for nested array->object properties |
+| `x-fqm-essential`           | default no                                        |
 
 ## Config
 
