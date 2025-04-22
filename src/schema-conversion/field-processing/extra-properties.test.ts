@@ -24,7 +24,7 @@ describe('getExtraProperties', () => {
   it('should return valueSourceApi when x-fqm-value-source-api is present', () => {
     const schema = { 'x-fqm-value-source-api': 'api-source' } as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result.valueSourceApi as unknown).toBe('api-source');
+    expect(result.extraProperties.valueSourceApi as unknown).toBe('api-source');
   });
 
   it.each([
@@ -46,18 +46,21 @@ describe('getExtraProperties', () => {
   it('should set visibleByDefault when x-fqm-visibility-by-default is present', () => {
     const schema = { 'x-fqm-visibility-by-default': true } as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result.visibleByDefault).toBe(true);
+    expect(result.extraProperties.visibleByDefault).toBe(true);
+    expect(result.issues).toBeEmpty();
   });
 
   it('should set essential when x-fqm-essential is present', () => {
     const schema = { 'x-fqm-essential': true } as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result.essential).toBe(true);
+    expect(result.extraProperties.essential).toBe(true);
+    expect(result.issues).toBeEmpty();
   });
 
   it('should return an empty object when no relevant properties are present', () => {
     const schema = {} as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result).toEqual({});
+    expect(result.extraProperties).toEqual({});
+    expect(result.issues).toBeEmpty();
   });
 });

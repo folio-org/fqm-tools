@@ -1,5 +1,6 @@
-import { EntityTypeField } from '@/types';
+import { EntityTypeField, EntityTypeFieldJoinIntermediateTemplate } from '@/types';
 import { JSONSchema7 } from 'json-schema';
+import { ZodError } from 'zod';
 
 export function getIsIdColumn(name: string, propSchema: JSONSchema7) {
   if ('x-fqm-is-id-column' in propSchema) {
@@ -19,10 +20,16 @@ export function getIsIdColumn(name: string, propSchema: JSONSchema7) {
 
 export function getExtraProperties(propSchema: JSONSchema7) {
   const extraProperties: Partial<EntityTypeField> = {};
+  const issues: string[] = [];
+
+  if ('x-fqm-name' in propSchema) {
+    extraProperties.name = propSchema['x-fqm-name'] as EntityTypeField['name'];
+  }
 
   if ('x-fqm-value-source-api' in propSchema) {
     extraProperties.valueSourceApi = propSchema['x-fqm-value-source-api'] as EntityTypeField['valueSourceApi'];
   }
+
   if ('x-fqm-visibility' in propSchema) {
     switch (propSchema['x-fqm-visibility']) {
       case 'all':
@@ -56,5 +63,18 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties.essential = propSchema['x-fqm-essential'] === true;
   }
 
-  return extraProperties;
+  if ('x-fqm-joins-to' in propSchema) {
+    extraProperties.joinsToIntermediate = [];
+
+    for (const raw of propSchema['x-fqm-joins-to'] as unknown[]) {
+      try {
+        const intermediateJoin = EntityTypeFieldJoinIntermediateTemplate.parse(raw);
+        extraProperties.joinsToIntermediate.push(intermediateJoin);
+      } catch (e) {
+        issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to: ${issue.message}`));
+      }
+    }
+  }
+
+  return { extraProperties, issues };
 }

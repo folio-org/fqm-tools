@@ -43,7 +43,10 @@ export function inferFieldFromSchema(
   issues.push(...validateField(prop, propSchema));
 
   const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`, entityType, config);
-  issues.push(...dtIssues);
+  issues.push(...dtIssues.map((i) => `${prop}: ${i}`));
+
+  const { extraProperties, issues: extraIssues } = getExtraProperties(propSchema);
+  issues.push(...extraIssues.map((i) => `${prop}: ${i}`));
 
   return {
     issues,
@@ -55,7 +58,7 @@ export function inferFieldFromSchema(
       ...getIsIdColumn(name, propSchema),
       ...getGetters(prop, propSchema, dataType, entityType, config),
       ...getValues(dataType, propSchema),
-      ...getExtraProperties(propSchema),
+      ...extraProperties,
     },
   };
 }

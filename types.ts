@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface FqmConnection {
   host: string;
   port: number;
@@ -63,7 +65,21 @@ export interface EntityTypeField {
     labelJsonPath: string;
   };
   values?: { value: string; label: string }[];
+  joinsTo?: EntityTypeFieldJoin[];
+  // used for middle stage of generating
+  joinsToIntermediate?: EntityTypeFieldJoinIntermediate[];
 }
+
+export type EntityTypeFieldJoin = {
+  targetId: string;
+  targetField: string;
+  direction?: 'inner' | 'left' | 'right' | 'full';
+} & EntityTypeFieldJoinType;
+
+type EntityTypeFieldJoinType =
+  | { type: 'custom'; sql: string }
+  | { type: 'equality-simple' }
+  | { type: 'equality-cast-uuid' };
 
 export interface EntityTypeSource {
   type: 'db' | 'entity-type';
@@ -102,25 +118,57 @@ export interface Schema {
   isView: Record<string, boolean>;
 }
 
-export interface EntityTypeGenerationConfig {
-  metadata: {
-    team: string;
-    domain: string;
-    module: string;
-  };
-  sources: {
-    name: string;
-    // todo: convert this to raw DB tables and compute view names intelligently
-    view: string;
-  }[];
-  entityTypes: {
-    name: string;
-    private?: boolean;
-    schema: string;
-    permissions: string[];
-    source: string;
-    sort: [string, string];
-    useRmbIndexStyle?: boolean;
-    includeJsonbField?: boolean;
-  }[];
-}
+// using runtypes here as this is a mess and we really want to make sure incoming schemas are valid
+export const EntityTypeFieldJoinIntermediateTemplate = z
+  .object({
+    targetModule: z.string(),
+    targetEntity: z.string(),
+    targetField: z.string(),
+    direction: z.enum(['inner', 'left', 'right', 'full']).optional(),
+  })
+  .and(
+    z.discriminatedUnion('type', [
+      z.object({ type: z.undefined() }),
+      z.object({ type: z.literal('equality-simple') }),
+      z.object({ type: z.literal('equality-cast-uuid') }),
+      z.object({ type: z.literal('custom'), sql: z.string() }),
+    ]),
+  );
+
+export type EntityTypeFieldJoinIntermediate = z.infer<typeof EntityTypeFieldJoinIntermediateTemplate>;
+
+export const EntityTypeGenerationConfigTemplate = z
+  .object({
+    metadata: z
+      .object({
+        team: z.string(),
+        domain: z.enum(['acquisition', 'catalog', 'circulation', 'erm', 'users', 'other']),
+        module: z.string(),
+      })
+      .strict(),
+    sources: z.array(
+      z
+        .object({
+          name: z.string(),
+          view: z.string(), // todo: convert this to raw DB tables and compute view names intelligently
+        })
+        .strict(),
+    ),
+    entityTypes: z.array(
+      z
+        .object({
+          name: z.string(),
+          private: z.boolean().optional(),
+          schema: z.string(),
+          permissions: z.array(z.string()),
+          source: z.string(),
+          sort: z.tuple([z.string(), z.string()]),
+          useRmbIndexStyle: z.boolean().optional(),
+          includeJsonbField: z.boolean().optional(),
+        })
+        .strict(),
+    ),
+  })
+  .strict();
+
+export type EntityTypeGenerationConfig = z.infer<typeof EntityTypeGenerationConfigTemplate>;
