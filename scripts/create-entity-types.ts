@@ -1,4 +1,5 @@
-import createEntityTypeFromConfig, { resolveEntityTypeJoins } from '@/src/schema-conversion/entity-type/entity-type';
+import createEntityTypeFromConfig from '@/src/schema-conversion/entity-type/entity-type';
+import { resolveEntityTypeJoins } from '@/src/schema-conversion/entity-type/joins';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { TOML } from 'bun';
