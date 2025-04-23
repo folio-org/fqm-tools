@@ -1,6 +1,7 @@
 import { JSONSchema7 } from 'json-schema';
 
 const ALLOWED_CUSTOM_PROPERTIES = [
+  'x-fqm-name',
   'x-fqm-ignore',
   'x-fqm-data-type',
   'x-fqm-value-getter',
@@ -11,6 +12,7 @@ const ALLOWED_CUSTOM_PROPERTIES = [
   'x-fqm-visible-by-default',
   'x-fqm-visibility',
   'x-fqm-essential',
+  'x-fqm-joins-to',
 ];
 
 export function validateField(name: string, schema: JSONSchema7): string[] {

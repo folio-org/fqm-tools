@@ -1,4 +1,5 @@
 import { EntityType, EntityTypeField, EntityTypeGenerationConfig, EntityTypeSource } from '@/types';
+import { snakeCase } from 'change-case';
 import { JSONSchema7 } from 'json-schema';
 import { v5 } from 'uuid';
 import {
@@ -33,7 +34,7 @@ export default function createEntityTypeFromConfig(
     entityType: {
       // ensures the same entity type gets to keep the same UUID across runs
       id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
-      name: entityType.name,
+      name: `${snakeCase(config.metadata.module)}__${entityType.name}`,
       private: entityType.private ?? false,
       sources: [getSourceDefinition(entityType.source, config.sources)],
       requiredPermissions: entityType.permissions,

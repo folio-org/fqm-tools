@@ -10,7 +10,7 @@ describe('createEntityTypeFromConfig', () => {
     const inputConfig: EntityTypeGenerationConfig = {
       metadata: {
         team: 'corsair',
-        domain: 'everything',
+        domain: 'users',
         module: 'mod-users',
       },
       sources: [
