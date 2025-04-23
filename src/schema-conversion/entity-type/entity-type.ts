@@ -69,6 +69,7 @@ function getSort(sort: [string, string]): NonNullable<EntityType['defaultSort']>
 }
 
 export function resolveEntityTypeJoins(
+  // bundled type only really used to make calling more convenient
   entityTypes: {
     entityType: EntityType;
     domain: string;
@@ -77,6 +78,7 @@ export function resolveEntityTypeJoins(
   forceGenerateJoins: boolean,
 ) {
   const entityTypeMap = new Map<string, EntityType>();
+  const issues: string[] = [];
 
   for (const { entityType } of entityTypes) {
     entityTypeMap.set(entityType.name, entityType);
@@ -90,43 +92,47 @@ export function resolveEntityTypeJoins(
         );
 
         if (!targetEntityType && !forceGenerateJoins) {
-          console.error(
-            `::error title=Unable to resolve join::Entity type ${entityType.name} field ${field} has a join to entity ${targetModule}__${targetEntity}, but it does not exist.`,
+          issues.push(
+            `::error title=Unable to resolve join::Entity type ${entityType.name} field ${field.name} has a join to entity ${targetModule}__${targetEntity}, but it does not exist.`,
           );
           continue;
         } else if (!targetEntityType) {
           targetEntityType = {
             id: 'deadbeef-dead-beef-dead-beefdeadbeef',
           };
-          console.warn(
-            `::warn title=Unable to resolve join::Entity type ${entityType.name} field ${field} has a join to entity ${targetModule}__${targetEntity}, but it does not exist.`,
+          issues.push(
+            `::warn title=Unable to resolve join::Entity type ${entityType.name} field ${field.name} has a join to entity ${targetModule}__${targetEntity}, but it does not exist.`,
           );
         } else {
           const resolvedField = targetEntityType.columns?.find((f) => f.name === targetField);
           if (!resolvedField) {
-            console.error(
-              `::error title=Unable to resolve join::Entity type ${entityType.name} field ${field} has a join to field ${targetField} in entity ${targetModule}__${targetEntity}, but no such field exists.`,
+            issues.push(
+              `::error title=Unable to resolve join::Entity type ${entityType.name} field ${field.name} has a join to field ${targetField} in entity ${targetModule}__${targetEntity}, but no such field exists.`,
             );
             continue;
           }
         }
 
-        const joinType =
-          (join.type ?? field.dataType.dataType === DataTypeValue.rangedUUIDType)
-            ? 'equality-cast-uuid'
-            : 'equality-simple';
-
         field.joinsTo = field.joinsTo ?? [];
-        field.joinsTo.push({
-          targetId: targetEntityType.id,
-          targetField: targetField,
-          ...join,
-          type: joinType,
-        });
+        // should be prettier, but TS gets mad when trying to coerce between joins with and without additional properties
+        if (join.type) {
+          field.joinsTo.push({
+            targetId: targetEntityType.id,
+            targetField: targetField,
+            ...join,
+          });
+        } else {
+          field.joinsTo.push({
+            targetId: targetEntityType.id,
+            targetField: targetField,
+            ...join,
+            type: field.dataType.dataType === DataTypeValue.rangedUUIDType ? 'equality-cast-uuid' : 'equality-simple',
+          });
+        }
       }
       delete field.joinsToIntermediate;
     }
   }
 
-  return entityTypes;
+  return { entityTypes, issues };
 }

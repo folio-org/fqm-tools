@@ -35,7 +35,8 @@ describe('getExtraProperties', () => {
   ])('should handle x-fqm-visibility=%s correctly', (visibility, expected) => {
     const schema = { 'x-fqm-visibility': visibility } as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result).toMatchObject(expected);
+    expect(result.extraProperties).toMatchObject(expected);
+    expect(result.issues).toBeEmpty();
   });
 
   it('should throw an error for invalid x-fqm-visibility value', () => {
@@ -55,6 +56,33 @@ describe('getExtraProperties', () => {
     const result = getExtraProperties(schema);
     expect(result.extraProperties.essential).toBe(true);
     expect(result.issues).toBeEmpty();
+  });
+
+  it('should set name when x-fqm-name is present', () => {
+    const schema = { 'x-fqm-name': 'customName' } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.name).toBe('customName');
+    expect(result.issues).toBeEmpty();
+  });
+
+  it('should pass intermediate join information', () => {
+    const schema = {
+      'x-fqm-joins-to': [{ targetModule: 'mod-target', targetEntity: 'entity', targetField: 'field1' }],
+    } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.joinsToIntermediate).toEqual((schema as Record<string, never>)['x-fqm-joins-to']);
+    expect(result.issues).toBeEmpty();
+  });
+
+  it('fails on invalid joins', () => {
+    const schema = {
+      'x-fqm-joins-to': [{ targetModule: 'mod-target', targetEntity: 'entity', targetField: 'field1', type: 'bad' }],
+    } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.joinsToIntermediate).toBeEmpty();
+    expect(result.issues).toContain(
+      "Error parsing x-fqm-joins-to: Invalid discriminator value. Expected  | 'equality-simple' | 'equality-cast-uuid' | 'custom'",
+    );
   });
 
   it('should return an empty object when no relevant properties are present', () => {

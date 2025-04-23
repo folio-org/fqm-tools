@@ -106,7 +106,11 @@ for (const { dir, config } of configs) {
   }
 }
 
-const results = resolveEntityTypeJoins(intermediateResults, args.values['force-generate-joins']);
+const { entityTypes: results, issues } = resolveEntityTypeJoins(
+  intermediateResults,
+  args.values['force-generate-joins'],
+);
+issues.forEach((issue) => console.warn(issue));
 
 for (const { entityType, domain, module } of results) {
   await mkdir(path.resolve(args.values.out, domain, module), { recursive: true });
