@@ -1,6 +1,6 @@
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo, ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
 import JSONTable from './JSONTable';
@@ -64,6 +64,32 @@ export default function QueryValues({
     [socket],
   );
 
+  const persistIcon = useMemo(() => {
+    return (
+      (
+        {
+          [State.NOT_STARTED]: <Pending color="disabled" />,
+          [State.STARTED]: <Schedule color="warning" />,
+          [State.ERROR_PERSIST]: <Error color="error" />,
+          [State.DONE]: <Done color="success" />,
+        } as Record<State, ReactNode>
+      )[state.state] ?? <Done color="success" />
+    );
+  }, [state.state]);
+
+  const queryIcon = useMemo(() => {
+    return (
+      {
+        [State.NOT_STARTED]: <Pending color="disabled" />,
+        [State.STARTED]: <Pending color="disabled" />,
+        [State.PERSISTED]: <Schedule color="warning" />,
+        [State.ERROR_PERSIST]: <Error color="error" />,
+        [State.ERROR_QUERY]: <Error color="error" />,
+        [State.DONE]: <Done color="success" />,
+      }[state.state] ?? <Done color="success" />
+    );
+  }, [state.state]);
+
   if (entityType === null) {
     return <p>Select an entity type first</p>;
   }
@@ -97,28 +123,11 @@ export default function QueryValues({
       </Box>
 
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.STARTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}
+        {persistIcon}
         Persist to database
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED || state.state === State.STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.PERSISTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST || state.state === State.ERROR_QUERY ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}{' '}
-        Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
+        {queryIcon} Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
       </Typography>
       {!!state.result &&
         (typeof state.result === 'string' ? <pre>{state.result}</pre> : <JSONTable data={state.result} />)}

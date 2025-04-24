@@ -1,11 +1,7 @@
 import { DataTypeValue, EntityType } from '@/types';
 import { Grid, Typography } from '@mui/material';
 import { snakeCase } from 'change-case';
-// import { compile, JSONSchema } from 'json-schema-to-typescript';
-// import { format } from 'prettier';
-// import prettierPluginESTree from 'prettier/plugins/estree.mjs';
-// import prettierPluginTS from 'prettier/plugins/typescript.mjs';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 
 export default function DBColumnInspector({
@@ -44,22 +40,7 @@ export default function DBColumnInspector({
           setAnalysis({
             ...result,
             resultRaw: result.result,
-            // todo: figure out why we can't reference prettier from the bundle.
-            //       maybe shove this on the backside of the socket if needed?
             result: JSON.stringify(result.result, null, 2),
-            // result: await format(
-            //   await compile(
-            //     result.result as JSONSchema,
-            //     `${pascalCase(db)}${pascalCase(table)}${pascalCase(column)}Schema`,
-            //     {
-            //       additionalProperties: false,
-            //       bannerComment: '',
-            //       format: false,
-            //       ignoreMinAndMaxItems: true,
-            //     },
-            //   ),
-            //   { parser: 'typescript', plugins: [prettierPluginTS, prettierPluginESTree] },
-            // ),
           });
         } else {
           setAnalysis(result);
@@ -68,55 +49,56 @@ export default function DBColumnInspector({
     );
   }, [db, table, column, socket]);
 
-  return (
-    <li>
-      {column}: {dataType}{' '}
-      {dataType === 'jsonb' ? (
-        analysis ? (
-          analysis.finished ? (
-            <>
-              <button onClick={analyze}>re-analyze</button>
-              <Typography>
-                Scanned {analysis.scanned} of {analysis.total} records
-                <Grid container>
-                  <Grid size={{ xs: 6 }}>
-                    <fieldset>
-                      <legend>Pretty interface</legend>
-                      <pre style={{ whiteSpace: 'pre-wrap' }}>{analysis.result as string}</pre>
-                    </fieldset>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <fieldset>
-                      <legend>Raw JSON schema (as guessed from data)</legend>
-                      <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(analysis.resultRaw, null, 2)}</pre>
-                    </fieldset>
-                  </Grid>
+  const actionButton = useMemo(() => {
+    if (dataType === 'jsonb') {
+      if (!analysis) {
+        return <button onClick={analyze}>analyze</button>;
+      }
+      if (analysis.finished) {
+        return (
+          <>
+            <button onClick={analyze}>re-analyze</button>
+            <Typography>
+              Scanned {analysis.scanned} of {analysis.total} records
+              <Grid container>
+                <Grid size={{ xs: 6 }}>
+                  <fieldset>
+                    <legend>Pretty interface</legend>
+                    <pre style={{ whiteSpace: 'pre-wrap' }}>{analysis.result as string}</pre>
+                  </fieldset>
                 </Grid>
-              </Typography>
-            </>
-          ) : (
-            <>
-              <button disabled>
-                analyzing ({analysis.scanned}/{analysis.total})
-              </button>
-              <button
-                onClick={() => {
-                  socket.emit(`abort-analyze-jsonb-${db}-${table}-${column}`);
-                  setAnalysis(null);
-                }}
-              >
-                abort
-              </button>
-            </>
-          )
-        ) : (
-          <button onClick={analyze}>analyze</button>
-        )
-      ) : (
+                <Grid size={{ xs: 6 }}>
+                  <fieldset>
+                    <legend>Raw JSON schema (as guessed from data)</legend>
+                    <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(analysis.resultRaw, null, 2)}</pre>
+                  </fieldset>
+                </Grid>
+              </Grid>
+            </Typography>
+          </>
+        );
+      } else {
+        return (
+          <>
+            <button disabled>
+              analyzing ({analysis.scanned}/{analysis.total})
+            </button>
+            <button
+              onClick={() => {
+                socket.emit(`abort-analyze-jsonb-${db}-${table}-${column}`);
+                setAnalysis(null);
+              }}
+            >
+              abort
+            </button>
+          </>
+        );
+      }
+    } else {
+      return (
         <button
           disabled={!!entityType?.columns?.some((c) => c.name === column)}
           onClick={() =>
-            // this has to be one of the laziest things in here, but i don't want to re-engineer state across everything
             socket.emit('add-column-from-db-inspector', {
               name: snakeCase(column),
               sourceAlias: entityType?.sources?.find((s) => s.type === 'db' && s.target === table)?.alias,
@@ -166,7 +148,13 @@ export default function DBColumnInspector({
         >
           ✨auto-add✨
         </button>
-      )}
+      );
+    }
+  }, [dataType, analysis, entityType, column, db, table, socket, analyze]);
+
+  return (
+    <li>
+      {column}: {dataType} {actionButton}
     </li>
   );
 }

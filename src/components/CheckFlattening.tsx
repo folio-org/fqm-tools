@@ -1,6 +1,6 @@
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
 
@@ -22,6 +22,32 @@ export default function CheckFlattening({
 }>) {
   const [state, setState] = useState<{ state: State; result?: string }>({ state: State.NOT_STARTED });
   const [includeHidden, setIncludeHidden] = useState(false);
+
+  const persistIcon = useMemo(() => {
+    return (
+      (
+        {
+          [State.NOT_STARTED]: <Pending color="disabled" />,
+          [State.STARTED]: <Schedule color="warning" />,
+          [State.ERROR_PERSIST]: <Error color="error" />,
+          [State.DONE]: <Done color="success" />,
+        } as Record<State, ReactNode>
+      )[state.state] ?? <Done color="success" />
+    );
+  }, [state.state]);
+
+  const queryIcon = useMemo(() => {
+    return (
+      {
+        [State.NOT_STARTED]: <Pending color="disabled" />,
+        [State.STARTED]: <Pending color="disabled" />,
+        [State.PERSISTED]: <Schedule color="warning" />,
+        [State.ERROR_PERSIST]: <Error color="error" />,
+        [State.ERROR_QUERY]: <Error color="error" />,
+        [State.DONE]: <Done color="success" />,
+      }[state.state] ?? <Done color="success" />
+    );
+  }, [state.state]);
 
   const run = useCallback(
     (entityType: EntityType) => {
@@ -78,28 +104,10 @@ export default function CheckFlattening({
       </Button>
 
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.STARTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}
-        Persist to database
+        {persistIcon} Persist to database
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED || state.state === State.STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.PERSISTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST || state.state === State.ERROR_QUERY ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}{' '}
-        Query <code>/entity-types/{entityType.id}</code>
+        {queryIcon} Query <code>/entity-types/{entityType.id}</code>
       </Typography>
 
       {!!state.result && <pre>{state.result}</pre>}

@@ -2,7 +2,7 @@ import { json } from '@codemirror/lang-json';
 import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Button, Typography } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
 import JSONTable from './JSONTable';
@@ -64,27 +64,29 @@ export default function QueryTool({
   );
 
   const runQueryIcon = useMemo(() => {
-    if (state.state === State.NOT_STARTED || state.state === State.STARTED) {
-      return <Pending color="disabled" />;
-    } else if (state.state === State.PERSISTED) {
-      return <Schedule color="warning" />;
-    } else if (state.state === State.ERROR_PERSIST || state.state === State.ERROR_QUERY) {
-      return <Error color="error" />;
-    } else {
-      return <Done color="success" />;
-    }
+    return (
+      {
+        [State.NOT_STARTED]: <Pending color="disabled" />,
+        [State.STARTED]: <Pending color="disabled" />,
+        [State.PERSISTED]: <Schedule color="warning" />,
+        [State.ERROR_PERSIST]: <Error color="error" />,
+        [State.ERROR_QUERY]: <Error color="error" />,
+        [State.DONE]: <Done color="success" />,
+      }[state.state] ?? <Done color="success" />
+    );
   }, [state.state]);
 
   const persistIcon = useMemo(() => {
-    if (state.state === State.NOT_STARTED) {
-      return <Pending color="disabled" />;
-    } else if (state.state === State.STARTED) {
-      return <Schedule color="warning" />;
-    } else if (state.state === State.ERROR_PERSIST) {
-      return <Error color="error" />;
-    } else {
-      return <Done color="success" />;
-    }
+    return (
+      (
+        {
+          [State.NOT_STARTED]: <Pending color="disabled" />,
+          [State.STARTED]: <Schedule color="warning" />,
+          [State.ERROR_PERSIST]: <Error color="error" />,
+          [State.DONE]: <Done color="success" />,
+        } as Record<State, ReactNode>
+      )[state.state] ?? <Done color="success" />
+    );
   }, [state.state]);
 
   if (entityType === null) {

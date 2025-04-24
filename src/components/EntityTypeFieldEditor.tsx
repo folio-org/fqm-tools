@@ -19,6 +19,18 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { ReactNode, useMemo } from 'react';
 import NestedDataTypeEditor from './NestedDataTypeEditor';
 
+function getSourceType(field: EntityTypeField): string {
+  if (field.valueSourceApi !== undefined) {
+    return 'api';
+  } else if (field.source !== undefined) {
+    return 'entity';
+  } else if (field.values !== undefined) {
+    return 'list';
+  } else {
+    return '';
+  }
+}
+
 export default function EntityTypeFieldEditor({
   parentName,
   labelDecoration = null,
@@ -242,15 +254,7 @@ export default function EntityTypeFieldEditor({
                 <Select
                   labelId={`${parentName}-${field.name}-source-type`}
                   fullWidth
-                  value={
-                    field.valueSourceApi !== undefined
-                      ? 'api'
-                      : field.source !== undefined
-                        ? 'entity'
-                        : field.values !== undefined
-                          ? 'list'
-                          : ''
-                  }
+                  value={getSourceType(field)}
                   onChange={(e) => {
                     switch (e.target.value) {
                       case 'entity':
