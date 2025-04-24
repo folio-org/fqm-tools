@@ -64,7 +64,7 @@ export default function ImportStep({
         metadata: {
           module: '???',
           team: '',
-          domain: '',
+          domain: 'erm',
         },
       },
     );

@@ -236,7 +236,7 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponse<
 
         const sorted = Object.keys(updatedTranslationSet)
           .filter((k) => !keysToRemove.includes(k))
-          .toSorted()
+          .toSorted((a, b) => a.localeCompare(b))
           .reduce(
             (acc, key) => {
               acc[key] = updatedTranslationSet[key];

@@ -49,8 +49,9 @@ export default function InitialImportConfig({
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <label>JSON schema</label>
+            <label htmlFor="json-schema">JSON schema</label>
             <CodeMirror
+              id="json-schema"
               value={state.schemaRaw}
               onChange={(schemaRaw) => setState((s) => ({ ...s, schemaRaw }))}
               extensions={[json(), EditorView.lineWrapping]}

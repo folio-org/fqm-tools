@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/src/schema-conversion/csv';
 import { Button, Container } from '@mui/material';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { EmojiTrueFalse, getDiscrepanciesBoolean, getDiscrepanciesList } from './FieldRow';
@@ -9,7 +9,7 @@ const redProps = {
   'data-text-custom-color': '#ff5630',
 };
 
-function Red({ children }: { children: ReactNode }) {
+function Red({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <strong>
       <span className="fabric-text-color-mark" {...redProps}>
@@ -257,11 +257,10 @@ export default function FieldResults({
       {results && (
         <fieldset>
           <legend>
-            Changes (copy-paste me into Jira, where formatting will appear) (
+            Changes (copy-paste me into Jira, where formatting will appear){' '}
             <a href={link!} download="result.csv">
-              download
+              (download)
             </a>
-            )
           </legend>
 
           {prettyResults}

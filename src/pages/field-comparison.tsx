@@ -1,7 +1,7 @@
 import FieldResults from '@/src/components/Fields/FieldResults';
 import FieldTable from '@/src/components/Fields/FieldTable';
 import Uploader from '@/src/components/Fields/Uploader';
-import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/src/schema-conversion/csv';
 import { Mapping } from '@/scripts/get-column-mapping';
 import { Container } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';

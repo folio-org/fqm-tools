@@ -1,8 +1,8 @@
+import { ResultRowPretty } from '@/src/schema-conversion/csv';
+import { migrate } from '@/src/socket/fqm';
 import { FqmConnection } from '@/types';
 import { readdir } from 'node:fs/promises';
 import { parse } from 'papaparse';
-import { ResultRowPretty } from './dump-entity-type-information';
-import { migrate } from '@/src/socket/fqm';
 
 export interface Mapping {
   src: { entityType: string; column: string };

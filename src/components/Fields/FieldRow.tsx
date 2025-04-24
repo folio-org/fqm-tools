@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/src/schema-conversion/csv';
 import { useEffect, useMemo, useState } from 'react';
 import FieldEditor from './FieldEditor';
 
@@ -61,7 +61,7 @@ export function EmojiTrueFalse({ value }: { value: string }) {
 }
 
 function addBreakOpportunities(str: string) {
-  return str.replaceAll(/([\._])/g, '­$1');
+  return str.replaceAll(/([._])/g, '­$1');
 }
 
 function FieldContents({
@@ -172,6 +172,37 @@ export default function FieldRow({
     backgroundColor: markedForRemoval ? 'lightcoral' : undefined,
   };
 
+  const button = useMemo(() => {
+    if (markedForRemoval) {
+      return <button onClick={markForRemoval}>unremove</button>;
+    }
+    if (isEditing) {
+      return '';
+    }
+    if (newVersion) {
+      return (
+        <>
+          <button
+            onClick={() => {
+              setIsEditing(newVersion);
+              setNewVersion(null);
+            }}
+          >
+            edit
+          </button>
+          <button onClick={() => setNewVersion(null)}>remove</button>
+        </>
+      );
+    }
+    return (
+      <>
+        {!!newField && <button onClick={() => setIsEditing(newField)}>edit</button>}
+        {!newField && <button onClick={() => setIsEditing(oldField)}>readd</button>}
+        {!!newField && <button onClick={markForRemoval}>remove</button>}
+      </>
+    );
+  }, [isEditing, markForRemoval, markedForRemoval, newField, newVersion, oldField, setNewVersion]);
+
   return (
     <>
       <tr
@@ -192,29 +223,7 @@ export default function FieldRow({
           rowSpan={2 + warnings.length + (markedForRemoval ? 1 : 0) + (isEditing ? -1 : 0) + (newVersion ? 1 : 0)}
           style={{ textAlign: 'center' }}
         >
-          {markedForRemoval ? (
-            <button onClick={markForRemoval}>unremove</button>
-          ) : isEditing ? (
-            ''
-          ) : newVersion ? (
-            <>
-              <button
-                onClick={() => {
-                  setIsEditing(newVersion);
-                  setNewVersion(null);
-                }}
-              >
-                edit
-              </button>
-              <button onClick={() => setNewVersion(null)}>remove</button>
-            </>
-          ) : (
-            <>
-              {!!newField && <button onClick={() => setIsEditing(newField)}>edit</button>}
-              {!newField && <button onClick={() => setIsEditing(oldField)}>readd</button>}
-              {!!newField && <button onClick={markForRemoval}>remove</button>}
-            </>
-          )}
+          {button}
         </td>
       </tr>
       {!!warnings.length &&

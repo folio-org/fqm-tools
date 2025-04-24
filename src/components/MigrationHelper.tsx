@@ -203,8 +203,11 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 6 }} sx={{ height: 300, overflow: 'auto' }}>
-        <label style={oldEntityType === null ? { color: 'red' } : {}}>Old entity type:</label>
+        <label htmlFor="old-entity-type" style={oldEntityType === null ? { color: 'red' } : {}}>
+          Old entity type:
+        </label>
         <CodeMirror
+          id="old-entity-type"
           onChange={(s) => {
             try {
               setOldEntityType(json5.parse(s));
@@ -217,8 +220,11 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
         />
       </Grid>
       <Grid size={{ xs: 6 }} sx={{ height: 300, overflow: 'auto' }}>
-        <label style={newEntityType === null ? { color: 'red' } : {}}>New entity type, fully resolved:</label>
+        <label htmlFor="new-entity-type" style={newEntityType === null ? { color: 'red' } : {}}>
+          New entity type, fully resolved:
+        </label>
         <CodeMirror
+          id="new-entity-type"
           onChange={(s) => {
             try {
               setNewEntityType(json5.parse(s));

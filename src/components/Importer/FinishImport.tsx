@@ -1,6 +1,6 @@
 import { EntityTypeField } from '@/types';
 import { Alert, Button, DialogActions, DialogContent, Typography } from '@mui/material';
-import { State } from './JSONSchemaImporter';
+import { State } from './JSONSchemaImporterStates';
 
 export default function FinishImport({
   state,

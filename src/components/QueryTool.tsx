@@ -63,6 +63,30 @@ export default function QueryTool({
     [socket],
   );
 
+  const runQueryIcon = useMemo(() => {
+    if (state.state === State.NOT_STARTED || state.state === State.STARTED) {
+      return <Pending color="disabled" />;
+    } else if (state.state === State.PERSISTED) {
+      return <Schedule color="warning" />;
+    } else if (state.state === State.ERROR_PERSIST || state.state === State.ERROR_QUERY) {
+      return <Error color="error" />;
+    } else {
+      return <Done color="success" />;
+    }
+  }, [state.state]);
+
+  const persistIcon = useMemo(() => {
+    if (state.state === State.NOT_STARTED) {
+      return <Pending color="disabled" />;
+    } else if (state.state === State.STARTED) {
+      return <Schedule color="warning" />;
+    } else if (state.state === State.ERROR_PERSIST) {
+      return <Error color="error" />;
+    } else {
+      return <Done color="success" />;
+    }
+  }, [state.state]);
+
   if (entityType === null) {
     return <p>Select an entity type first</p>;
   }
@@ -77,28 +101,11 @@ export default function QueryTool({
         Run
       </Button>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.STARTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}
+        {persistIcon}
         Persist to database
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {state.state === State.NOT_STARTED || state.state === State.STARTED ? (
-          <Pending color="disabled" />
-        ) : state.state === State.PERSISTED ? (
-          <Schedule color="warning" />
-        ) : state.state === State.ERROR_PERSIST || state.state === State.ERROR_QUERY ? (
-          <Error color="error" />
-        ) : (
-          <Done color="success" />
-        )}{' '}
-        Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
+        {runQueryIcon} Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
       </Typography>
       {!!state.result &&
         (typeof state.result === 'string' ? <pre>{state.result}</pre> : <JSONTable data={state.result} />)}

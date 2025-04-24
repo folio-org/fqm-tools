@@ -1,4 +1,4 @@
-import { ResultRowPretty } from '@/scripts/dump-entity-type-information';
+import { ResultRowPretty } from '@/src/schema-conversion/csv';
 import { Mapping } from '@/scripts/get-column-mapping';
 import { Grid } from '@mui/material';
 import { parse } from 'papaparse';

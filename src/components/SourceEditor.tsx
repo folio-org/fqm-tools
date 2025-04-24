@@ -37,7 +37,7 @@ export default function SourceEditor({
         .filter((k) => k.startsWith('TENANT_mod_fqm_manager.'))
         .map((k) => k.substring(23))
         .filter((k) => !k.startsWith('query_results_'))
-        .toSorted(),
+        .toSorted((a, b) => a.localeCompare(b)),
     [schema],
   );
 
