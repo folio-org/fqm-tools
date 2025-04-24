@@ -154,7 +154,7 @@ export async function getValues(
     return `dropdown from API(${column.valueSourceApi.path})`;
   } else if (column.values) {
     if (column.values.length === 2 && column.values[0].value === 'true' && column.values[1].value === 'false') {
-      return 'true-false';
+      return 'true/false';
     } else {
       return `dropdown hardcoded (${column.values.map((v) => v.label).join(', ')})`;
     }

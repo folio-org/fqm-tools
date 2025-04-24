@@ -277,7 +277,7 @@ describe('CSV generation', () => {
       expect(result).toBe('dropdown from API(/api/path)');
     });
 
-    it('returns "true-false" when values are hardcoded as true and false', async () => {
+    it('returns "true/false" when values are hardcoded as true and false', async () => {
       const column: EntityTypeField = {
         values: [
           { value: 'true', label: 'True' },
@@ -286,7 +286,7 @@ describe('CSV generation', () => {
       } as EntityTypeField;
 
       const result = await getValues(column, explodingFetchEntityType);
-      expect(result).toBe('true-false');
+      expect(result).toBe('true/false');
     });
 
     it('returns "dropdown hardcoded" with labels when values are hardcoded', async () => {
