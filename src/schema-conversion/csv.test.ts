@@ -65,33 +65,36 @@ describe('CSV generation', () => {
             name: 'recursive_column',
             labelAlias: 'Recursive Column',
             dataType: {
-              dataType: DataTypeValue.objectType,
-              properties: [
-                {
-                  name: 'nestedProperty',
-                  labelAlias: 'Nested Property',
-                  labelAliasFullyQualified: 'Recursive Column > Nested Property',
-                  dataType: {
-                    dataType: DataTypeValue.objectType,
-                    properties: [
-                      {
-                        name: 'deepNestedProperty',
-                        labelAlias: 'Deep Nested Property',
-                        labelAliasFullyQualified: 'Nested Property > Deep Nested Property',
-                        dataType: { dataType: DataTypeValue.booleanType },
-                        queryable: true,
-                        visibleByDefault: true,
-                        hidden: false,
-                        essential: false,
-                      },
-                    ],
+              dataType: DataTypeValue.arrayType,
+              itemDataType: {
+                dataType: DataTypeValue.objectType,
+                properties: [
+                  {
+                    name: 'nestedProperty',
+                    labelAlias: 'Nested Property',
+                    labelAliasFullyQualified: 'Recursive Column > Nested Property',
+                    dataType: {
+                      dataType: DataTypeValue.objectType,
+                      properties: [
+                        {
+                          name: 'deepNestedProperty',
+                          labelAlias: 'Deep Nested Property',
+                          labelAliasFullyQualified: 'Nested Property > Deep Nested Property',
+                          dataType: { dataType: DataTypeValue.booleanType },
+                          queryable: true,
+                          visibleByDefault: true,
+                          hidden: false,
+                          essential: false,
+                        },
+                      ],
+                    },
+                    queryable: true,
+                    visibleByDefault: true,
+                    hidden: false,
+                    essential: false,
                   },
-                  queryable: true,
-                  visibleByDefault: true,
-                  hidden: false,
-                  essential: false,
-                },
-              ],
+                ],
+              },
             },
             queryable: true,
             visibleByDefault: true,
@@ -152,12 +155,12 @@ describe('CSV generation', () => {
         {
           'API only': false,
           'Base entity': 'test_entity',
-          Datatype: 'object',
+          Datatype: 'object[]',
           'Entity ID': 'entity-id',
           Essential: false,
           Label: 'Recursive Column',
           Name: 'recursive_column',
-          Operators: '=, !=, >, >=, <, <=, empty',
+          Operators: 'contains all/any, not contains all/any, empty',
           Queryable: true,
           'Simple entity': '',
           'Table (nested)': '',
