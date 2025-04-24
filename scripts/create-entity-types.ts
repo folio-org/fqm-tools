@@ -1,3 +1,4 @@
+import entityTypeToCsv from '@/src/schema-conversion/csv';
 import createEntityTypeFromConfig from '@/src/schema-conversion/entity-type/entity-type';
 import { resolveEntityTypeJoins } from '@/src/schema-conversion/entity-type/joins';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
@@ -114,9 +115,13 @@ const { entityTypes: results, issues } = resolveEntityTypeJoins(
 issues.forEach((issue) => console.warn(issue));
 
 for (const { entityType, domain, module } of results) {
-  await mkdir(path.resolve(args.values.out, domain, module), { recursive: true });
+  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
   await Bun.write(
-    Bun.file(path.resolve(args.values.out, domain, module, `${entityType.name}.json5`)),
+    Bun.file(path.resolve(args.values.out, 'entity-types', domain, module, `${entityType.name}.json5`)),
     json5.stringify(entityType, null, 2),
+  );
+  await Bun.write(
+    Bun.file(path.resolve(args.values.out, 'csv', domain, module, `${entityType.name}.csv`)),
+    await entityTypeToCsv(entityType, () => Promise.resolve({} as EntityType)),
   );
 }

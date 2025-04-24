@@ -131,8 +131,8 @@ export function getJsonbField(entityType: EntityTypeGenerationConfig['entityType
 
   return [
     {
-      dataType: { dataType: DataTypeValue.stringType },
       name: 'jsonb',
+      dataType: { dataType: DataTypeValue.stringType },
       queryable: false,
       visibleByDefault: false,
       valueGetter: `:${entityType.source}.jsonb::text`,

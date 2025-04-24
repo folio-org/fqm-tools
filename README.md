@@ -12,8 +12,8 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 <!-- this table will be made into something coherent in FQMTOOL-5 -->
 
-| Property                    | Description                                       | Type                                                                                                                  | Required | Default |
-| --------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------- | ------- |
+| Property                    | Description                                       | Type                                                                          | Required | Default |
+| --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | ------- |
 | `x-fqm-name`                |
 | `x-fqm-joins-to`            |
 | `x-fqm-ignore`              |
@@ -24,7 +24,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 | `x-fqm-is-id-column`        | default `name === 'id'`                           |
 | `x-fqm-value-source-api`    |
 | `x-fqm-visible-by-default`  | default no                                        |
-| `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`     | default `all` unless object, then `results-only`. temporarily also `results-only` for nested array->object properties |
+| `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`     | default `all`; temporarily `results-only` for nested array->object properties |
 | `x-fqm-essential`           | default no                                        |
 
 ## Config
