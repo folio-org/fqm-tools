@@ -194,7 +194,7 @@ export default function EntityTypeManager({
                   <legend>Sources</legend>
                   {entityType.sources?.map((source, i) => (
                     <SourceEditor
-                      key={i}
+                      key={i} // NOSONAR
                       entityTypes={entityTypes}
                       schema={schema}
                       source={source}
@@ -237,7 +237,9 @@ export default function EntityTypeManager({
 
                   {entityType.columns?.map((column, i) =>
                     hiddenColumns[column.name] ? (
-                      <fieldset key={i}>
+                      <fieldset
+                        key={i} // NOSONAR
+                      >
                         <legend>
                           <IconButton onClick={() => setHiddenColumns({ ...hiddenColumns, [column.name]: false })}>
                             <UnfoldMore fontSize="small" />
