@@ -1,17 +1,8 @@
-import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Alert, Button, Checkbox, FormControlLabel, Typography } from '@mui/material';
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
-
-enum State {
-  NOT_STARTED,
-  STARTED,
-  PERSISTED,
-  DONE,
-  ERROR_PERSIST,
-  ERROR_QUERY,
-}
+import { State, useQueryPersistIcons } from '../hooks/queryPersistStates';
 
 export default function CheckFlattening({
   socket,
@@ -23,31 +14,7 @@ export default function CheckFlattening({
   const [state, setState] = useState<{ state: State; result?: string }>({ state: State.NOT_STARTED });
   const [includeHidden, setIncludeHidden] = useState(false);
 
-  const persistIcon = useMemo(() => {
-    return (
-      (
-        {
-          [State.NOT_STARTED]: <Pending color="disabled" />,
-          [State.STARTED]: <Schedule color="warning" />,
-          [State.ERROR_PERSIST]: <Error color="error" />,
-          [State.DONE]: <Done color="success" />,
-        } as Record<State, ReactNode>
-      )[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
-
-  const queryIcon = useMemo(() => {
-    return (
-      {
-        [State.NOT_STARTED]: <Pending color="disabled" />,
-        [State.STARTED]: <Pending color="disabled" />,
-        [State.PERSISTED]: <Schedule color="warning" />,
-        [State.ERROR_PERSIST]: <Error color="error" />,
-        [State.ERROR_QUERY]: <Error color="error" />,
-        [State.DONE]: <Done color="success" />,
-      }[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
+  const { persistIcon, queryIcon } = useQueryPersistIcons(state.state);
 
   const run = useCallback(
     (entityType: EntityType) => {

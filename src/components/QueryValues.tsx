@@ -1,18 +1,9 @@
-import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Autocomplete, Box, Button, TextField, Typography } from '@mui/material';
-import { useCallback, useState, useMemo, ReactNode } from 'react';
+import { useCallback, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
+import { State, useQueryPersistIcons } from '../hooks/queryPersistStates';
 import JSONTable from './JSONTable';
-
-enum State {
-  NOT_STARTED,
-  STARTED,
-  PERSISTED,
-  DONE,
-  ERROR_PERSIST,
-  ERROR_QUERY,
-}
 
 export default function QueryValues({
   socket,
@@ -64,31 +55,7 @@ export default function QueryValues({
     [socket],
   );
 
-  const persistIcon = useMemo(() => {
-    return (
-      (
-        {
-          [State.NOT_STARTED]: <Pending color="disabled" />,
-          [State.STARTED]: <Schedule color="warning" />,
-          [State.ERROR_PERSIST]: <Error color="error" />,
-          [State.DONE]: <Done color="success" />,
-        } as Record<State, ReactNode>
-      )[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
-
-  const queryIcon = useMemo(() => {
-    return (
-      {
-        [State.NOT_STARTED]: <Pending color="disabled" />,
-        [State.STARTED]: <Pending color="disabled" />,
-        [State.PERSISTED]: <Schedule color="warning" />,
-        [State.ERROR_PERSIST]: <Error color="error" />,
-        [State.ERROR_QUERY]: <Error color="error" />,
-        [State.DONE]: <Done color="success" />,
-      }[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
+  const { persistIcon, queryIcon } = useQueryPersistIcons(state.state);
 
   if (entityType === null) {
     return <p>Select an entity type first</p>;

@@ -1,20 +1,11 @@
 import { json } from '@codemirror/lang-json';
-import { Done, Error, Pending, Schedule } from '@mui/icons-material';
 import { Button, Typography } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { EntityType } from '../../types';
+import { State, useQueryPersistIcons } from '../hooks/queryPersistStates';
 import JSONTable from './JSONTable';
-
-enum State {
-  NOT_STARTED,
-  STARTED,
-  PERSISTED,
-  DONE,
-  ERROR_PERSIST,
-  ERROR_QUERY,
-}
 
 export default function QueryTool({
   socket,
@@ -63,31 +54,7 @@ export default function QueryTool({
     [socket],
   );
 
-  const runQueryIcon = useMemo(() => {
-    return (
-      {
-        [State.NOT_STARTED]: <Pending color="disabled" />,
-        [State.STARTED]: <Pending color="disabled" />,
-        [State.PERSISTED]: <Schedule color="warning" />,
-        [State.ERROR_PERSIST]: <Error color="error" />,
-        [State.ERROR_QUERY]: <Error color="error" />,
-        [State.DONE]: <Done color="success" />,
-      }[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
-
-  const persistIcon = useMemo(() => {
-    return (
-      (
-        {
-          [State.NOT_STARTED]: <Pending color="disabled" />,
-          [State.STARTED]: <Schedule color="warning" />,
-          [State.ERROR_PERSIST]: <Error color="error" />,
-          [State.DONE]: <Done color="success" />,
-        } as Record<State, ReactNode>
-      )[state.state] ?? <Done color="success" />
-    );
-  }, [state.state]);
+  const { persistIcon, queryIcon } = useQueryPersistIcons(state.state);
 
   if (entityType === null) {
     return <p>Select an entity type first</p>;
@@ -103,11 +70,10 @@ export default function QueryTool({
         Run
       </Button>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {persistIcon}
-        Persist to database
+        {persistIcon} Persist to database
       </Typography>
       <Typography sx={{ display: 'flex', alignItems: 'center', gap: '0.5em', m: 2 }}>
-        {runQueryIcon} Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
+        {queryIcon} Run query {state.state === State.DONE ? `(${(ended - started) / 1000}s)` : ''}
       </Typography>
       {!!state.result &&
         (typeof state.result === 'string' ? <pre>{state.result}</pre> : <JSONTable data={state.result} />)}
