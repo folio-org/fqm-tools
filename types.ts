@@ -150,10 +150,12 @@ export const EntityTypeGenerationConfigTemplate = z
       z
         .object({
           name: z.string(),
-          view: z.string(), // todo: convert this to raw DB tables and compute view names intelligently
+          table: z.string(),
         })
         .strict(),
     ),
+    // from name used in entity type definitions to true name
+    sourceMap: z.record(z.string(), z.string()).optional(),
     entityTypes: z.array(
       z
         .object({
@@ -172,3 +174,4 @@ export const EntityTypeGenerationConfigTemplate = z
   .strict();
 
 export type EntityTypeGenerationConfig = z.infer<typeof EntityTypeGenerationConfigTemplate>;
+export type EntityTypeGenerationConfigSource = EntityTypeGenerationConfig['sources'][number];

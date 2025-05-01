@@ -1,6 +1,7 @@
 import entityTypeToCsv from '@/src/schema-conversion/csv';
 import createEntityTypeFromConfig from '@/src/schema-conversion/entity-type/entity-type';
 import { resolveEntityTypeJoins } from '@/src/schema-conversion/entity-type/joins';
+import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { TOML } from 'bun';
@@ -8,6 +9,7 @@ import { mkdir } from 'fs/promises';
 import json5 from 'json5';
 import path from 'path';
 import { parseArgs } from 'util';
+import YAML from 'yaml';
 
 const args = parseArgs({
   args: Bun.argv.slice(2),
@@ -46,6 +48,12 @@ if (args.values.help) {
   process.exit(0);
 }
 
+async function write(category: string, domain: string, module: string, filename: string, data: string) {
+  await mkdir(path.resolve(args.values.out, category, domain, module), { recursive: true });
+  await Bun.write(Bun.file(path.resolve(args.values.out, category, domain, module, filename)), data);
+  console.log(`Wrote ${category}/${domain}/${module}/${filename}`);
+}
+
 const configs: { dir: string; config: EntityTypeGenerationConfig }[] = [];
 
 for (const dir of args.positionals) {
@@ -65,6 +73,29 @@ for (const dir of args.positionals) {
       `::error title=Unable to parse config::${file.name} does not match the expected schema: ${JSON.stringify(e)}`,
     );
   }
+}
+
+for (const { config } of configs) {
+  config.sourceMap = { ...config.sourceMap };
+  config.sources = await Promise.all(
+    config.sources.map(async (source) => {
+      const disambiguated = disambiguateSource(source, config);
+
+      config.sourceMap![source.name] = disambiguated.name;
+
+      const changeset = createLiquibaseChangeset(disambiguated, config);
+
+      await write(
+        'liquibase',
+        config.metadata.domain,
+        config.metadata.module,
+        `${disambiguated.name}.yaml`,
+        YAML.stringify(changeset),
+      );
+
+      return disambiguated;
+    }),
+  );
 }
 
 const intermediateResults: {
@@ -116,12 +147,12 @@ issues.forEach((issue) => console.warn(issue));
 
 for (const { entityType, domain, module } of results) {
   await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
-  await Bun.write(
-    Bun.file(path.resolve(args.values.out, 'entity-types', domain, module, `${entityType.name}.json5`)),
-    json5.stringify(entityType, null, 2),
-  );
-  await Bun.write(
-    Bun.file(path.resolve(args.values.out, 'csv', domain, module, `${entityType.name}.csv`)),
+  await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
+  await write(
+    'csv',
+    domain,
+    module,
+    `${entityType.name}.csv`,
     await entityTypeToCsv(entityType, () => Promise.resolve({} as EntityType)),
   );
 }

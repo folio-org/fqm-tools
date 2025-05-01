@@ -19,7 +19,7 @@ export function inferFieldFromSchema(
   entityType: EntityTypeGenerationConfig['entityTypes'][0],
   config: EntityTypeGenerationConfig,
 ): { issues: string[]; field?: EntityTypeField } {
-  log.debug('Examining ', prop, propSchema);
+  log.debug('Examining', prop, propSchema);
 
   if ('x-fqm-ignore' in propSchema) {
     if (propSchema['x-fqm-ignore']) {
