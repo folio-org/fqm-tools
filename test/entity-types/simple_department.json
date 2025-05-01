@@ -6,7 +6,7 @@
     {
       "type": "db",
       "alias": "department",
-      "target": "marinara"
+      "target": "department"
     }
   ],
   "requiredPermissions": ["perm1", "perm2"],

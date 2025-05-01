@@ -36,7 +36,7 @@ export default function createEntityTypeFromConfig(
       id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
       name: `${snakeCase(config.metadata.module)}__${entityType.name}`,
       private: entityType.private ?? false,
-      sources: [getSourceDefinition(entityType.source, config.sources)],
+      sources: [getSourceDefinition(entityType.source, config.sources, config.sourceMap)],
       requiredPermissions: entityType.permissions,
       defaultSort: [getSort(entityType.sort)],
       columns: markNestedArrayOfObjectsNonQueryable(
@@ -47,7 +47,14 @@ export default function createEntityTypeFromConfig(
   };
 }
 
-function getSourceDefinition(key: string, sources: EntityTypeGenerationConfig['sources']): EntityTypeSource {
+function getSourceDefinition(
+  key: string,
+  sources: EntityTypeGenerationConfig['sources'],
+  sourceMap?: Record<string, string>,
+): EntityTypeSource {
+  while (sourceMap && key in sourceMap) {
+    key = sourceMap[key];
+  }
   const source = sources.find((s) => s.name === key);
 
   if (!source) {
@@ -57,7 +64,7 @@ function getSourceDefinition(key: string, sources: EntityTypeGenerationConfig['s
   return {
     type: 'db',
     alias: source.name,
-    target: source.view,
+    target: source.name,
   };
 }
 
