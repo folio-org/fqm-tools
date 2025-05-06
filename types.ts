@@ -99,7 +99,6 @@ export interface EntityTypeSourceJoin {
 export interface EntityType {
   id: string;
   name: string;
-  root?: boolean;
   private?: boolean;
   customFieldEntityTypeId?: string;
   fromClause?: string;

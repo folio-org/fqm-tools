@@ -123,7 +123,7 @@ export default function EntityTypeManager({
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={{ xs: 8 }}>
                 <TextField
                   label="Name"
                   required
@@ -133,17 +133,7 @@ export default function EntityTypeManager({
                   slotProps={{ htmlInput: { style: { fontFamily: 'monospace' } } }}
                 />
               </Grid>
-              <Grid size={{ xs: 6 }} container sx={{ justifyContent: 'space-around' }}>
-                <FormControlLabel
-                  label="Root"
-                  control={
-                    <Checkbox
-                      indeterminate={entityType.root === undefined}
-                      checked={entityType.root}
-                      onChange={(e) => setEntityType({ ...entityType, root: e.target.checked })}
-                    />
-                  }
-                />
+              <Grid size={{ xs: 4 }} container sx={{ justifyContent: 'space-around' }}>
                 <FormControlLabel
                   label="Private"
                   control={
