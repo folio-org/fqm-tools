@@ -16,7 +16,7 @@ const log = {
 export function inferFieldFromSchema(
   prop: string,
   propSchema: JSONSchema7,
-  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  entityType: EntityTypeGenerationConfig['entityTypes'][number],
   config: EntityTypeGenerationConfig,
 ): { issues: string[]; field?: EntityTypeField } {
   log.debug('Examining', prop, propSchema);
@@ -124,7 +124,7 @@ export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[])
   }));
 }
 
-export function getJsonbField(entityType: EntityTypeGenerationConfig['entityTypes'][0]) {
+export function getJsonbField(entityType: EntityTypeGenerationConfig['entityTypes'][number]) {
   if (entityType.includeJsonbField === false) {
     return [];
   }

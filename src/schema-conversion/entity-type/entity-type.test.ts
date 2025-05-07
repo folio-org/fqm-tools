@@ -44,7 +44,7 @@ describe('createEntityTypeFromConfig', () => {
   it('fails on non-object schema', () => {
     expect(() => {
       createEntityTypeFromConfig(
-        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        {} as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'string' } as JSONSchema7,
         {} as EntityTypeGenerationConfig,
       );
@@ -54,7 +54,7 @@ describe('createEntityTypeFromConfig', () => {
   it('fails on empty object schema', () => {
     expect(() => {
       createEntityTypeFromConfig(
-        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        {} as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object' } as JSONSchema7,
         {} as EntityTypeGenerationConfig,
       );
@@ -73,7 +73,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         schema as JSONSchema7,
         { metadata: { module: 'foo' }, sources: [] } as unknown as EntityTypeGenerationConfig,
       ),
@@ -92,7 +92,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         schema as JSONSchema7,
         {
           metadata: { module: 'foo' },
@@ -118,7 +118,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object', properties: {} } as JSONSchema7,
         {
           metadata: { module: 'foo' },
@@ -144,7 +144,7 @@ describe('createEntityTypeFromConfig', () => {
           sort: ['id', 'ASC'],
           private: true,
           includeJsonbField: false,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object', properties: {} } as JSONSchema7,
         {
           metadata: { module: 'foo' },

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
 import { getDataType } from './data-type';
 
-const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][0];
+const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][number];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
 
 describe('getDataType', () => {

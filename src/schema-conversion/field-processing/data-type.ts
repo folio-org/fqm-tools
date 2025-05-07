@@ -106,7 +106,7 @@ function getSimpleTypeOf(schema: JSONSchema7): SimpleGuessedType {
 export function getDataType(
   schema: JSONSchema7,
   path: string,
-  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  entityType: EntityTypeGenerationConfig['entityTypes'][number],
   config: EntityTypeGenerationConfig,
   parentIsArrayType = false,
 ): [DataType, string[]] {
