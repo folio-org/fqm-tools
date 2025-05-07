@@ -32,54 +32,88 @@ export enum DataTypeValue {
   stringType = 'stringType',
 }
 
-export interface DataType {
+export const DataTypeTemplateBase: z.ZodType<{
   dataType: DataTypeValue;
-  itemDataType?: DataType;
-  properties?: EntityTypeField[];
-}
+  itemDataType?: z.infer<z.ZodTypeAny>; // must use any here due to recursive reference
+  properties?: z.infer<typeof EntityTypeFieldTemplate>[];
+}> = z
+  .object({
+    dataType: z.nativeEnum(DataTypeValue),
+    itemDataType: z.lazy(() => DataTypeTemplate).optional(),
+    properties: z.array(z.lazy(() => EntityTypeFieldTemplate)).optional(),
+  })
+  .strict();
 
-export interface EntityTypeField {
-  name: string;
-  labelAlias?: string;
-  labelAliasFullyQualified?: string;
-  property?: string;
-  dataType: DataType;
-  sourceAlias?: string;
-  isIdColumn?: boolean;
-  idColumnName?: string;
-  queryable?: boolean;
-  queryOnly?: boolean;
-  hidden?: boolean;
-  essential?: boolean;
-  visibleByDefault?: boolean;
-  valueGetter?: string;
-  filterValueGetter?: string;
-  valueFunction?: string;
-  source?: {
-    columnName: string;
-    entityTypeId: string;
-  };
-  valueSourceApi?: {
-    path: string;
-    valueJsonPath: string;
-    labelJsonPath: string;
-  };
-  values?: { value: string; label: string }[];
-  joinsTo?: EntityTypeFieldJoin[];
-  // used for middle stage of generating
-  joinsToIntermediate?: EntityTypeFieldJoinIntermediate[];
-}
+export const DataTypeTemplate: z.ZodType<{
+  dataType: DataTypeValue;
+  itemDataType?: z.infer<typeof DataTypeTemplate>;
+  properties?: z.infer<typeof EntityTypeFieldTemplate>[];
+}> = DataTypeTemplateBase;
 
-export type EntityTypeFieldJoin = {
-  targetId: string;
-  targetField: string;
-  direction?: 'inner' | 'left' | 'right' | 'full';
-} & EntityTypeFieldJoinType;
+export type DataType = z.infer<typeof DataTypeTemplate>;
 
-type EntityTypeFieldJoinType =
-  | { type: 'custom'; sql: string }
-  | { type: 'equality-simple' }
-  | { type: 'equality-cast-uuid' };
+export const EntityTypeFieldTemplate = z
+  .object({
+    name: z.string(),
+    labelAlias: z.string().optional(),
+    labelAliasFullyQualified: z.string().optional(),
+    property: z.string().optional(),
+    dataType: DataTypeTemplate, // Reference to DataTypeTemplate
+    sourceAlias: z.string().optional(),
+    isIdColumn: z.boolean().optional(),
+    idColumnName: z.string().optional(),
+    queryable: z.boolean().optional(),
+    queryOnly: z.boolean().optional(),
+    hidden: z.boolean().optional(),
+    essential: z.boolean().optional(),
+    visibleByDefault: z.boolean().optional(),
+    valueGetter: z.string().optional(),
+    filterValueGetter: z.string().optional(),
+    valueFunction: z.string().optional(),
+    source: z
+      .object({
+        columnName: z.string(),
+        entityTypeId: z.string(),
+      })
+      .optional(),
+    valueSourceApi: z
+      .object({
+        path: z.string(),
+        valueJsonPath: z.string(),
+        labelJsonPath: z.string(),
+      })
+      .optional(),
+    values: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+        }),
+      )
+      .optional(),
+    joinsTo: z.array(z.lazy(() => EntityTypeFieldJoinTemplate)).optional(), // Reference to EntityTypeFieldJoinTemplate
+    joinsToIntermediate: z.array(z.lazy(() => EntityTypeFieldJoinIntermediateTemplate)).optional(),
+  })
+  .strict();
+
+export type EntityTypeField = z.infer<typeof EntityTypeFieldTemplate>;
+
+export const EntityTypeFieldJoinTypeTemplate = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('custom'), sql: z.string() }),
+  z.object({ type: z.literal('equality-simple') }),
+  z.object({ type: z.literal('equality-cast-uuid') }),
+]);
+
+// Zod schema for EntityTypeFieldJoin
+export const EntityTypeFieldJoinTemplate = z
+  .object({
+    targetId: z.string(),
+    targetField: z.string(),
+    direction: z.enum(['inner', 'left', 'right', 'full']).optional(),
+  })
+  .and(EntityTypeFieldJoinTypeTemplate);
+
+export type EntityTypeFieldJoin = z.infer<typeof EntityTypeFieldJoinTemplate>;
 
 export interface EntityTypeSource {
   type: 'db' | 'entity-type';
@@ -166,6 +200,8 @@ export const EntityTypeGenerationConfigTemplate = z
           sort: z.tuple([z.string(), z.string()]),
           useRmbIndexStyle: z.boolean().optional(),
           includeJsonbField: z.boolean().optional(),
+          fieldOverrides: z.array(z.lazy(() => EntityTypeFieldTemplate)).optional(),
+          fieldExclusions: z.array(z.string()).optional(),
         })
         .strict(),
     ),

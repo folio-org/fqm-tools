@@ -1,4 +1,4 @@
-import { EntityTypeGenerationConfig } from '@/types';
+import { DataTypeValue, EntityTypeGenerationConfig } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
@@ -44,7 +44,7 @@ describe('createEntityTypeFromConfig', () => {
   it('fails on non-object schema', () => {
     expect(() => {
       createEntityTypeFromConfig(
-        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        {} as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'string' } as JSONSchema7,
         {} as EntityTypeGenerationConfig,
       );
@@ -54,7 +54,7 @@ describe('createEntityTypeFromConfig', () => {
   it('fails on empty object schema', () => {
     expect(() => {
       createEntityTypeFromConfig(
-        {} as EntityTypeGenerationConfig['entityTypes'][0],
+        {} as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object' } as JSONSchema7,
         {} as EntityTypeGenerationConfig,
       );
@@ -73,7 +73,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         schema as JSONSchema7,
         { metadata: { module: 'foo' }, sources: [] } as unknown as EntityTypeGenerationConfig,
       ),
@@ -92,7 +92,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         schema as JSONSchema7,
         {
           metadata: { module: 'foo' },
@@ -118,7 +118,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object', properties: {} } as JSONSchema7,
         {
           metadata: { module: 'foo' },
@@ -144,7 +144,7 @@ describe('createEntityTypeFromConfig', () => {
           sort: ['id', 'ASC'],
           private: true,
           includeJsonbField: false,
-        } as EntityTypeGenerationConfig['entityTypes'][0],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
         { type: 'object', properties: {} } as JSONSchema7,
         {
           metadata: { module: 'foo' },
@@ -157,5 +157,107 @@ describe('createEntityTypeFromConfig', () => {
         } as unknown as EntityTypeGenerationConfig,
       ).entityType.columns,
     ).toBeEmpty();
+  });
+
+  it('excludes fields if requested', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+          fieldExclusions: ['jsonb'],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).entityType.columns,
+    ).toBeEmpty();
+  });
+
+  it('reports an issue if a field to be excluded does not exist', async () => {
+    const { entityType, issues } = createEntityTypeFromConfig(
+      {
+        name: 'simple_department',
+        source: 'department',
+        schema: 'test/schemas/department.json',
+        permissions: ['perm1', 'perm2'],
+        sort: ['id', 'ASC'],
+        private: true,
+        fieldExclusions: ['test'],
+      } as EntityTypeGenerationConfig['entityTypes'][number],
+      { type: 'object', properties: {} } as JSONSchema7,
+      {
+        metadata: { module: 'foo' },
+        sources: [
+          {
+            name: 'department',
+            view: 'marinara',
+          },
+        ],
+      } as unknown as EntityTypeGenerationConfig,
+    );
+
+    expect(entityType.columns).toHaveLength(1);
+    expect(entityType.columns![0].name).toBe('jsonb');
+    expect(issues).toContainEqual('Excluded field test does not exist in the entity type');
+  });
+
+  it('overrides add and update fields as applicable', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+          fieldOverrides: [
+            {
+              name: 'jsonb',
+              dataType: { dataType: DataTypeValue.stringType },
+              valueGetter: 'overridden',
+            },
+            {
+              name: 'test',
+              dataType: { dataType: DataTypeValue.stringType },
+              valueGetter: 'new field',
+            },
+          ],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).entityType.columns,
+    ).toEqual([
+      {
+        name: 'jsonb',
+        dataType: { dataType: DataTypeValue.stringType },
+        valueGetter: 'overridden',
+      },
+      {
+        name: 'test',
+        dataType: { dataType: DataTypeValue.stringType },
+        valueGetter: 'new field',
+      },
+    ]);
   });
 });

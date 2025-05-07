@@ -12,7 +12,7 @@ import {
 export const NAMESPACE_UUID = 'dac5ff9d-28e2-4ce8-b498-958f5d2ad3da';
 
 export default function createEntityTypeFromConfig(
-  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  entityType: EntityTypeGenerationConfig['entityTypes'][number],
   schema: JSONSchema7,
   config: EntityTypeGenerationConfig,
 ): { entityType: EntityType; issues: string[] } {
@@ -30,6 +30,14 @@ export default function createEntityTypeFromConfig(
     })
     .filter((f): f is NonNullable<EntityTypeField> => !!f);
 
+  const completedColumns = applyOverrides(
+    markNestedArrayOfObjectsNonQueryable(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
+    entityType['fieldOverrides'],
+  );
+
+  const [columns, exclusionIssues] = applyExclusions(completedColumns, entityType['fieldExclusions']);
+  issues.push(...exclusionIssues);
+
   return {
     entityType: {
       // ensures the same entity type gets to keep the same UUID across runs
@@ -39,9 +47,7 @@ export default function createEntityTypeFromConfig(
       sources: [getSourceDefinition(entityType.source, config.sources, config.sourceMap)],
       requiredPermissions: entityType.permissions,
       defaultSort: [getSort(entityType.sort)],
-      columns: markNestedArrayOfObjectsNonQueryable(
-        unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)]),
-      ),
+      columns,
     },
     issues,
   };
@@ -73,4 +79,29 @@ function getSort(sort: [string, string]): NonNullable<EntityType['defaultSort']>
     columnName: sort[0],
     direction: sort[1],
   };
+}
+
+function applyOverrides(
+  fields: EntityTypeField[],
+  overrides?: EntityTypeGenerationConfig['entityTypes'][number]['fieldOverrides'],
+): EntityTypeField[] {
+  const withOverrides = [...fields, ...(overrides || [])];
+
+  // map will take later values if the key already exists
+  return Array.from(new Map(withOverrides.map((field) => [field.name, field])).values());
+}
+
+function applyExclusions(fields: EntityTypeField[], exclusions?: string[]): [EntityTypeField[], string[]] {
+  const issues: string[] = [];
+  const fieldMap = new Map(fields.map((field) => [field.name, field]));
+
+  exclusions?.forEach((exclusion) => {
+    if (fieldMap.has(exclusion)) {
+      fieldMap.delete(exclusion);
+    } else {
+      issues.push(`Excluded field ${exclusion} does not exist in the entity type`);
+    }
+  });
+
+  return [Array.from(fieldMap.values()), issues];
 }

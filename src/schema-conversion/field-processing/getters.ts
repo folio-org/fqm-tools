@@ -51,7 +51,7 @@ export function getGetters(
   prop: string,
   schema: JSONSchema7,
   dataType: DataType,
-  entityType: EntityTypeGenerationConfig['entityTypes'][0],
+  entityType: EntityTypeGenerationConfig['entityTypes'][number],
   config: EntityTypeGenerationConfig,
 ): Partial<EntityTypeField> {
   let overrides: GetterOverrides = getGetterOverrides(schema);
