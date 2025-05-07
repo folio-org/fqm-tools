@@ -1,4 +1,4 @@
-import { EntityTypeGenerationConfig } from '@/types';
+import { DataTypeValue, EntityTypeGenerationConfig } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
@@ -157,5 +157,79 @@ describe('createEntityTypeFromConfig', () => {
         } as unknown as EntityTypeGenerationConfig,
       ).entityType.columns,
     ).toBeEmpty();
+  });
+
+  it('excludes fields if requested', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+          fieldExclusions: ['jsonb'],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).entityType.columns,
+    ).toBeEmpty();
+  });
+
+  it('overrides add and update fields as applicable', async () => {
+    expect(
+      createEntityTypeFromConfig(
+        {
+          name: 'simple_department',
+          source: 'department',
+          schema: 'test/schemas/department.json',
+          permissions: ['perm1', 'perm2'],
+          sort: ['id', 'ASC'],
+          private: true,
+          fieldOverrides: [
+            {
+              name: 'jsonb',
+              dataType: { dataType: DataTypeValue.stringType },
+              valueGetter: 'overridden',
+            },
+            {
+              name: 'test',
+              dataType: { dataType: DataTypeValue.stringType },
+              valueGetter: 'new field',
+            },
+          ],
+        } as EntityTypeGenerationConfig['entityTypes'][number],
+        { type: 'object', properties: {} } as JSONSchema7,
+        {
+          metadata: { module: 'foo' },
+          sources: [
+            {
+              name: 'department',
+              view: 'marinara',
+            },
+          ],
+        } as unknown as EntityTypeGenerationConfig,
+      ).entityType.columns,
+    ).toEqual([
+      {
+        name: 'jsonb',
+        dataType: { dataType: DataTypeValue.stringType },
+        valueGetter: 'overridden',
+      },
+      {
+        name: 'test',
+        dataType: { dataType: DataTypeValue.stringType },
+        valueGetter: 'new field',
+      },
+    ]);
   });
 });
