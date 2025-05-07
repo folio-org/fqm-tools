@@ -185,6 +185,34 @@ describe('createEntityTypeFromConfig', () => {
     ).toBeEmpty();
   });
 
+  it('reports an issue if a field to be excluded does not exist', async () => {
+    const { entityType, issues } = createEntityTypeFromConfig(
+      {
+        name: 'simple_department',
+        source: 'department',
+        schema: 'test/schemas/department.json',
+        permissions: ['perm1', 'perm2'],
+        sort: ['id', 'ASC'],
+        private: true,
+        fieldExclusions: ['test'],
+      } as EntityTypeGenerationConfig['entityTypes'][number],
+      { type: 'object', properties: {} } as JSONSchema7,
+      {
+        metadata: { module: 'foo' },
+        sources: [
+          {
+            name: 'department',
+            view: 'marinara',
+          },
+        ],
+      } as unknown as EntityTypeGenerationConfig,
+    );
+
+    expect(entityType.columns).toHaveLength(1);
+    expect(entityType.columns![0].name).toBe('jsonb');
+    expect(issues).toContainEqual('Excluded field test does not exist in the entity type');
+  });
+
   it('overrides add and update fields as applicable', async () => {
     expect(
       createEntityTypeFromConfig(

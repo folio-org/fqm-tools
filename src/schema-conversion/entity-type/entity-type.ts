@@ -99,7 +99,7 @@ function applyExclusions(fields: EntityTypeField[], exclusions?: string[]): [Ent
     if (fieldMap.has(exclusion)) {
       fieldMap.delete(exclusion);
     } else {
-      issues.push(`Excluded field ${exclusion} did not exist in the entity type`);
+      issues.push(`Excluded field ${exclusion} does not exist in the entity type`);
     }
   });
 
