@@ -1,10 +1,16 @@
 import entityTypeToCsv from '@/src/schema-conversion/csv';
 import createEntityTypeFromConfig from '@/src/schema-conversion/entity-type/entity-type';
 import { resolveEntityTypeJoins } from '@/src/schema-conversion/entity-type/joins';
+import {
+  EXPECTED_LOCALES,
+  inferTranslationsFromEntityType,
+  marshallExternalTranslations,
+} from '@/src/schema-conversion/field-processing/translations';
 import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { TOML } from 'bun';
+import { readdir } from 'fs/promises';
 import { mkdir } from 'fs/promises';
 import json5 from 'json5';
 import path from 'path';
@@ -49,9 +55,10 @@ if (args.values.help) {
 }
 
 async function write(category: string, domain: string, module: string, filename: string, data: string) {
-  await mkdir(path.resolve(args.values.out, category, domain, module), { recursive: true });
-  await Bun.write(Bun.file(path.resolve(args.values.out, category, domain, module, filename)), data);
-  console.log(`Wrote ${category}/${domain}/${module}/${filename}`);
+  const fullPath = path.resolve(args.values.out, category, domain, module, filename);
+  await mkdir(path.dirname(fullPath), { recursive: true });
+  await Bun.write(Bun.file(fullPath), data);
+  console.log(`Wrote ${fullPath}`);
 }
 
 const configs: { dir: string; config: EntityTypeGenerationConfig }[] = [];
@@ -155,4 +162,57 @@ for (const { entityType, domain, module } of results) {
     `${entityType.name}.csv`,
     await entityTypeToCsv(entityType, () => Promise.resolve({} as EntityType)),
   );
+}
+
+const translationsByLocale = new Map<string, Record<string, string>>();
+for (const locale of EXPECTED_LOCALES) {
+  translationsByLocale.set(locale, {});
+}
+
+for (const { dir, config } of configs) {
+  const translationFiles = (await readdir(path.resolve(dir, 'translations'), { recursive: true })).filter((p) =>
+    p.endsWith('.json'),
+  );
+
+  for (const file of translationFiles) {
+    const locale = path.basename(file, '.json');
+    const filePath = path.resolve(dir, 'translations', file);
+    const incoming = await Bun.file(filePath).json();
+
+    translationsByLocale.set(locale, {
+      ...translationsByLocale.get(locale),
+      ...marshallExternalTranslations(incoming, config.metadata.module),
+    });
+  }
+}
+
+const missingTranslations = new Map<string, Record<string, string>>();
+
+for (const { entityType, module } of results) {
+  const inferredTranslations = inferTranslationsFromEntityType(entityType);
+  const missingKeys = Object.keys(inferredTranslations).filter((key) => !translationsByLocale.get('en')?.[key]);
+  if (missingKeys.length > 0) {
+    missingTranslations.set(module, {
+      ...missingTranslations.get(module),
+      ...Object.entries(inferredTranslations)
+        .filter(([key]) => missingKeys.includes(key))
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+    });
+  }
+  for (const [locale, translations] of translationsByLocale.entries()) {
+    translationsByLocale.set(locale, {
+      ...inferredTranslations,
+      ...translations,
+    });
+  }
+}
+
+for (const [module, translations] of missingTranslations.entries()) {
+  console.warn(
+    `::warning title=Missing translations::⚠️ Missing translations for module ${module}: Please see full job run summary for details and a pasteable snippet to add to \`${module}\`'s \`translations/${module}/en.json\`.  ${Object.keys(translations).join(', ')}.`,
+  );
+}
+
+for (const [locale, translations] of translationsByLocale.entries()) {
+  await write('translations', '', 'mod-fqm-manager', `${locale}.json`, JSON.stringify(translations, null, 2));
 }
