@@ -1,5 +1,5 @@
 import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
-import { inferTranslationsFromColumn } from '@/src/schema-conversion/field-processing/translations';
+import { inferTranslationsFromField } from '@/src/schema-conversion/translations';
 import { EntityType, EntityTypeField } from '@/types';
 import { json } from '@codemirror/lang-json';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';
@@ -68,7 +68,7 @@ export default function ImportStep({
         },
       },
     );
-    const translations = inferTranslationsFromColumn(field, entityType.name);
+    const translations = inferTranslationsFromField(field, entityType.name);
     setProvisionalIssues(issues);
     setProvisionalColumn(field ?? null);
     setProvisionalTranslations(translations);

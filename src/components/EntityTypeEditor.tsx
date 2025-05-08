@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { DataTypeValue, EntityType, EntityTypeField } from '../../types';
-import { inferTranslationsFromColumn } from '../schema-conversion/field-processing/translations';
+import { inferTranslationsFromField } from '../schema-conversion/translations';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 import JSONSchemaImporter from './Importer/JSONSchemaImporter';
 import SourceEditor from './SourceEditor';
@@ -33,7 +33,7 @@ export default function EntityTypeManager({
     socket.off('add-column-from-db-inspector-pong');
     socket.on('add-column-from-db-inspector-pong', (column: EntityTypeField) => {
       setEntityType((et) => {
-        setTranslationsBuffer((tb) => ({ ...tb, ...inferTranslationsFromColumn(column, et.name) }));
+        setTranslationsBuffer((tb) => ({ ...tb, ...inferTranslationsFromField(column, et.name) }));
         return { ...et, columns: [...(et.columns ?? []), column] };
       });
     });

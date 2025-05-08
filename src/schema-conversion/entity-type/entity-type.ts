@@ -42,7 +42,7 @@ export default function createEntityTypeFromConfig(
     entityType: {
       // ensures the same entity type gets to keep the same UUID across runs
       id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
-      name: `${snakeCase(config.metadata.module)}__${entityType.name}`,
+      name: disambiguateName(config.metadata.module, entityType.name),
       private: entityType.private ?? false,
       sources: [getSourceDefinition(entityType.source, config.sources, config.sourceMap)],
       requiredPermissions: entityType.permissions,
@@ -51,6 +51,10 @@ export default function createEntityTypeFromConfig(
     },
     issues,
   };
+}
+
+export function disambiguateName(moduleName: string, entityTypeName: string): string {
+  return `${snakeCase(moduleName)}__${entityTypeName}`;
 }
 
 function getSourceDefinition(
