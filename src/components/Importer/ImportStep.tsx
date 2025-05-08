@@ -1,5 +1,5 @@
 import { inferFieldFromSchema } from '@/src/schema-conversion/field-processing/field';
-import { inferTranslationsFromField } from '@/src/schema-conversion/field-processing/translations';
+import { inferTranslationsFromField } from '@/src/schema-conversion/translations';
 import { EntityType, EntityTypeField } from '@/types';
 import { json } from '@codemirror/lang-json';
 import { PostgreSQL, sql } from '@codemirror/lang-sql';

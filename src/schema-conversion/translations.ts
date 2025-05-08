@@ -1,6 +1,6 @@
 import { EntityTypeField, DataTypeValue, EntityType } from '@/types';
 import { sentenceCase } from 'change-case';
-import { disambiguateName } from '../entity-type/entity-type';
+import { disambiguateName } from './entity-type/entity-type';
 
 export const EXPECTED_LOCALES = [
   'ar',

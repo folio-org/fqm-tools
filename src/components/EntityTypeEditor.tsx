@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
 import { DataTypeValue, EntityType, EntityTypeField } from '../../types';
-import { inferTranslationsFromField } from '../schema-conversion/field-processing/translations';
+import { inferTranslationsFromField } from '../schema-conversion/translations';
 import EntityTypeFieldEditor from './EntityTypeFieldEditor';
 import JSONSchemaImporter from './Importer/JSONSchemaImporter';
 import SourceEditor from './SourceEditor';

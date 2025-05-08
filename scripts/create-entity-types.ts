@@ -5,7 +5,7 @@ import {
   EXPECTED_LOCALES,
   inferTranslationsFromEntityType,
   marshallExternalTranslations,
-} from '@/src/schema-conversion/field-processing/translations';
+} from '@/src/schema-conversion/translations';
 import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
