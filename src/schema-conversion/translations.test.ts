@@ -1,6 +1,27 @@
 import { DataTypeValue, EntityTypeField } from '@/types';
+import { describe, expect, it } from 'bun:test';
 import { inferTranslationsFromField, marshallExternalTranslations } from './translations';
-import { describe, it, expect } from 'bun:test';
+
+import { inferTranslationsFromEntityType } from './translations';
+
+describe('inferTranslationsFromEntityType', () => {
+  it('infers translations for entity type and fields together', () => {
+    const result = inferTranslationsFromEntityType({
+      id: 'zzz',
+      name: 'test_entity',
+      columns: [
+        { name: 'my_date', dataType: { dataType: DataTypeValue.stringType } },
+        { name: 'cool_id', dataType: { dataType: DataTypeValue.rangedUUIDType } },
+      ],
+    });
+
+    expect(result).toEqual({
+      'entityType.test_entity': 'Test entity',
+      'entityType.test_entity.my_date': 'My date',
+      'entityType.test_entity.cool_id': 'Cool UUID',
+    });
+  });
+});
 
 describe('inferTranslationsFromField', () => {
   const testCases = [
