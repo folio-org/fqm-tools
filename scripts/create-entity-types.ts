@@ -82,6 +82,11 @@ for (const dir of args.positionals) {
   }
 }
 
+if (configs.length === 0) {
+  console.error('No valid configs found. Exiting.');
+  process.exit(1);
+}
+
 for (const { config } of configs) {
   config.sourceMap = { ...config.sourceMap };
   config.sources = await Promise.all(

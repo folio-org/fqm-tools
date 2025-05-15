@@ -180,12 +180,10 @@ export const EntityTypeGenerationConfigTemplate = z
       })
       .strict(),
     sources: z.array(
-      z
-        .object({
-          name: z.string(),
-          table: z.string(),
-        })
-        .strict(),
+      z.union([
+        z.object({ name: z.string(), table: z.string() }).strict(),
+        z.object({ name: z.string(), sql: z.string() }).strict(),
+      ]),
     ),
     // from name used in entity type definitions to true name
     sourceMap: z.record(z.string(), z.string()).optional(),
