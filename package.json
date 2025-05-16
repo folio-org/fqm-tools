@@ -65,7 +65,7 @@
     "@types/papaparse": "5.3.16",
     "@types/react": "19.1.4",
     "@types/react-dom": "19.1.5",
-    "eslint": "9.26.0",
+    "eslint": "9.27.0",
     "eslint-config-prettier": "10.1.5",
     "eslint-config-next": "15.3.2",
     "husky": "9.1.7",
