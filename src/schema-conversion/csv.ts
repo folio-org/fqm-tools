@@ -51,7 +51,6 @@ export default async function entityTypeToCsv(
   entityType: EntityType,
   fetchEntityType: (entityTypeId: string) => Promise<EntityType>,
 ): Promise<string> {
-  console.log(entityType);
   const data: ResultRow[] = [];
 
   for (const column of entityType.columns ?? []) {

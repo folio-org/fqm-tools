@@ -61,14 +61,21 @@ if (process.argv[3] === 'all') {
 const dir = `./dump/${process.argv[2]}`;
 await mkdir(dir, { recursive: true });
 
-const fetcher = memoize(async (entityTypeId) => JSON.parse(await fetchEntityType(FQM_CONNECTION, entityTypeId)));
+const fetcher = memoize(async (entityTypeId) => {
+  try {
+    return JSON.parse(
+      await fetchEntityType(FQM_CONNECTION, entityTypeId, process.env['FQM_INCLUDE_HIDDEN_FIELDS'] === 'true'),
+    );
+  } catch (e) {
+    console.error('Error fetching entity type', entityTypeId, e);
+    return {} as EntityType;
+  }
+});
 
 for (const { id, label } of entityTypes) {
   console.log('Dumping information for entity type', label ?? id);
 
-  const entityType = JSON.parse(
-    await fetchEntityType(FQM_CONNECTION, id, process.env['FQM_INCLUDE_HIDDEN_FIELDS'] === 'true'),
-  ) as EntityType;
+  const entityType = await fetcher(id);
   const filename = `${dir}/${(label ?? entityType.name).replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`;
 
   await Bun.write(Bun.file(filename), await entityTypeToCsv(entityType, fetcher));
