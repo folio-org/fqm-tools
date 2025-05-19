@@ -161,6 +161,7 @@ export default function FieldRow({
         'Showable in results': 'false',
         'API Only': 'false',
         Essential: 'false',
+        'Joins to': '',
       });
     }
   }, [oldField, newField, isEditing, newVersion]);
