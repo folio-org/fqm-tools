@@ -24,7 +24,7 @@ describe('CSV generation', () => {
       ).toEqual('\ufeff[]');
     });
 
-    it('generates a CSV string covering all parts of the function', async () => {
+    it('generates a CSV string covering a majority of cases together', async () => {
       const mockEntityType: EntityType = {
         id: 'entity-id',
         name: 'test_entity',
@@ -121,6 +121,7 @@ describe('CSV generation', () => {
           'Visible by default': true,
           'API only': false,
           Essential: true,
+          'Joins to': '',
         },
         {
           'Entity ID': 'entity-id',
@@ -136,6 +137,7 @@ describe('CSV generation', () => {
           'Visible by default': true,
           'API only': false,
           Essential: false,
+          'Joins to': '',
         },
         {
           'Entity ID': 'entity-id',
@@ -151,6 +153,7 @@ describe('CSV generation', () => {
           'Visible by default': false,
           'API only': false,
           Essential: false,
+          'Joins to': '',
         },
         {
           'API only': false,
@@ -158,6 +161,7 @@ describe('CSV generation', () => {
           Datatype: 'object[]',
           'Entity ID': 'entity-id',
           Essential: false,
+          'Joins to': '',
           Label: 'Recursive Column',
           Name: 'recursive_column',
           Operators: 'contains all/any, not contains all/any, empty',
@@ -173,6 +177,7 @@ describe('CSV generation', () => {
           Datatype: 'object',
           'Entity ID': 'entity-id',
           Essential: false,
+          'Joins to': '',
           Label: 'Recursive Column > Nested Property',
           Name: 'recursive_column[*]->nestedProperty',
           Operators: '=, !=, >, >=, <, <=, empty',
@@ -188,6 +193,7 @@ describe('CSV generation', () => {
           Datatype: 'boolean',
           'Entity ID': 'entity-id',
           Essential: false,
+          'Joins to': '',
           Label: 'Nested Property > Deep Nested Property',
           Name: 'nestedProperty[*]->deepNestedProperty',
           Operators: '=, !=, empty',
@@ -200,6 +206,30 @@ describe('CSV generation', () => {
       ];
 
       expect(JSON.parse(result.substring(1))).toEqual(expectedData);
+    });
+
+    it('handles joinsTo', async () => {
+      const mockEntityType: EntityType = {
+        id: 'entity-id',
+        name: 'test_entity',
+        columns: [
+          {
+            name: 'column1',
+            labelAlias: 'Column 1',
+            dataType: { dataType: DataTypeValue.stringType },
+            queryable: true,
+            visibleByDefault: true,
+            hidden: false,
+            essential: true,
+            joinsTo: [{ type: 'equality-simple', targetId: 'target-id', targetField: 'target_field' }],
+          },
+        ],
+      };
+
+      const fetcher = mock(() => Promise.resolve({ name: 'other' } as EntityType));
+      const result = JSON.parse((await entityTypeToCsv(mockEntityType, fetcher)).substring(1));
+
+      expect(result[0]).toHaveProperty('Joins to', 'other.target_field');
     });
   });
 
