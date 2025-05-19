@@ -14,6 +14,7 @@ export interface ResultRow {
   visibleByDefault: boolean;
   apiOnly: boolean;
   essential: boolean;
+  joinsTo: string[];
 }
 
 export interface ResultRowPretty {
@@ -30,6 +31,20 @@ export interface ResultRowPretty {
   'Showable in results': string;
   'API Only': string;
   Essential: string;
+  'Joins to': string;
+}
+
+async function resolveJoins(
+  field: EntityTypeField,
+  fetcher: (entityTypeId: string) => Promise<EntityType>,
+): Promise<string[]> {
+  return Promise.all(
+    field.joinsTo?.map(async (join) => {
+      const target = await fetcher(join.targetId);
+
+      return `${target.name}.${join.targetField}`;
+    }) ?? [],
+  );
 }
 
 export default async function entityTypeToCsv(
@@ -53,6 +68,7 @@ export default async function entityTypeToCsv(
       visibleByDefault: column.visibleByDefault === true,
       apiOnly: column.hidden === true,
       essential: column.essential === true,
+      joinsTo: await resolveJoins(column, fetchEntityType),
     });
 
     if (getProperties(column.dataType)) {
@@ -70,6 +86,7 @@ export default async function entityTypeToCsv(
           visibleByDefault: property.visibleByDefault === true,
           apiOnly: property.hidden === true,
           essential: property.essential === true,
+          joinsTo: await resolveJoins(property, fetchEntityType),
         });
 
         await Promise.all(
@@ -100,6 +117,7 @@ export default async function entityTypeToCsv(
         'Visible by default': r.visibleByDefault,
         'API only': r.apiOnly,
         Essential: r.essential,
+        'Joins to': r.joinsTo.join(', '),
       })),
     )
   );

@@ -16,6 +16,7 @@ import json5 from 'json5';
 import path from 'path';
 import { parseArgs } from 'util';
 import YAML from 'yaml';
+import memoize from 'lodash.memoize';
 
 const args = parseArgs({
   args: Bun.argv.slice(2),
@@ -165,7 +166,12 @@ for (const { entityType, domain, module } of results) {
     domain,
     module,
     `${entityType.name}.csv`,
-    await entityTypeToCsv(entityType, () => Promise.resolve({} as EntityType)),
+    await entityTypeToCsv(
+      entityType,
+      memoize((searchId) =>
+        Promise.resolve(results.map((r) => r.entityType).find((et) => et.id === searchId) ?? ({} as EntityType)),
+      ),
+    ),
   );
 }
 
