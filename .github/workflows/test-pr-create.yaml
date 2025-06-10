@@ -20,7 +20,7 @@ jobs:
           repository: folio-org/mod-fqm-manager
           token: ${{ steps.generate-token.outputs.token }}
 
-      - run: echo 'test $(date)' > test.txt
+      - run: echo test `date` > test.txt
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
