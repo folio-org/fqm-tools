@@ -7,7 +7,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: peter-evans/repository-dispatch@v3
+      - uses: actions/create-github-app-token@v2
+        id: generate-token
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: folio-org
+          repositories: mod-fqm-manager
+
+      - uses: actions/checkout@v4
         with:
           repository: folio-org/mod-fqm-manager
-          event-type: test
+          token: ${{ steps.generate-token.outputs.token }}
+
+      - run: echo 'test $(date)' > test.txt
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          sign-commits: true
+          branch: autogen-staging
+          draft: true
