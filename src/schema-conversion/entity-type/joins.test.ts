@@ -1,6 +1,12 @@
 import { DataTypeValue, EntityType, EntityTypeFieldJoinIntermediate } from '@/types';
-import { describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it, Mock, mock, spyOn } from 'bun:test';
 import { resolveEntityTypeJoins } from './joins';
+import * as ErrorModule from '../error';
+
+spyOn(ErrorModule, 'warn').mockImplementation(mock(() => ({})));
+spyOn(ErrorModule, 'error').mockImplementation(mock(() => ({})));
+
+const { warn, error } = ErrorModule;
 
 describe('resolveEntityTypeJoins', () => {
   const targetEntityType = {
@@ -14,8 +20,11 @@ describe('resolveEntityTypeJoins', () => {
         },
       ],
     },
-    domain: 'other',
-    module: 'mod-foo',
+    metadata: {
+      domain: 'circulation',
+      module: 'mod-foo',
+      team: 'team',
+    } as const,
   };
   const getSourceEntityType = (
     joins?: EntityTypeFieldJoinIntermediate[],
@@ -32,8 +41,11 @@ describe('resolveEntityTypeJoins', () => {
         },
       ],
     },
-    domain: 'foo',
-    module: 'mod-foo',
+    metadata: {
+      domain: 'circulation',
+      module: 'mod-foo',
+      team: 'team',
+    } as const,
   });
   const getResultingJoins = (entityTypes: { entityType: EntityType }[]) =>
     entityTypes
@@ -41,14 +53,20 @@ describe('resolveEntityTypeJoins', () => {
       .filter((c) => Boolean(c.joinsTo))
       .flatMap((c) => c.joinsTo);
 
+  beforeEach(() => {
+    (warn as Mock<typeof warn>).mockReset();
+    (error as Mock<typeof error>).mockReset();
+  });
+
   it('does nothing with no joins', () => {
     const input = [getSourceEntityType(), targetEntityType];
     const expected = JSON.parse(JSON.stringify(input));
 
     const result = resolveEntityTypeJoins(input, false);
 
-    expect(result.entityTypes).toEqual(expected);
-    expect(result.issues).toBeEmpty();
+    expect(result).toEqual(expected);
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   it('resolves join to existing column with explicit type', () => {
@@ -68,7 +86,7 @@ describe('resolveEntityTypeJoins', () => {
       false,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toEqual([
+    expect(getResultingJoins(result)).toEqual([
       {
         targetField: 'target_column',
         targetId: 'targetId',
@@ -76,7 +94,8 @@ describe('resolveEntityTypeJoins', () => {
         sql: ':this.id = :that.id',
       },
     ]);
-    expect(result.issues).toBeEmpty();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   it('resolves join to existing column without explicit join type (UUID datatype)', () => {
@@ -98,7 +117,7 @@ describe('resolveEntityTypeJoins', () => {
       false,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toEqual([
+    expect(getResultingJoins(result)).toEqual([
       {
         targetField: 'target_column',
         targetId: 'targetId',
@@ -106,7 +125,8 @@ describe('resolveEntityTypeJoins', () => {
         direction: 'left',
       },
     ]);
-    expect(result.issues).toBeEmpty();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   it('resolves join to existing column without explicit join type (non-UUID datatype)', () => {
@@ -127,14 +147,15 @@ describe('resolveEntityTypeJoins', () => {
       false,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toEqual([
+    expect(getResultingJoins(result)).toEqual([
       {
         targetField: 'target_column',
         targetId: 'targetId',
         type: 'equality-simple',
       },
     ]);
-    expect(result.issues).toBeEmpty();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
   });
 
   it('abandons join if no target entity type is found', () => {
@@ -151,9 +172,23 @@ describe('resolveEntityTypeJoins', () => {
       false,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toBeEmpty();
-    expect(result.issues).toContain(
-      '::error title=Unable to resolve join::Entity type source_entity field source_column has a join to entity bad__worse, but it does not exist.',
+    expect(getResultingJoins(result)).toBeEmpty();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      {
+        domain: 'circulation',
+        module: 'mod-foo',
+        team: 'team',
+      },
+      'source_entity',
+      {
+        type: 'join',
+        fieldName: 'source_column',
+        targetModule: 'bad',
+        targetEntity: 'worse',
+        targetField: 'definitely_not_a_column',
+        missing: 'entity',
+      },
     );
   });
 
@@ -171,15 +206,29 @@ describe('resolveEntityTypeJoins', () => {
       true,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toEqual([
+    expect(getResultingJoins(result)).toEqual([
       {
         targetId: 'deadbeef-dead-beef-dead-beefdeadbeef',
         targetField: 'definitely_not_a_column',
         type: 'equality-simple',
       },
     ]);
-    expect(result.issues).toContain(
-      '::warn title=Unable to resolve join::Entity type source_entity field source_column has a join to entity bad__worse, but it does not exist.',
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      {
+        domain: 'circulation',
+        module: 'mod-foo',
+        team: 'team',
+      },
+      'source_entity',
+      {
+        type: 'join',
+        fieldName: 'source_column',
+        targetModule: 'bad',
+        targetEntity: 'worse',
+        targetField: 'definitely_not_a_column',
+        missing: 'entity',
+      },
     );
   });
 
@@ -198,9 +247,23 @@ describe('resolveEntityTypeJoins', () => {
       false,
     );
 
-    expect(getResultingJoins(result.entityTypes)).toBeEmpty();
-    expect(result.issues).toContain(
-      '::error title=Unable to resolve join::Entity type source_entity field source_column has a join to field definitely_not_a_column in entity target_module__target_entity, but no such field exists.',
+    expect(getResultingJoins(result)).toBeEmpty();
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith(
+      {
+        domain: 'circulation',
+        module: 'mod-foo',
+        team: 'team',
+      },
+      'source_entity',
+      {
+        type: 'join',
+        fieldName: 'source_column',
+        targetModule: 'target_module',
+        targetEntity: 'target_entity',
+        targetField: 'definitely_not_a_column',
+        missing: 'field',
+      },
     );
   });
 });
