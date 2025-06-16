@@ -40,10 +40,10 @@ jobs:
           path: mod-fqm-manager
 
       - name: Generate report
-        run: bun scripts/entity-generation/3-generate-report.ts --base-dir mod-fqm-manager -o out -i generation.log | tee report.md
+        run: bun scripts/entity-generation/3-generate-report.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log | tee report.md
 
       - name: Stage changes
-        run: bun scripts/entity-generation/4-stage-changes.ts --base-dir mod-fqm-manager -o out -i generation.log
+        run: bun scripts/entity-generation/4-stage-changes.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
