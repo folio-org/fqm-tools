@@ -29,6 +29,10 @@ export type Error =
       type: 'config-schema';
       file: string;
       error: string;
+    }
+  | {
+      type: 'unknown-team';
+      teamName: string;
     };
 
 export type ErrorSerialized = {
@@ -51,6 +55,8 @@ export function getTitle(error: Error): string {
       return `Configuration file does not exist`;
     case 'config-schema':
       return `Configuration schema error`;
+    case 'unknown-team':
+      return `Unknown team`;
   }
 }
 
@@ -68,6 +74,8 @@ export function getDescription(error: Error, entityTypeName?: string): string {
       return `The configuration file \`${error.file}\` does not exist.`;
     case 'config-schema':
       return `Configuration schema error in \`${error.file}\`: ${error.error}`;
+    case 'unknown-team':
+      return `The team \`${error.teamName}\` is not known in \`team-info.yaml\`. Please add it to ensure reviews and notifications are delivered correctly.`;
   }
 }
 

@@ -178,4 +178,19 @@ describe('error', () => {
       type: 'config-schema',
     });
   });
+
+  it('logs error and serialized output for unknown-team error', () => {
+    error(undefined, undefined, {
+      type: 'unknown-team',
+      teamName: 'unknown',
+    });
+
+    expect(consoleWarnMock).not.toHaveBeenCalled();
+    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('The team `unknown` is not known'));
+    expect(JSON.parse(consoleLogMock.mock.lastCall![0])).toEqual({
+      severity: 'error',
+      type: 'unknown-team',
+      teamName: 'unknown',
+    });
+  });
 });

@@ -5,7 +5,7 @@ import {
   EXPECTED_LOCALES,
   inferTranslationsFromEntityType,
   marshallExternalTranslations,
-  undisambiguateTranslationKey,
+  unmarshallTranslationKey,
 } from '@/src/schema-conversion/translations';
 import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
@@ -54,7 +54,7 @@ if (args.values.help) {
   console.log('  -o, --out               Output directory (default: out)');
   console.log('  --force-generate-joins  [dev only] Force generation of joins even if no matching target is found.');
   console.log('                          Will fill dummy data in for target ET/fields, to enable result verification.');
-  process.exit(0);
+  process.exit(1);
 }
 
 async function write(category: string, domain: string, module: string, filename: string, data: string) {
@@ -89,7 +89,7 @@ for (const dir of args.positionals) {
 
 if (configs.length === 0) {
   console.error('No valid configs found. Exiting.');
-  process.exit(1);
+  process.exit(2);
 }
 
 for (const { config } of configs) {
@@ -223,7 +223,7 @@ for (const [metadata, translations] of missingTranslations.entries()) {
   warn(metadata, undefined, {
     type: 'translations',
     missingTranslations: Object.fromEntries(
-      Object.entries(translations).map(([key, value]) => [undisambiguateTranslationKey(key), value]),
+      Object.entries(translations).map(([key, value]) => [unmarshallTranslationKey(key), value]),
     ),
   });
 }
@@ -231,3 +231,25 @@ for (const [metadata, translations] of missingTranslations.entries()) {
 for (const [locale, translations] of translationsByLocale.entries()) {
   await write('translations', '', 'mod-fqm-manager', `${locale}.json`, JSON.stringify(translations, null, 2));
 }
+
+const teamInfo = Bun.file(path.resolve(__dirname, '../../team-info.yaml'))
+  .text()
+  .then((t) => YAML.parse(t) as Record<string, { github: string; slack: string }>);
+
+const teams = new Set(configs.map(({ config }) => config.metadata.team));
+for (const team of teams) {
+  if (!(team in teamInfo)) {
+    error(undefined, undefined, {
+      type: 'unknown-team',
+      teamName: team,
+    });
+  }
+}
+
+write(
+  '',
+  '',
+  '',
+  'module-team-map.json',
+  JSON.stringify(Object.fromEntries(configs.map(({ config }) => [config.metadata.module, config.metadata.team]))),
+);

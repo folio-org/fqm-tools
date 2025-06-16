@@ -1,9 +1,10 @@
 import { ErrorSerialized, getDescription, getTitle } from '@/src/schema-conversion/error';
 import { EntityType } from '@/types';
+import { WebClient } from '@slack/web-api';
+import { AsciiTable3 } from 'ascii-table3';
 import { $ } from 'bun';
 import { readdir } from 'fs/promises';
 import json5 from 'json5';
-import { markdownTable } from 'markdown-table';
 import diff from 'microdiff';
 import path from 'path';
 import pluralize from 'pluralize';
@@ -50,6 +51,10 @@ const args = parseArgs({
       short: 'i',
       default: '-',
     },
+    'notify-pr': {
+      type: 'string',
+      short: 'n',
+    },
   },
   strict: true,
   allowPositionals: false,
@@ -70,28 +75,48 @@ if (args.values.help) {
   console.log('  -f, --base-dir        mod-fqm-manager repository location (default: ../mod-fqm-manager)');
   console.log('  -o, --generated-dir   Output directory from create-entity-types.ts (default: out)');
   console.log('  -i, --error-log       Where create-entity-types.ts stddout is saved (default: -, for stdin)');
-  process.exit(0);
+  console.log('  -n, --notify-pr       Send Slack notifications about this report and the provided PR number');
+  process.exit(1);
 }
 
+const moduleToTeamMap = (await Bun.file(
+  path.resolve(args.values['generated-dir'], 'module-team-map.json'),
+).json()) as Record<string, string>;
+const teamInfo = await Bun.file(path.resolve(__dirname, '../../team-info.yaml'))
+  .text()
+  .then((t) => YAML.parse(t) as Record<string, { github: string; slack: string }>);
+
+const affectedTeams = new Set<string>(['corsair']);
+
 // liquibase and translations are sufficient to determine summary ± across versions, as all ETs and their fields are catalogued via translation keys
-export async function readChangelogsFromDirectory(dir: string): Promise<Record<string, string>> {
+async function readChangelogsFromDirectory(
+  dir: string,
+): Promise<Record<string, { module: string; selectQuery: string }>> {
   return Object.fromEntries(
     (
       await Promise.all(
-        (await readdir(dir, { recursive: true }))
+        (
+          await readdir(dir, { recursive: true }).catch((e) => {
+            console.error(`Failed to read directory ${dir}:`, e);
+            return [];
+          })
+        )
           .filter((f) => f.endsWith('.yaml'))
           .map((f) => path.resolve(dir, f))
           .map((f) =>
             Bun.file(f)
               .text()
               .then(YAML.parse)
-              .then((c) => {
-                if ('dropView' in c.databaseChangeLog[0].changeSet.changes[0]) {
+              .then((c): [string, { module: string; selectQuery: string }] | [null, null] => {
+                if (!('createView' in (c.databaseChangeLog[0].changeSet.changes[0] ?? {}))) {
                   return [null, null];
                 }
                 return [
                   c.databaseChangeLog[0].changeSet.changes[0].createView.viewName,
-                  c.databaseChangeLog[0].changeSet.changes[0].createView.selectQuery,
+                  {
+                    module: c.databaseChangeLog[0].changeSet.author.split('--').slice(-1)[0].trim(),
+                    selectQuery: c.databaseChangeLog[0].changeSet.changes[0].createView.selectQuery,
+                  },
                 ];
               }),
           ),
@@ -103,7 +128,12 @@ export async function readChangelogsFromDirectory(dir: string): Promise<Record<s
 async function readEntityTypesFromDirectory(dir: string): Promise<Record<string, EntityType>> {
   return Object.fromEntries(
     await Promise.all(
-      (await readdir(dir, { recursive: true }))
+      (
+        await readdir(dir, { recursive: true }).catch((e) => {
+          console.error(`Failed to read directory ${dir}:`, e);
+          return [];
+        })
+      )
         .filter((f) => f.endsWith('.json') || f.endsWith('.json5'))
         .map((f) => path.resolve(dir, f))
         .map((f) =>
@@ -125,6 +155,15 @@ const liquibaseDiff = diff(originalViews, newViews, {
   cyclesFix: false,
 }).toSorted((a, b) => DIFF_SORT[a.type] - DIFF_SORT[b.type]);
 
+liquibaseDiff.forEach((change) => {
+  const key = change.path[0] as string;
+  if (key in newViews) {
+    affectedTeams.add(moduleToTeamMap[newViews[key].module] || 'corsair');
+  } else if (key in originalViews) {
+    affectedTeams.add(moduleToTeamMap[originalViews[key].module] || 'corsair');
+  }
+});
+
 const oldTranslations = await Bun.file(
   path.resolve(
     args.values['base-dir'],
@@ -135,7 +174,12 @@ const oldTranslations = await Bun.file(
     'mod-fqm-manager',
     'en.json',
   ),
-).json();
+)
+  .json()
+  .catch((e) => {
+    console.error('Failed to read old translations:', e);
+    return {};
+  });
 const newTranslations = await Bun.file(
   path.resolve(args.values['generated-dir'], 'translations', 'mod-fqm-manager', 'en.json'),
 ).json();
@@ -147,10 +191,15 @@ const fieldDiffRaw = diff(oldTranslations, newTranslations, { cyclesFix: false }
   .reduce(
     (acc, change) => {
       const [, entityType, ...rest] = (change.path[0] as string).split('.');
+
+      const moduleName = entityType.split('__')[0];
+      affectedTeams.add(moduleToTeamMap[moduleName] || 'corsair');
+
       if (!acc[entityType]) {
         acc[entityType] = {};
       }
       acc[entityType][rest.join('.')] = change.type as 'CREATE' | 'REMOVE';
+
       return acc;
     },
     {} as Record<string, Record<string, 'CREATE' | 'REMOVE'>>,
@@ -187,7 +236,12 @@ for (const [name, newEt] of Object.entries(newEntityTypes)) {
   if (!oldEntityTypes[name]) {
     continue;
   }
+
+  const moduleName = name.split('__')[0];
+  affectedTeams.add(moduleToTeamMap[moduleName] || 'corsair');
+
   const oldEt = oldEntityTypes[name];
+
   for (const newField of newEt.columns ?? []) {
     const oldField = oldEt.columns?.find((f) => f.name === newField.name);
     if (!oldField) {
@@ -228,6 +282,7 @@ const issuesByTeam = issues.reduce(
     const team = issue.metadata?.team || '';
     if (!acc[team]) {
       acc[team] = [];
+      affectedTeams.add(team || 'corsair');
     }
     acc[team].push(issue);
     return acc;
@@ -255,6 +310,7 @@ function diffSummary(changes: ('CREATE' | 'CHANGE' | 'REMOVE')[]): string {
   return changes.length === 0 ? 'no changes' : changes.map((c) => DIFF_EMOJI[c]).join('');
 }
 
+/***** START REPORT PRINTING *****/
 if (
   Object.values(entityTypeDiff).includes('REMOVE') ||
   Object.values(fieldDiff).some((c) => Object.values(c).includes('REMOVE'))
@@ -292,14 +348,15 @@ await logCollapsable(
           .map((c) => DIFF_EMOJI[c])
           .join('')}`,
         (p) => {
-          const table: [string, string, string, string, string][] = [['', 'Field', 'Path', 'Old', 'New']];
+          const table: [string, string, string, string, string][] = [];
+
           for (const [field, change] of Object.entries(changes)) {
             if (typeof change === 'string') {
-              table.push([DIFF_EMOJI[change], field, '', '', '']);
+              table.push([DIFF_EMOJI[change].repeat(2), field, '', '', '']);
             } else {
               for (const c of change) {
                 table.push([
-                  DIFF_EMOJI[c.type],
+                  DIFF_EMOJI[c.type].repeat(2),
                   field,
                   `\`${c.path}\``,
                   c.oldValue !== undefined ? `\`${JSON.stringify(c.oldValue)}\`` : '',
@@ -309,7 +366,19 @@ await logCollapsable(
             }
           }
 
-          markdownTable(table).split('\n').forEach(p);
+          // markdown tables in GH can't scroll horizontally, but code blocks can!
+          p('```md');
+          new AsciiTable3()
+            .setHeading('', 'Field', 'Path', 'Old', 'New')
+            .addRowMatrix(table)
+            .toString()
+            // we have to add duplicate emojis when generating the table as the generation does not support double-width
+            .replaceAll(DIFF_EMOJI.CREATE.repeat(2), DIFF_EMOJI.CREATE)
+            .replaceAll(DIFF_EMOJI.CHANGE.repeat(2), DIFF_EMOJI.CHANGE)
+            .replaceAll(DIFF_EMOJI.REMOVE.repeat(2), DIFF_EMOJI.REMOVE)
+            .split('\n')
+            .forEach(p);
+          p('```');
         },
         2,
       );
@@ -353,19 +422,30 @@ for (const team of Object.keys(issuesByTeam).toSorted()) {
         return aModule.localeCompare(bModule) || a.severity.localeCompare(b.severity) || a.type.localeCompare(b.type);
       });
 
-      markdownTable([
-        ['', 'Domain', 'Module', 'Entity type', 'Error type', 'Message'],
-        ...issuesSorted.map((issue) => [
-          ISSUE_EMOJI[issue.severity] + (aliveAndKnownIssues.includes(issue) ? ' (suppressed)' : ''),
-          issue.metadata?.domain || '-',
-          issue.metadata?.module || '-',
-          issue.entityTypeName || '-',
-          getTitle(issue),
-          getDescription(issue),
-        ]),
-      ])
+      // markdown tables in GH can't scroll horizontally, but code blocks can!
+      p('```md');
+      new AsciiTable3()
+        .setHeading('', 'Domain', 'Module', 'Entity type', 'Error type', 'Message')
+        .addRowMatrix(
+          issuesSorted.map((issue) => [
+            // we will remove the duplicate after generating the table;
+            // the table generation does not support double-width chars natively, so we do it ourselves
+            ISSUE_EMOJI[issue.severity].repeat(2) + (aliveAndKnownIssues.includes(issue) ? ' (suppressed)' : ''),
+            issue.metadata?.domain || '-',
+            issue.metadata?.module || '-',
+            issue.entityTypeName || '-',
+            getTitle(issue),
+            getDescription(issue),
+          ]),
+        )
+        .toString()
+        // remove double-width chars
+        .replaceAll(ISSUE_EMOJI.error.repeat(2), ISSUE_EMOJI.error)
+        .replaceAll(ISSUE_EMOJI.warning.repeat(2), ISSUE_EMOJI.warning)
+        .replaceAll(ISSUE_EMOJI.zzz.repeat(2), ISSUE_EMOJI.zzz)
         .split('\n')
         .forEach(p);
+      p('```');
 
       for (const missingTranslations of issuesSorted.filter((i) => i.type === 'translations')) {
         p('');
@@ -401,6 +481,7 @@ await logCollapsable('Run/debug information', async () => {
   );
   console.log(`- **Generation directory**: \`${args.values['generated-dir']}\``);
   console.log(`- **Error log**: \`${args.values['error-log']}\``);
+  console.log(`- **Affected teams**: \`${Array.from(affectedTeams).join('`, `')}\``);
   console.log('');
 
   await logCollapsable('`run-config.yaml` contents', async (p) => {
@@ -409,3 +490,126 @@ await logCollapsable('Run/debug information', async () => {
     p('```');
   });
 });
+
+/***** SLACK NOTIFICATIONS *****/
+function getColorFromErrors(errors: ErrorSerialized[]): string {
+  if (errors.some((e) => e.severity === 'error')) {
+    return '#ff0000';
+  }
+  if (errors.some((e) => e.severity === 'warning')) {
+    return '#e9d502';
+  }
+  return '#36a64f';
+}
+
+if (args.values['notify-pr']) {
+  const prNumber = args.values['notify-pr'];
+  const prUrl = `https://github.com/folio-org/mod-fqm-manager/pull/${prNumber}`;
+  const slack = new WebClient(process.env.SLACK_TOKEN);
+
+  const corsairMessage = await slack.chat.postMessage({
+    channel: teamInfo.corsair.slack,
+    attachments: [
+      {
+        fallback: 'New entity type PR is available!',
+        color: getColorFromErrors(newIssues),
+        mrkdwn_in: ['text', 'fields'],
+        title: `A new FQM entity type PR is available!`,
+        text: `<${prUrl}|PR #${prNumber}> has been created; please review the changes as soon as possible.`,
+        fields: [
+          {
+            title: 'New issues',
+            value: newIssues.length === 0 ? 'no new issues' : newIssues.map((i) => ISSUE_EMOJI[i.severity]).join(''),
+            short: false,
+          },
+          {
+            title: 'Entity types (+/-)',
+            value: diffSummary(Object.values(entityTypeDiff)),
+            short: true,
+          },
+          {
+            title: 'Entity type fields',
+            value: pluralize('entity type', Object.keys(fieldDiff).length, true),
+            short: true,
+          },
+          {
+            title: 'Liquibase',
+            value: diffSummary(liquibaseDiff.map((c) => c.type)),
+            short: true,
+          },
+        ],
+        actions: [
+          {
+            text: '*View the PR* :octocat:',
+            type: 'button',
+            url: prUrl,
+          },
+        ],
+      },
+    ],
+  });
+
+  const corsairMessagePermalink = await slack.chat.getPermalink({
+    channel: corsairMessage.channel!,
+    message_ts: corsairMessage.ts!,
+  });
+
+  console.log(affectedTeams);
+
+  for (const team of affectedTeams) {
+    const slackChannel = teamInfo[team]?.slack;
+    console.log(`Notifying ${team} in Slack channel ${slackChannel}`);
+    if (!slackChannel || team === 'corsair') {
+      continue;
+    }
+
+    const newTeamIssues = (issuesByTeam[team] || []).filter((i) => newIssues.includes(i));
+
+    await slack.chat.postMessage({
+      channel: teamInfo.corsair.slack,
+      attachments: [
+        {
+          fallback: `New entity type PR requires ${team}'s attention!`,
+          color: getColorFromErrors(newTeamIssues),
+          mrkdwn_in: ['text', 'fields'],
+          title: `A new FQM entity type PR is available with ${team}'s changes!`,
+          text: `<${prUrl}|PR #${prNumber}> has been created and contains changes from ${team}. Please review the changes${newTeamIssues.length === 0 ? '' : ' and resolve any issues'} as soon as possible.`,
+          fields: [
+            {
+              title: 'New issues',
+              value:
+                newTeamIssues.length === 0
+                  ? 'no new issues'
+                  : newTeamIssues.map((i) => ISSUE_EMOJI[i.severity]).join(''),
+              short: false,
+            },
+          ],
+          actions: [
+            {
+              text: '*View the PR* :octocat:',
+              type: 'button',
+              url: prUrl,
+            },
+            {
+              text: '*Message Corsair* :slack:',
+              type: 'button',
+              url: corsairMessagePermalink.permalink,
+            },
+          ],
+        },
+      ],
+    });
+  }
+}
+
+// list of affected teams for review purposes
+if (process.env.GITHUB_OUTPUT) {
+  await Bun.write(
+    Bun.file(process.env.GITHUB_OUTPUT),
+    'reviewers=' +
+      Array.from(affectedTeams)
+        .map((t) => teamInfo[t]?.github)
+        .filter(Boolean)
+        .join(','),
+  );
+}

@@ -3,7 +3,6 @@ import { readdir } from 'fs/promises';
 import { rm } from 'fs/promises';
 import path from 'path';
 import { parseArgs } from 'util';
-import { readChangelogsFromDirectory } from './3-generate-report';
 import YAML from 'yaml';
 import { ErrorSerialized } from '@/src/schema-conversion/error';
 
@@ -48,7 +47,7 @@ if (args.values.help) {
   console.log('  -f, --base-dir        mod-fqm-manager repository location (default: ../mod-fqm-manager)');
   console.log('  -o, --generated-dir   Output directory from create-entity-types.ts (default: out)');
   console.log('  -i, --error-log       Where create-entity-types.ts stddout is saved (default: -, for stdin)');
-  process.exit(0);
+  process.exit(1);
 }
 
 const entityTypeDir = path.resolve(args.values['base-dir'], 'src', 'main', 'resources', 'entity-types', 'external');
@@ -126,7 +125,20 @@ const historicViewsPath = path.resolve(
   'provided-views.json',
 );
 const historicViews = new Set<string>((await Bun.file(historicViewsPath).json()) as string[]);
-const currentViews = Object.keys(await readChangelogsFromDirectory(liquibaseDir));
+const currentViews = (
+  await Promise.all(
+    (await readdir(liquibaseDir, { recursive: true }))
+      .filter((f) => f.endsWith('.yaml'))
+      .map((f) => path.resolve(liquibaseDir, f))
+      .map((f) =>
+        Bun.file(f)
+          .text()
+          .then(YAML.parse)
+          .then((c) => c.databaseChangeLog[0].changeSet.changes[0]?.createView?.viewName as string),
+      ),
+  )
+).filter((c) => c !== null);
+
 currentViews.forEach((v) => historicViews.add(v));
 
 console.log('[Liquibase cleanup] Writing list of', historicViews.size, 'historic views to', historicViewsPath);

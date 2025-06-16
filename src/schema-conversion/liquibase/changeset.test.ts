@@ -29,14 +29,12 @@ describe('createLiquibaseChangeset', () => {
             preConditions: [
               {
                 onFail: 'CONTINUE',
-                preCondition: [
-                  {
-                    tableExists: {
-                      tableName: 'test_table',
-                      schemaName: '${tenant_id}_mod_test',
-                    },
-                  },
-                ],
+              },
+              {
+                tableExists: {
+                  tableName: 'test_table',
+                  schemaName: '${tenant_id}_mod_test',
+                },
               },
             ],
             changes: [
@@ -80,7 +78,6 @@ describe('createLiquibaseChangeset', () => {
             preConditions: [
               {
                 onFail: 'CONTINUE',
-                preCondition: [],
               },
             ],
             changes: [

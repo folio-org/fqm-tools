@@ -124,8 +124,8 @@ export function marshallExternalTranslations(
   return result;
 }
 
-export function undisambiguateTranslationKey(key: string) {
+export function unmarshallTranslationKey(key: string) {
   const split = key.split('.');
   split[1] = split[1].replace(/^.+__/, ''); // remove module name from prefix
-  return split.join('.');
+  return 'fqm.' + split.join('.');
 }
