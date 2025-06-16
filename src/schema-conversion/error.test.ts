@@ -100,9 +100,9 @@ describe('error', () => {
     error(undefined, 'EntityType', err);
 
     expect(consoleWarnMock).not.toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Join issue for field fieldA'));
+    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Join issue'));
     expect(consoleErrorMock).toHaveBeenCalledWith(
-      expect.stringContaining('is trying to join to modB (EntityB) but the entity does not exist'),
+      expect.stringContaining('is trying to join to `modB` (`EntityB`) but the entity does not exist'),
     );
     expect(JSON.parse(consoleLogMock.mock.lastCall![0])).toEqual({
       entityTypeName: 'EntityType',
@@ -124,7 +124,7 @@ describe('error', () => {
     error(metadata, undefined, err);
 
     expect(consoleWarnMock).not.toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Schema issue: Invalid schema'));
+    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Invalid schema'));
     expect(JSON.parse(consoleLogMock.mock.lastCall![0])).toEqual({
       message: 'Invalid schema',
       metadata: {
@@ -145,9 +145,7 @@ describe('error', () => {
     error(undefined, undefined, err);
 
     expect(consoleWarnMock).not.toHaveBeenCalled();
-    expect(consoleErrorMock).toHaveBeenCalledWith(
-      expect.stringContaining('Configuration file config.json does not exist'),
-    );
+    expect(consoleErrorMock).toHaveBeenCalledWith(expect.stringContaining('Configuration file does not exist'));
     expect(JSON.parse(consoleLogMock.mock.lastCall![0])).toEqual({
       file: 'config.json',
       severity: 'error',
@@ -165,7 +163,7 @@ describe('error', () => {
 
     expect(consoleWarnMock).not.toHaveBeenCalled();
     expect(consoleErrorMock).toHaveBeenCalledWith(
-      expect.stringContaining('Configuration schema error in config.json: Invalid property'),
+      expect.stringContaining('Configuration schema error in `config.json`: Invalid property'),
     );
     expect(JSON.parse(consoleLogMock.mock.lastCall![0])).toEqual({
       entityTypeName: 'EntityType',

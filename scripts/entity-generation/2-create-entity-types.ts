@@ -5,6 +5,7 @@ import {
   EXPECTED_LOCALES,
   inferTranslationsFromEntityType,
   marshallExternalTranslations,
+  undisambiguateTranslationKey,
 } from '@/src/schema-conversion/translations';
 import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
@@ -17,6 +18,7 @@ import path from 'path';
 import { parseArgs } from 'util';
 import YAML from 'yaml';
 import memoize from 'lodash.memoize';
+import { error, warn } from '@/src/schema-conversion/error';
 
 const args = parseArgs({
   args: Bun.argv.slice(2),
@@ -46,7 +48,7 @@ if (args.positionals.length === 0) {
 }
 
 if (args.values.help) {
-  console.log('Usage: bun create-entity-type.ts [options] <baseDir1> <baseDir2> ... <baseDirN>');
+  console.log('Usage: bun 2-create-entity-types.ts [options] <baseDir1> <baseDir2> ... <baseDirN>');
   console.log('Options:');
   console.log('  -h, --help              Show this help message');
   console.log('  -o, --out               Output directory (default: out)');
@@ -59,7 +61,7 @@ async function write(category: string, domain: string, module: string, filename:
   const fullPath = path.resolve(args.values.out, category, domain, module, filename);
   await mkdir(path.dirname(fullPath), { recursive: true });
   await Bun.write(Bun.file(fullPath), data);
-  console.log(`Wrote ${fullPath}`);
+  await Bun.write(Bun.stderr, `Wrote ${fullPath}\n`);
 }
 
 const configs: { dir: string; config: EntityTypeGenerationConfig }[] = [];
@@ -67,7 +69,7 @@ const configs: { dir: string; config: EntityTypeGenerationConfig }[] = [];
 for (const dir of args.positionals) {
   const file = Bun.file(path.resolve(dir, 'fqm-config.toml'));
   if (!(await file.exists())) {
-    console.error(`::error title=Unable to open config::${file.name} does not exist.`);
+    error(undefined, undefined, { type: 'config-does-not-exist', file: file.name! });
     continue;
   }
 
@@ -77,9 +79,11 @@ for (const dir of args.positionals) {
     const config = EntityTypeGenerationConfigTemplate.parse(raw);
     configs.push({ dir, config });
   } catch (e) {
-    console.error(
-      `::error title=Unable to parse config::${file.name} does not match the expected schema: ${JSON.stringify(e)}`,
-    );
+    error(undefined, undefined, {
+      type: 'config-schema',
+      file: file.name!,
+      error: e instanceof Error ? e.message : String(e),
+    });
   }
 }
 
@@ -113,16 +117,16 @@ for (const { config } of configs) {
 
 const intermediateResults: {
   entityType: EntityType;
-  domain: string;
-  module: string;
+  metadata: EntityTypeGenerationConfig['metadata'];
 }[] = [];
 
 for (const { dir, config } of configs) {
-  console.log(
-    `[stage 1] Processing ${config.metadata.domain}->${config.metadata.module} (team ${config.metadata.team}) from ${dir}`,
+  await Bun.write(
+    Bun.stderr,
+    `Processing ${config.metadata.domain}->${config.metadata.module} (team ${config.metadata.team}) from ${dir}\n`,
   );
   for (const entityType of config.entityTypes) {
-    console.log(`[stage 1] - Processing ${entityType.name}`);
+    await Bun.write(Bun.stderr, `- Processing ${entityType.name}\n`);
 
     try {
       const result = createEntityTypeFromConfig(
@@ -131,34 +135,27 @@ for (const { dir, config } of configs) {
         config,
       );
 
-      for (const issue of result.issues) {
-        console.warn(
-          `::warning title=${config.metadata.domain}->${config.metadata.module} (team ${config.metadata.team})::⚠️ ${issue}`,
-        );
-      }
+      result.issues.forEach((message) => warn(config.metadata, entityType.name, { type: 'schema', message }));
 
       intermediateResults.push({
         entityType: result.entityType,
-        domain: config.metadata.domain,
-        module: config.metadata.module,
+        metadata: config.metadata,
       });
     } catch (e) {
       // critical errors like schema not existing/object, etc., that cannot be recovered from/skipped
-      console.error(
-        `::error title=${config.metadata.domain}->${config.metadata.module} (team ${config.metadata.team})::❌ ${e}`,
-      );
+      error(config.metadata, entityType.name, { type: 'schema', message: e instanceof Error ? e.message : String(e) });
+
       continue;
     }
   }
 }
 
-const { entityTypes: results, issues } = resolveEntityTypeJoins(
-  intermediateResults,
-  args.values['force-generate-joins'],
-);
-issues.forEach((issue) => console.warn(issue));
+const results = resolveEntityTypeJoins(intermediateResults, args.values['force-generate-joins']);
 
-for (const { entityType, domain, module } of results) {
+for (const {
+  entityType,
+  metadata: { domain, module },
+} of results) {
   await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
   await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
   await write(
@@ -180,6 +177,10 @@ for (const locale of EXPECTED_LOCALES) {
   translationsByLocale.set(locale, {});
 }
 
+const expectedTranslationKeys = results
+  .map(({ entityType }) => inferTranslationsFromEntityType(entityType))
+  .flatMap(Object.keys);
+
 for (const { dir, config } of configs) {
   const translationFiles = (await readdir(path.resolve(dir, 'translations'), { recursive: true })).filter((p) =>
     p.endsWith('.json'),
@@ -192,19 +193,19 @@ for (const { dir, config } of configs) {
 
     translationsByLocale.set(locale, {
       ...translationsByLocale.get(locale),
-      ...marshallExternalTranslations(incoming, config.metadata.module),
+      ...marshallExternalTranslations(incoming, config.metadata, expectedTranslationKeys),
     });
   }
 }
 
-const missingTranslations = new Map<string, Record<string, string>>();
+const missingTranslations = new Map<EntityTypeGenerationConfig['metadata'], Record<string, string>>();
 
-for (const { entityType, module } of results) {
+for (const { entityType, metadata } of results) {
   const inferredTranslations = inferTranslationsFromEntityType(entityType);
   const missingKeys = Object.keys(inferredTranslations).filter((key) => !translationsByLocale.get('en')?.[key]);
   if (missingKeys.length > 0) {
-    missingTranslations.set(module, {
-      ...missingTranslations.get(module),
+    missingTranslations.set(metadata, {
+      ...missingTranslations.get(metadata),
       ...Object.entries(inferredTranslations)
         .filter(([key]) => missingKeys.includes(key))
         .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
@@ -218,10 +219,13 @@ for (const { entityType, module } of results) {
   }
 }
 
-for (const [module, translations] of missingTranslations.entries()) {
-  console.warn(
-    `::warning title=Missing translations::⚠️ Missing translations for module ${module}: Please see full job run summary for details and a pasteable snippet to add to \`${module}\`'s \`translations/${module}/en.json\`.  ${Object.keys(translations).join(', ')}.`,
-  );
+for (const [metadata, translations] of missingTranslations.entries()) {
+  warn(metadata, undefined, {
+    type: 'translations',
+    missingTranslations: Object.fromEntries(
+      Object.entries(translations).map(([key, value]) => [undisambiguateTranslationKey(key), value]),
+    ),
+  });
 }
 
 for (const [locale, translations] of translationsByLocale.entries()) {

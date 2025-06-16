@@ -29,6 +29,8 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 add note about having to maybe add `annotationTypes` to RAML schemas bc :/
 
+json patch support?
+
 ## Config
 
 - useRmbIndexStyle (default `false`)

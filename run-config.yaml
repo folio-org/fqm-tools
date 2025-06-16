@@ -1,0 +1,7 @@
+modules:
+  # list of repositories to run entity type generation on, provided as strings with (repository name or repository path) and an (optional) ref:
+  #   Format: "[git path with URI][#(branch/tag/commit)]"
+  #        or "[module name][#(branch/tag/commit)]"
+  # Using a repository name instead of the full git path will assume "https://github.com/folio-org/{module}.git".
+  # Omitting the ref will use the default branch. Using an explicit ref is not recommended as it will decrease speed; it is only to be used short-term for testing or debugging.
+  - mod-users#corsair-testing
