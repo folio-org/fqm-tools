@@ -1,6 +1,7 @@
-import { EntityTypeField, DataTypeValue, EntityType } from '@/types';
+import { EntityTypeField, DataTypeValue, EntityType, EntityTypeGenerationConfig } from '@/types';
 import { sentenceCase } from 'change-case';
 import { disambiguateName } from './entity-type/entity-type';
+import { warn } from './error';
 
 export const EXPECTED_LOCALES = [
   'ar',
@@ -93,17 +94,32 @@ export function inferTranslationsFromField(
 /** Takes external module translations of the form `fqm.entityType.etc` and turns them into our expected just `entityType.` and removes extra */
 export function marshallExternalTranslations(
   translations: Record<string, string>,
-  moduleName: string,
+  metadata: EntityTypeGenerationConfig['metadata'],
+  expectedTranslationKeys: string[],
 ): Record<string, string> {
   const result: Record<string, string> = {};
+  const extraTranslations: string[] = [];
+
   for (const [key, value] of Object.entries(translations)) {
     if (key.startsWith('fqm.')) {
       const entityTypeName = key.split('.')[2];
-      const newEntityType = disambiguateName(moduleName, entityTypeName);
+      const newEntityType = disambiguateName(metadata.module, entityTypeName);
       const newKey = key.replace(`fqm.entityType.${entityTypeName}`, `entityType.${newEntityType}`);
 
-      result[newKey] = value;
+      if (expectedTranslationKeys.includes(newKey)) {
+        result[newKey] = value;
+      } else {
+        extraTranslations.push(key);
+      }
     }
   }
+
+  if (extraTranslations.length > 0) {
+    warn(metadata, undefined, {
+      type: 'translations-extra',
+      extraTranslations,
+    });
+  }
+
   return result;
 }

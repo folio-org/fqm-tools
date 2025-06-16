@@ -1,8 +1,16 @@
 import { DataTypeValue, EntityTypeField } from '@/types';
-import { describe, expect, it } from 'bun:test';
-import { inferTranslationsFromField, marshallExternalTranslations } from './translations';
+import { beforeEach, describe, expect, it, Mock, mock } from 'bun:test';
+import { error, warn } from './error';
+import {
+  inferTranslationsFromEntityType,
+  inferTranslationsFromField,
+  marshallExternalTranslations,
+} from './translations';
 
-import { inferTranslationsFromEntityType } from './translations';
+mock.module('./error', () => ({
+  error: mock(() => ({})),
+  warn: mock(() => ({})),
+}));
 
 describe('inferTranslationsFromEntityType', () => {
   it('infers translations for entity type and fields together', () => {
@@ -93,15 +101,26 @@ describe('inferTranslationsFromField', () => {
 });
 
 describe('marshallExternalTranslations', () => {
+  beforeEach(async () => {
+    (error as Mock<typeof error>).mockReset();
+    (warn as Mock<typeof warn>).mockReset();
+    mock.restore();
+  });
+
   it('transforms translations to the expected format', () => {
     const translations = {
       'fqm.entityType.test_entity.field1': 'Field 1',
       'fqm.entityType.test_entity.field2': 'Field 2',
     };
-    const moduleName = 'mod-test';
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
 
-    const result = marshallExternalTranslations(translations, moduleName);
+    const result = marshallExternalTranslations(translations, metadata, [
+      'entityType.mod_test__test_entity.field1',
+      'entityType.mod_test__test_entity.field2',
+    ]);
 
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     expect(result).toEqual({
       'entityType.mod_test__test_entity.field1': 'Field 1',
       'entityType.mod_test__test_entity.field2': 'Field 2',
@@ -113,36 +132,69 @@ describe('marshallExternalTranslations', () => {
       'fqm.entityType.test_entity.field1': 'Field 1',
       'other.key': 'Other Value',
     };
-    const moduleName = 'mod-test';
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
 
-    const result = marshallExternalTranslations(translations, moduleName);
+    const result = marshallExternalTranslations(translations, metadata, ['entityType.mod_test__test_entity.field1']);
 
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     expect(result).toEqual({
       'entityType.mod_test__test_entity.field1': 'Field 1',
     });
   });
 
-  it('handles translations object', () => {
+  it('handles empty translations object', () => {
     const translations = {};
-    const moduleName = 'mod-test';
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
 
-    const result = marshallExternalTranslations(translations, moduleName);
+    const result = marshallExternalTranslations(translations, metadata, []);
 
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     expect(result).toEqual({});
   });
 
-  it('handles entity types correctly', () => {
+  it('handles multiple entity types correctly', () => {
     const translations = {
       'fqm.entityType.entity_one.field1': 'Field 1',
       'fqm.entityType.entity_two.field2': 'Field 2',
     };
-    const moduleName = 'mod-test';
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
 
-    const result = marshallExternalTranslations(translations, moduleName);
+    const result = marshallExternalTranslations(translations, metadata, [
+      'entityType.mod_test__entity_one.field1',
+      'entityType.mod_test__entity_two.field2',
+    ]);
 
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     expect(result).toEqual({
       'entityType.mod_test__entity_one.field1': 'Field 1',
       'entityType.mod_test__entity_two.field2': 'Field 2',
+    });
+  });
+
+  it('warns if extra translations are found', () => {
+    const translations = {
+      'fqm.entityType.test_entity.field1': 'Field 1',
+      'fqm.entityType.test_entity.field2': 'Field 2',
+      'fqm.entityType.extra_entity.field3': 'Extra Field',
+    };
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
+
+    const result = marshallExternalTranslations(translations, metadata, [
+      'entityType.mod_test__test_entity.field1',
+      'entityType.mod_test__test_entity.field2',
+    ]);
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(metadata, undefined, {
+      type: 'translations-extra',
+      extraTranslations: ['fqm.entityType.extra_entity.field3'],
+    });
+    expect(result).toEqual({
+      'entityType.mod_test__test_entity.field1': 'Field 1',
+      'entityType.mod_test__test_entity.field2': 'Field 2',
     });
   });
 });

@@ -27,6 +27,8 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 | `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`     | default `all`; temporarily `results-only` for nested array->object properties |
 | `x-fqm-essential`           | default no                                        |
 
+add note about having to maybe add `annotationTypes` to RAML schemas bc :/
+
 ## Config
 
 - useRmbIndexStyle (default `false`)

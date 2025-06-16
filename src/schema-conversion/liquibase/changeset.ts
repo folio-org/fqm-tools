@@ -16,7 +16,7 @@ export default function createLiquibaseChangeset(
   let selectQuery = '';
 
   if ('table' in source) {
-    selectQuery = `SELECT * FROM $\{tenant_id}_${schemaName}.${source.table}`;
+    selectQuery = `SELECT * FROM ${schemaName}.${source.table}`;
     preCondition.push({
       tableExists: {
         tableName: source.table,
@@ -34,10 +34,12 @@ export default function createLiquibaseChangeset(
           id: `create_view__${source.name}`,
           author: `generated--${config.metadata.team}--${config.metadata.module}`,
           runAlways: true,
-          preConditions: {
-            onFail: 'CONTINUE',
-            preCondition,
-          },
+          preConditions: [
+            {
+              onFail: 'CONTINUE',
+              preCondition,
+            },
+          ],
           createView: {
             replaceIfExists: true,
             viewName: source.name,
