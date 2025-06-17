@@ -554,8 +554,6 @@ if (args.values['notify-pr']) {
     message_ts: corsairMessage.ts!,
   });
 
-  console.log(affectedTeams);
-
   for (const team of affectedTeams) {
     const slackChannel = teamInfo[team]?.slack;
     console.log(`Notifying ${team} in Slack channel ${slackChannel}`);
