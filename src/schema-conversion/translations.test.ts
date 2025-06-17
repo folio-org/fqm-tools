@@ -1,10 +1,11 @@
 import { DataTypeValue, EntityTypeField } from '@/types';
-import { beforeEach, describe, expect, it, Mock, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, Mock, mock, test } from 'bun:test';
 import { error, warn } from './error';
 import {
   inferTranslationsFromEntityType,
   inferTranslationsFromField,
   marshallExternalTranslations,
+  unmarshallTranslationKey,
 } from './translations';
 
 mock.module('./error', () => ({
@@ -198,3 +199,12 @@ describe('marshallExternalTranslations', () => {
     });
   });
 });
+
+test.each([
+  ['entityType.mod_foo__entity', 'fqm.entityType.entity'],
+  ['entityType.entity', 'fqm.entityType.entity'],
+  ['entityType.mod_foo__entity.field', 'fqm.entityType.entity.field'],
+  ['entityType.entity.field', 'fqm.entityType.entity.field'],
+])('unmarshallTranslationKey removes module prefix', (input, expected) =>
+  expect(unmarshallTranslationKey(input)).toEqual(expected),
+);

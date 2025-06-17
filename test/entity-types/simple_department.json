@@ -122,6 +122,33 @@
       "valueGetter": ":department.jsonb->'metadata'->>'updatedByUsername'"
     },
     {
+      "dataType": {
+        "dataType": "jsonbArrayType",
+        "itemDataType": {
+          "dataType": "objectType",
+          "properties": [
+            {
+              "dataType": {
+                "dataType": "stringType"
+              },
+              "filterValueGetter": "(SELECT array_agg(lower(elems.value->>'testString')) FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)",
+              "name": "test_string",
+              "property": "testString",
+              "queryable": false,
+              "valueFunction": "lower(:value)",
+              "valueGetter": "(SELECT array_agg(elems.value->>'testString') FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)"
+            }
+          ]
+        }
+      },
+      "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'testArray'::text))",
+      "name": "test_array",
+      "queryable": true,
+      "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+      "valueGetter": ":department.jsonb->>'testArray'",
+      "visibleByDefault": false
+    },
+    {
       "name": "jsonb",
       "dataType": {
         "dataType": "stringType"

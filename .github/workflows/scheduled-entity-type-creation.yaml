@@ -1,0 +1,14 @@
+name: Generate and submit entity types
+
+on:
+  # push: {} # for manual testing
+  schedule:
+    - cron: '0 */3 * * *'
+
+jobs:
+  test:
+    uses: ./.github/workflows/generate-entity-types.yaml
+    secrets: inherit
+    with:
+      create-pr: 'yes'
+      send-slack: true

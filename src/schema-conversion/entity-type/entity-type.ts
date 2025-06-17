@@ -6,6 +6,7 @@ import {
   getJsonbField,
   inferFieldFromSchema,
   markNestedArrayOfObjectsNonQueryable,
+  removeNestedFieldDisallowedProperties,
   unpackObjectColumns,
 } from '../field-processing/field';
 
@@ -31,7 +32,9 @@ export default function createEntityTypeFromConfig(
     .filter((f): f is NonNullable<EntityTypeField> => !!f);
 
   const completedColumns = applyOverrides(
-    markNestedArrayOfObjectsNonQueryable(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
+    markNestedArrayOfObjectsNonQueryable(
+      removeNestedFieldDisallowedProperties(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
+    ),
     entityType['fieldOverrides'],
   );
 
