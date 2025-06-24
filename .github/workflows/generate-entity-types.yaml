@@ -36,7 +36,7 @@ on:
       send-slack:
         description: If Slack messages should be sent alerting about the PR creation and any team's issues
         required: false
-        default: false
+        default: true
         type: boolean
   workflow_call:
     inputs:
@@ -145,7 +145,7 @@ jobs:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 
       - name: Send Slack messages about PR creation
-        if: ${{ inputs.send-slack == 'true' && inputs.create-pr != 'no' && steps.create-pr.outputs.pull-request-operation == 'created' }}
+        if: ${{ inputs.send-slack == true && inputs.create-pr != 'no' && steps.create-pr.outputs.pull-request-operation == 'created' }}
         run: bun scripts/entity-generation/3-generate-report.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log --pr-number ${{ steps.create-pr.outputs.pull-request-number }}
         env:
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
