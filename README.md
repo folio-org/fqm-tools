@@ -16,6 +16,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 | --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | ------- |
 | `x-fqm-name`                |
 | `x-fqm-joins-to`            |
+| `x-fqm-joins-to-raw`        |
 | `x-fqm-ignore`              |
 | `x-fqm-data-type`           |
 | `x-fqm-value-getter`        | using `null` will remove guessed from entity type |

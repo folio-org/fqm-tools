@@ -232,7 +232,7 @@ for (const [locale, translations] of translationsByLocale.entries()) {
   await write('translations', '', 'mod-fqm-manager', `${locale}.json`, JSON.stringify(translations, null, 2));
 }
 
-const teamInfo = Bun.file(path.resolve(__dirname, '../../team-info.yaml'))
+const teamInfo = await Bun.file(path.resolve(__dirname, '../../team-info.yaml'))
   .text()
   .then((t) => YAML.parse(t) as Record<string, { github: string; slack: string }>);
 

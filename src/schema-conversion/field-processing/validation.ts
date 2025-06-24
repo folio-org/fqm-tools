@@ -13,6 +13,7 @@ const ALLOWED_CUSTOM_PROPERTIES = [
   'x-fqm-visibility',
   'x-fqm-essential',
   'x-fqm-joins-to',
+  'x-fqm-joins-to-raw',
 ];
 
 export function validateField(name: string, schema: JSONSchema7): string[] {

@@ -1,4 +1,4 @@
-import { EntityTypeField, EntityTypeFieldJoinIntermediateTemplate } from '@/types';
+import { EntityTypeField, EntityTypeFieldJoinIntermediateTemplate, EntityTypeFieldJoinTemplate } from '@/types';
 import { JSONSchema7 } from 'json-schema';
 import { ZodError } from 'zod';
 
@@ -72,6 +72,19 @@ export function getExtraProperties(propSchema: JSONSchema7) {
         extraProperties.joinsToIntermediate.push(intermediateJoin);
       } catch (e) {
         issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to: ${issue.message}`));
+      }
+    }
+  }
+
+  if ('x-fqm-joins-to-raw' in propSchema) {
+    extraProperties.joinsTo = [];
+
+    for (const raw of propSchema['x-fqm-joins-to-raw'] as unknown[]) {
+      try {
+        const join = EntityTypeFieldJoinTemplate.parse(raw);
+        extraProperties.joinsTo.push(join);
+      } catch (e) {
+        issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to-raw: ${issue.message}`));
       }
     }
   }
