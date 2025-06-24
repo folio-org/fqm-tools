@@ -507,6 +507,7 @@ if (args.values['pr-number']) {
   const prUrl = `https://github.com/folio-org/mod-fqm-manager/pull/${prNumber}`;
   const slack = new WebClient(process.env.SLACK_TOKEN);
 
+  console.log(`Sending Corsair notification`);
   const corsairMessage = await slack.chat.postMessage({
     channel: teamInfo.corsair.slack,
     attachments: [
@@ -554,17 +555,19 @@ if (args.values['pr-number']) {
     message_ts: corsairMessage.ts!,
   });
 
+  console.log(`Corsair notification sent: ${corsairMessagePermalink.permalink}`);
+
   for (const team of affectedTeams) {
     const slackChannel = teamInfo[team]?.slack;
-    console.log(`Notifying ${team} in Slack channel ${slackChannel}`);
     if (!slackChannel || team === 'corsair') {
       continue;
     }
+    console.log(`Notifying ${team} in Slack channel ${slackChannel}`);
 
     const newTeamIssues = (issuesByTeam[team] || []).filter((i) => newIssues.includes(i));
 
     await slack.chat.postMessage({
-      channel: teamInfo.corsair.slack,
+      channel: slackChannel,
       attachments: [
         {
           fallback: `New entity type PR requires ${team}'s attention!`,
