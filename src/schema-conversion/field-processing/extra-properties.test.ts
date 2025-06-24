@@ -85,6 +85,24 @@ describe('getExtraProperties', () => {
     );
   });
 
+  it('handles raw joins', () => {
+    const schema = {
+      'x-fqm-joins-to-raw': [{ targetId: 'target', targetField: 'field1', type: 'equality-simple' }],
+    } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.joinsTo).toEqual((schema as Record<string, never>)['x-fqm-joins-to-raw']);
+    expect(result.issues).toBeEmpty();
+  });
+
+  it('fails on invalid raw joins', () => {
+    const schema = {
+      'x-fqm-joins-to-raw': [{ targetModule: 'target', targetField: 'field1', type: 'equality-simple' }],
+    } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.joinsTo).toBeEmpty();
+    expect(result.issues).toContain('Error parsing x-fqm-joins-to-raw: Required');
+  });
+
   it('should return an empty object when no relevant properties are present', () => {
     const schema = {} as JSONSchema7;
     const result = getExtraProperties(schema);

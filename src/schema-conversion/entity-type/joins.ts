@@ -34,8 +34,8 @@ function resolveFieldJoins(
   field: EntityTypeField,
   forceGenerateJoins: boolean,
 ): EntityTypeField['joinsTo'] {
-  return field.joinsToIntermediate
-    ?.map(({ targetModule, targetEntity, targetField, ...join }): EntityTypeFieldJoin | null => {
+  const resolved = (field.joinsToIntermediate ?? [])
+    .map(({ targetModule, targetEntity, targetField, ...join }): EntityTypeFieldJoin | null => {
       const targetEntityType = resolveFieldJoinTarget(
         entityTypeMap,
         targetModule,
@@ -69,6 +69,12 @@ function resolveFieldJoins(
       }
     })
     .filter((j) => j !== null);
+
+  if (resolved.length || field.joinsTo !== undefined) {
+    return [...(field.joinsTo ?? []), ...resolved];
+  }
+
+  return undefined;
 }
 
 function resolveFieldJoinTarget(

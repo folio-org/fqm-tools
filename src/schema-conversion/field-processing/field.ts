@@ -124,6 +124,18 @@ export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[])
   }));
 }
 
+export function removeNestedFieldDisallowedProperties(columns: EntityTypeField[]): EntityTypeField[] {
+  // visibleByDefault is not allowed in nested fields, but we can't remove it sooner as some nested fields get flattened
+  return columns.map((column) => ({
+    ...column,
+    dataType: recursiveFieldApplier(column.dataType, [], (field) => {
+      // this will always be in an object within an array as everything else gets flattened in unpackObjectColumns
+      delete field.visibleByDefault;
+      return field;
+    }),
+  }));
+}
+
 export function getJsonbField(entityType: EntityTypeGenerationConfig['entityTypes'][number]) {
   if (entityType.includeJsonbField === false) {
     return [];

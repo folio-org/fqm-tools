@@ -41,6 +41,16 @@ export const EXPECTED_LOCALES = [
   'zu',
 ];
 
+// we have a specific translation scheme for this very common fields
+const METADATA_KEYS = {
+  metadata_created_date: 'Created at',
+  metadata_created_by_user_id: 'Created by user UUID',
+  metadata_created_by_username: 'Created by username',
+  metadata_updated_date: 'Updated at',
+  metadata_updated_by_user_id: 'Updated by user UUID',
+  metadata_updated_by_username: 'Updated by username',
+};
+
 export function inferTranslationsFromEntityType(entityType: EntityType): Record<string, string> {
   const translations: Record<string, string> = {};
 
@@ -77,11 +87,14 @@ export function inferTranslationsFromField(
     if (name === 'jsonb') {
       translations[key] = 'JSONB';
     }
+    if (name in METADATA_KEYS) {
+      translations[key] = METADATA_KEYS[name as keyof typeof METADATA_KEYS];
+    }
 
-    if (dt.dataType === DataTypeValue.objectType) {
-      dt.properties?.forEach((prop) => {
-        stack.push({ key: `${key}.${prop.name}`, name: prop.name, dt: prop.dataType });
+    if (dt.itemDataType?.properties) {
+      dt.itemDataType.properties.forEach((prop) => {
         stack.push({ key: `${key}.${prop.name}._qualified`, name: `${name} ${prop.name}`, dt: prop.dataType });
+        stack.push({ key: `${key}.${prop.name}`, name: prop.name, dt: prop.dataType });
       });
     } else if (dt.dataType === DataTypeValue.arrayType) {
       stack.push({ key, name, dt: dt.itemDataType! });
@@ -122,4 +135,10 @@ export function marshallExternalTranslations(
   }
 
   return result;
+}
+
+export function unmarshallTranslationKey(key: string) {
+  const split = key.split('.');
+  split[1] = split[1].replace(/^.+__/, ''); // remove module name from prefix
+  return 'fqm.' + split.join('.');
 }

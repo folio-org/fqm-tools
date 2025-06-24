@@ -29,6 +29,10 @@ export type Error =
       type: 'config-schema';
       file: string;
       error: string;
+    }
+  | {
+      type: 'unknown-team';
+      teamName: string;
     };
 
 export type ErrorSerialized = {
@@ -37,37 +41,41 @@ export type ErrorSerialized = {
   entityTypeName?: string;
 } & Error;
 
-function getTitle(error: Error): string {
+export function getTitle(error: Error): string {
   switch (error.type) {
     case 'translations':
       return 'Missing translations';
     case 'translations-extra':
       return 'Extra translations found';
     case 'join':
-      return `Join issue for field ${error.fieldName}`;
+      return `Join issue`;
     case 'schema':
       return 'Schema issue';
     case 'config-does-not-exist':
-      return `Configuration file ${error.file} does not exist`;
+      return `Configuration file does not exist`;
     case 'config-schema':
-      return `Configuration schema error in ${error.file}`;
+      return `Configuration schema error`;
+    case 'unknown-team':
+      return `Unknown team`;
   }
 }
 
-function getDescription(error: Error, entityTypeName?: string): string {
+export function getDescription(error: Error, entityTypeName?: string): string {
   switch (error.type) {
     case 'translations':
-      return `The following translations are missing from the module's en.json: ${Object.keys(error.missingTranslations).join(', ')}. See the rich output for a pasteable snippet to get started.`;
+      return `The following translations are missing from the module's \`en.json\`: \`${Object.keys(error.missingTranslations).join('`, `')}\`. See the rich output for a pasteable snippet to get started.`;
     case 'translations-extra':
-      return `The following translations are unused in the module's en.json and no longer referenced by your entity types: ${error.extraTranslations.join(', ')}. These should be removed from the module's en.json.`;
+      return `The following translations are unused in the module's en.json and no longer referenced by your entity types: \`${error.extraTranslations.join('`, `')}\`. These should be removed from the module's \`en.json\`.`;
     case 'join':
-      return `The field ${error.fieldName} in entity type ${entityTypeName!} is trying to join to ${error.targetModule} (${error.targetEntity}) but the ${error.missing} does not exist.`;
+      return `The field \`${error.fieldName}\` in entity type \`${entityTypeName!}\` is trying to join to \`${error.targetModule}\` (\`${error.targetEntity}\`) but the ${error.missing} does not exist.`;
     case 'schema':
-      return `Schema issue: ${error.message}`;
+      return error.message;
     case 'config-does-not-exist':
-      return `The configuration file ${error.file} does not exist.`;
+      return `The configuration file \`${error.file}\` does not exist.`;
     case 'config-schema':
-      return `Configuration schema error in ${error.file}: ${error.error}`;
+      return `Configuration schema error in \`${error.file}\`: ${error.error}`;
+    case 'unknown-team':
+      return `The team \`${error.teamName}\` is not known in \`team-info.yaml\`. Please add it to ensure reviews and notifications are delivered correctly.`;
   }
 }
 

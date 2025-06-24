@@ -42,6 +42,18 @@
       "description": "Metadata about creation and changes to department records",
       "$ref": "./metadata.schema",
       "readonly": true
+    },
+    "testArray": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "testString": {
+            "type": "string",
+            "description": "A test string property"
+          }
+        }
+      }
     }
   },
   "required": ["name", "code"]
