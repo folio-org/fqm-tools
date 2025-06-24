@@ -1,8 +1,7 @@
 corsair:
   github: folio-org/corsair
-  # slack: C065XKBNARG
-  slack: U02FCDSKTU4
+  slack: C065XKBNARG
 
-test-team:
-  github: folio-org/corsair-test
-  slack: U02FCDSKTU4
+vega:
+  github: folio-org/corsair-vega
+  slack: CD1CCKE4V
