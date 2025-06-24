@@ -51,7 +51,7 @@ const args = parseArgs({
       short: 'i',
       default: '-',
     },
-    'notify-pr': {
+    'pr-number': {
       type: 'string',
       short: 'n',
     },
@@ -75,7 +75,7 @@ if (args.values.help) {
   console.log('  -f, --base-dir        mod-fqm-manager repository location (default: ../mod-fqm-manager)');
   console.log('  -o, --generated-dir   Output directory from create-entity-types.ts (default: out)');
   console.log('  -i, --error-log       Where create-entity-types.ts stddout is saved (default: -, for stdin)');
-  console.log('  -n, --notify-pr       Send Slack notifications about this report and the provided PR number');
+  console.log('  -n, --pr-number       Send Slack notifications about this report and the provided PR number');
   process.exit(1);
 }
 
