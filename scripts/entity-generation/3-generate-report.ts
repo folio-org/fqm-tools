@@ -502,8 +502,8 @@ function getColorFromErrors(errors: ErrorSerialized[]): string {
   return '#36a64f';
 }
 
-if (args.values['notify-pr']) {
-  const prNumber = args.values['notify-pr'];
+if (args.values['pr-number']) {
+  const prNumber = args.values['pr-number'];
   const prUrl = `https://github.com/folio-org/mod-fqm-manager/pull/${prNumber}`;
   const slack = new WebClient(process.env.SLACK_TOKEN);
 
