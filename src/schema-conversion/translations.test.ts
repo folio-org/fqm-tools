@@ -59,8 +59,11 @@ describe('inferTranslationsFromField', () => {
       {
         name: 'object_field',
         dataType: {
-          dataType: DataTypeValue.objectType,
-          properties: [{ name: 'nested_field', dataType: { dataType: DataTypeValue.stringType } }],
+          dataType: DataTypeValue.arrayType,
+          itemDataType: {
+            dataType: DataTypeValue.objectType,
+            properties: [{ name: 'nested_field', dataType: { dataType: DataTypeValue.stringType } }],
+          },
         },
       } as EntityTypeField,
       {
