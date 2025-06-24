@@ -1,4 +1,4 @@
-name: Generate Entity Types
+name: Generate and submit entity types
 
 on:
   # these must be duplicated :(

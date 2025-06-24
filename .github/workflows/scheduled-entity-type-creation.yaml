@@ -1,4 +1,4 @@
-name: Generate and submit entity types
+name: Scheduled entity type generation
 
 on:
   # push: {} # for manual testing
