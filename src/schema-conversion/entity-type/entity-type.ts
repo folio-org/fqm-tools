@@ -61,10 +61,11 @@ export function disambiguateName(moduleName: string, entityTypeName: string): st
 }
 
 function getSourceDefinition(
-  key: string,
+  originalKey: string,
   sources: EntityTypeGenerationConfig['sources'],
   sourceMap?: Record<string, string>,
 ): EntityTypeSource {
+  let key = originalKey;
   while (sourceMap && key in sourceMap) {
     key = sourceMap[key];
   }
@@ -76,7 +77,7 @@ function getSourceDefinition(
 
   return {
     type: 'db',
-    alias: source.name,
+    alias: originalKey,
     target: source.name,
   };
 }
