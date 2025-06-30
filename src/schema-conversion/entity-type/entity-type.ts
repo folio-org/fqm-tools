@@ -47,7 +47,7 @@ export default function createEntityTypeFromConfig(
       id: v5(`${config.metadata.module}/${entityType.name}`, NAMESPACE_UUID),
       name: disambiguateName(config.metadata.module, entityType.name),
       private: entityType.private ?? false,
-      sources: [getSourceDefinition(entityType.source, config.sources, config.sourceMap)],
+      sources: [getSourceDefinition(entityType.source, config.sources)],
       requiredPermissions: entityType.permissions,
       defaultSort: [getSort(entityType.sort)],
       columns,
@@ -60,15 +60,7 @@ export function disambiguateName(moduleName: string, entityTypeName: string): st
   return `${snakeCase(moduleName)}__${entityTypeName}`;
 }
 
-function getSourceDefinition(
-  originalKey: string,
-  sources: EntityTypeGenerationConfig['sources'],
-  sourceMap?: Record<string, string>,
-): EntityTypeSource {
-  let key = originalKey;
-  while (sourceMap && key in sourceMap) {
-    key = sourceMap[key];
-  }
+function getSourceDefinition(key: string, sources: EntityTypeGenerationConfig['sources']): EntityTypeSource {
   const source = sources.find((s) => s.name === key);
 
   if (!source) {
@@ -77,7 +69,7 @@ function getSourceDefinition(
 
   return {
     type: 'db',
-    alias: originalKey,
+    alias: key,
     target: source.name,
   };
 }

@@ -185,8 +185,6 @@ export const EntityTypeGenerationConfigTemplate = z
         z.object({ name: z.string(), sql: z.string() }).strict(),
       ]),
     ),
-    // from name used in entity type definitions to true name
-    sourceMap: z.record(z.string(), z.string()).optional(),
     entityTypes: z.array(
       z
         .object({
