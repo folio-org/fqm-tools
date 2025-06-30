@@ -8,14 +8,14 @@ interface GetterOverrides {
   valueFunction?: string | null;
 }
 
-export function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides) {
+export function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides, source: string) {
   const result = { ...getters };
 
   for (const [key, value] of Object.entries(overrides) as [keyof GetterOverrides, string | null][]) {
     if (value === null) {
       delete result[key];
     } else {
-      result[key] = value;
+      result[key] = value.replaceAll('${source}', ':' + source);
     }
   }
 
@@ -63,6 +63,7 @@ export function getGetters(
         filterValueGetter: `(SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:${entityType.source}.jsonb->'${prop}') AS elems)`,
       },
       overrides,
+      entityType.source,
     );
   }
 
@@ -76,6 +77,7 @@ export function getGetters(
         valueFunction: `(:value)::${cast}`,
       },
       overrides,
+      entityType.source,
     );
   }
 
@@ -93,6 +95,7 @@ export function getGetters(
       valueGetter: `:${entityType.source}.jsonb${fullPath}`,
     },
     overrides,
+    entityType.source,
   );
 }
 
