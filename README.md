@@ -12,21 +12,21 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 <!-- this table will be made into something coherent in FQMTOOL-5 -->
 
-| Property                    | Description                                       | Type                                                                          | Required | Default |
-| --------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | ------- |
+| Property                    | Description                                                                   | Type                                                                          | Required | Default |
+| --------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- | ------- |
 | `x-fqm-name`                |
 | `x-fqm-joins-to`            |
 | `x-fqm-joins-to-raw`        |
 | `x-fqm-ignore`              |
 | `x-fqm-data-type`           |
-| `x-fqm-value-getter`        | using `null` will remove guessed from entity type |
-| `x-fqm-filter-value-getter` | using `null` will remove guessed from entity type |
-| `x-fqm-value-function`      | using `null` will remove guessed from entity type |
-| `x-fqm-is-id-column`        | default `name === 'id'`                           |
+| `x-fqm-value-getter`        | using `null` will remove guessed from entity type; use `${source}` for source |
+| `x-fqm-filter-value-getter` | using `null` will remove guessed from entity type; use `${source}` for source |
+| `x-fqm-value-function`      | using `null` will remove guessed from entity type; use `${source}` for source |
+| `x-fqm-is-id-column`        | default `name === 'id'`                                                       |
 | `x-fqm-value-source-api`    |
-| `x-fqm-visible-by-default`  | default no                                        |
-| `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`     | default `all`; temporarily `results-only` for nested array->object properties |
-| `x-fqm-essential`           | default no                                        |
+| `x-fqm-visible-by-default`  | default no                                                                    |
+| `x-fqm-visibility`          | `all`, `query-only`, `results-only`, `hidden`                                 | default `all`; temporarily `results-only` for nested array->object properties |
+| `x-fqm-essential`           | default no                                                                    |
 
 add note about having to maybe add `annotationTypes` to RAML schemas bc :/
 

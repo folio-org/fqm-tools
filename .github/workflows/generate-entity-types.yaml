@@ -140,7 +140,7 @@ jobs:
 
       - name: Enable Pull Request Automerge
         run: gh pr merge --merge --auto --repo folio-org/mod-fqm-manager "${{ steps.create-pr.outputs.pull-request-number }}"
-        if: ${{ inputs.create-pr == 'yes' }}
+        if: ${{ inputs.create-pr == 'yes' && steps.create-pr.outputs.pull-request-operation != 'none' }}
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
 

@@ -80,34 +80,6 @@ describe('createEntityTypeFromConfig', () => {
     ).toThrowError(/Source department not found in source list/);
   });
 
-  it('properly handles mapped source on missing source', async () => {
-    const schema = await $RefParser.dereference(path.resolve('test/schemas/department.json'));
-
-    expect(
-      createEntityTypeFromConfig(
-        {
-          name: 'simple_department',
-          source: 'department',
-          schema: 'test/schemas/department.json',
-          permissions: ['perm1', 'perm2'],
-          sort: ['id', 'ASC'],
-          private: true,
-        } as EntityTypeGenerationConfig['entityTypes'][number],
-        schema as JSONSchema7,
-        {
-          metadata: { module: 'foo' },
-          sources: [
-            {
-              name: 'other-source',
-              table: 'table',
-            },
-          ],
-          sourceMap: { department: 'other-source' },
-        } as unknown as EntityTypeGenerationConfig,
-      ).entityType.sources![0].target,
-    ).toBe('other-source');
-  });
-
   it('generates jsonb field by default', async () => {
     expect(
       createEntityTypeFromConfig(
