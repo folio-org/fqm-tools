@@ -3,7 +3,7 @@
 Translation files are used to provide human-readable labels for entity types and their fields, enabling localization and improving the user experience for all of our users. Our translations use the same system as UI modules, storing a set of key-value pairs by locale in each repository. Here's what this normally looks like:
 
 ```
-mod-cool-module
+mod-cool-module (repository root)
 └── translations
     └── my-cool-module
         ├── en.json # source of truth
@@ -15,6 +15,9 @@ mod-cool-module
 ```
 
 For these translation files, **only `en.json` should be touched by developers.** All other files are maintained by an external platform, Lokalise, and will be overwritten as the community updates translations. For more information about the translation process, see [this wiki page](https://folio-org.atlassian.net/wiki/spaces/I18N/pages/5374336/How+to+Translate+FOLIO).
+
+> [!NOTE]
+> The extra folder inside `translations` is required to be the name of your module. Although it may not affect entity type generation, it is required for the translations to be properly handled by Lokalise and our community translators.
 
 > [!NOTE]
 > When first setting up translations, it is OK to only provide an `en.json`. `mod-fqm-manager` will automatically generate the other files based on it, and Lokalise will create the others automatically once your repository is connected to it.
