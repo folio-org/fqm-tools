@@ -11,7 +11,8 @@ domain = "circulation" # one of acquisition, catalog, circulation, erm, system, 
 module = "mod-cool-module"
 ```
 
-_Note: Does your module not fit into one of the domains above? Please let Corsair know and we'll add it!_
+> [!NOTE]
+> Does your module not fit into one of the domains above? Please let Corsair know and we'll add it!
 
 ## Sources
 
