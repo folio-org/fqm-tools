@@ -4,7 +4,7 @@ There are two main parts of the generation process: `2-create-entity-types.ts` a
 
 ## Run the script
 
-To run the generator, use the following two lines:
+To run the generator, execute the following:
 
 ```sh
 bun scripts/entity-generation/2-create-entity-types.ts external/my-module $(cat repositories.txt) > out/issues.log
