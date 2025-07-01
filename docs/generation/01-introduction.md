@@ -16,7 +16,7 @@ By reading this guide, you are (hopefully) interested in adding entity types to 
 
 Entity types are the fundamental building blocks of how FQM interfaces with other modules. Each entity type represents a type of queryable data, such as a `user`, `item`, `department`, or `invoice`. Each entity type defines the structure of its data, the fields it contains, and where its data is pulled from.
 
-There are two types of entity types: simple and composite. Simple entity types are our focus with entity type generation, representing a single type of data, typically in a one-to-one relationship with database tables. Composite entity types, on the other hand, are more complex and tie simple entity types together, allowing for more complex queries and data relationships. These are typically what users will query against as it allows displaying all relevant data together (for example, a `loan` with its `user`, `item`, `fee/fine`, etc.).
+There are two types of entity types: simple and composite. Simple entity types are our primary focus in entity type generation, representing a single type of data and typically maintaining a one-to-one relationship with a database table. Composite entity types, on the other hand, are more complex and tie simple entity types together, allowing for more complex queries and data relationships. These are typically what users will query against, as it allows displaying all relevant data together (for example, a `loan` with its `user`, `item`, `fee/fine`, etc.).
 
 With entity type generation, we will only focus on simple entity types. Composite entity types will be created later, typically by FQM developers (or in the future, by users themselves).
 
