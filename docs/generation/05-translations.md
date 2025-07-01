@@ -76,7 +76,7 @@ There are a few different levels represented here, with the format `fqm.entityTy
 
 ## Quick start
 
-To get started with translations, take a look at the generated report's output. Inside the Markdown report will be a copy-pastable JSON snippet that you can use to start your translations file! This will contain every translation key needed for your entity type and its best guess at what the labels for each should be. Simply copy this snippet into your `en.json` file and revise the labels as needed.
+To get started with translations, take a look at the generated report's output. Inside the Markdown report will be a copy-pasteable JSON snippet that you can use to start your translations file! This will contain every translation key needed for your entity type and its best guess at what the labels for each should be. Simply copy this snippet into your `en.json` file and revise the labels as needed.
 
 ## Translation best practices
 

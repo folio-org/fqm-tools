@@ -21,8 +21,8 @@ This creates a lot of files in the `out` folder!
 - `out/liquibase` contains the Liquibase changelogs that will create the necessary database views based on the provided sources;
 - `out/translations` contains the translations for the entity types and their fields, which will be used by FQM to display human-readable labels;
 - `out/csv` contains CSV summaries of each entity type which are easier to read and understand than the raw JSON5 files; and
-- `out/report.md` contains a Markdown report of the generated entity types, which is what we recommend you use to review any issues resulting from generation.
 - `out/issues.log` contains machine-readable results of the generation process, to be used by the report generator.
+- `out/report.md` contains a Markdown report of the generated entity types, which is what we recommend you use to review any issues resulting from generation.
 
 ### Whoa, where did this giant entity type come from?
 

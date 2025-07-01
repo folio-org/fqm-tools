@@ -2,7 +2,7 @@
 
 Inside your repository's folder, create a new file called `fqm-config.toml`. This file will contain the configuration that tells FQM Tools what entity types to generate and how, in the [TOML format](https://toml.io/). A full reference for this file's schema is in [config-schema.md](config-schema.md) and an example in [example-config.toml](example-config.toml), but we'll explain everything here.
 
-Now, let's add some metadata about the module to the configuration file. This will help FQM Tools know who is responsible for the module and how to group its files. Add the following lines to your `fqm-config.toml` file, substituting the values for what is appopriate:
+Now, let's add some metadata about the module to the configuration file. This will help FQM Tools know who is responsible for the module and how to group its files. Add the following lines to your `fqm-config.toml` file, substituting the values for what is appropriate:
 
 ```toml
 [metadata]
