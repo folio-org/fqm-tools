@@ -85,7 +85,7 @@ To get started with translations, take a look at the generated report's output. 
 
 There are a number of best practices to follow when writing translations for entity types to ensure a consistent user experience. They are described [here](https://github.com/folio-org/mod-fqm-manager/blob/master/translations/README.md) and include important information about abbreviations, prefixes, disambiguation, and more.
 
-Additionally, there are a number of best practices to use when drafting user-visible text in FOLIO, such as that only sentence case should be used. Most of these are not applicable to entity types, however, they can be useful to know. These are known as the MOTIF design language and may be found [here](https://ux.folio.org/docs/all-guidelines/?sort=type#language-rules).
+Additionally, there are a number of best practices to follow when drafting user-visible text in FOLIO, such as using only sentence case. Most of these are not applicable to entity types; however, they can be useful to know. These are known as the MOTIF design language and may be found [here](https://ux.folio.org/docs/all-guidelines/?sort=type#language-rules).
 
 **Ambiguous/incorrect translations are one of the most common reason to have entity type changes rejected!**
 
