@@ -4,10 +4,11 @@ There are two main parts of the generation process: `2-create-entity-types.ts` a
 
 ## Run the script
 
-To run the generator, use the following one-liner:
+To run the generator, use the following two lines:
 
 ```sh
-bun scripts/entity-generation/2-create-entity-types.ts external/my-module $(cat repositories.txt) | bun scripts/entity-generation/3-generate-report.ts > out/report.md
+bun scripts/entity-generation/2-create-entity-types.ts external/my-module $(cat repositories.txt) > out/issues.log
+bun scripts/entity-generation/3-generate-report.ts < out/issues.log > out/report.md
 ```
 
 Be sure to replace `external/my-module` with the path to your module, if it is not in the `external` folder. `repositories.txt` is the list of directories of other cloned modules, as saved in [02-setting-up-locally.md](02-setting-up-locally.md).
@@ -21,6 +22,7 @@ This creates a lot of files in the `out` folder!
 - `out/translations` contains the translations for the entity types and their fields, which will be used by FQM to display human-readable labels;
 - `out/csv` contains CSV summaries of each entity type which are easier to read and understand than the raw JSON5 files; and
 - `out/report.md` contains a Markdown report of the generated entity types, which is what we recommend you use to review any issues resulting from generation.
+- `out/issues.log` contains machine-readable results of the generation process, to be used by the report generator.
 
 ### Whoa, where did this giant entity type come from?
 
@@ -42,4 +44,4 @@ This report is simply meant for at-a-glance overviews of additions and changes, 
 
 ## Next steps
 
-Now that you have generated your entity types, let's move on to [testing them](05-testing.md).
+Now that you have generated your entity types, let's move on to [adding translations](05-translations.md).
