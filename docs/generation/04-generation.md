@@ -17,12 +17,32 @@ Be sure to replace `external/my-module` with the path to your module, if it is n
 
 This creates a lot of files in the `out` folder!
 
-- `out/entity-types` contains the generated entity types as JSON5 files. We'll look more into that in a minute...
-- `out/liquibase` contains the Liquibase changelogs that will create the necessary database views based on the provided sources;
-- `out/translations` contains the translations for the entity types and their fields, which will be used by FQM to display human-readable labels;
-- `out/csv` contains CSV summaries of each entity type which are easier to read and understand than the raw JSON5 files; and
-- `out/issues.log` contains machine-readable results of the generation process, to be used by the report generator.
-- `out/report.md` contains a Markdown report of the generated entity types, which is what we recommend you use to review any issues resulting from generation.
+<dl>
+<dt><code>out/entity-types</code></dt>
+<dd>
+Contains the generated entity types as JSON5 files. We'll look more into this more in a minute...
+</dd>
+<dt><code>out/liquibase</code></dt>
+<dd>
+Contains the Liquibase changelogs that will create the necessary database views based on the provided sources.
+</dd>
+<dt><code>out/translations</code></dt>
+<dd>
+Contains the translations for the entity types and their fields, which will be used by FQM to display human-readable labels.
+</dd>
+<dt><code>out/csv</code></dt>
+<dd>
+Contains CSV summaries of each entity type which are easier to read and understand than the raw JSON5 files.
+</dd>
+<dt><code>out/issues.log</code></dt>
+<dd>
+Contains machine-readable results of the generation process, to be used by the report generator.
+</dd>
+<dt><code>out/report.md</code></dt>
+<dd>
+Contains a Markdown report of the generated entity types, which is what we recommend you use to review any issues resulting from generation.
+</dd>
+</dl>
 
 ### Whoa, where did this giant entity type come from?
 
