@@ -25,21 +25,27 @@ With entity type generation, we will only focus on simple entity types.
 Entity types consist of several key components:
 
 <dl>
-  <dt>Metadata</dt>
-  <dd>Basic information about the entity type, such as its name, permissions required for users to access it, and default sorting.</dd>
+<dt>Metadata</dt>
+<dd>
+Basic information about the entity type, such as its name, permissions required for users to access it, and default sorting.
+</dd>
 
-  <dt>Sources</dt>
-  <dd>Information about where the data for the entity type comes from. For simple entity types, this is a database source; for composites, this is a set of child simple entity types.</dd>
+<dt>Sources</dt>
+<dd>
+Information about where the data for the entity type comes from. For simple entity types, this is a database source; for composites, this is a set of child simple entity types.
+</dd>
 
-  <dt>Fields</dt>
-  <dd>
+<dt>Fields</dt>
+<dd>
 
 The individual data points that make up the entity type, such as `id`, `name`, `email`, etc. Each field has a name, data type, and other properties that define how it should be handled.
 
-  </dd>
+</dd>
 
-  <dt>Translations</dt>
-  <dd>Human-readable labels for the entity type and its fields, allowing for localization and better user experience.</dd>
+<dt>Translations</dt>
+<dd>
+Human-readable labels for the entity type and its fields, allowing for localization and better user experience.
+</dd>
 </dl>
 
 Fields will be generated from your module's existing API schemas, enabling minimal duplication and overhead. The remainder will be defined in configuration and translation files, allowing for easy customization and updates.

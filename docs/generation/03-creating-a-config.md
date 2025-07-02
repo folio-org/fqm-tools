@@ -62,21 +62,35 @@ sort = ["id", "ASC"]
 This is all it takes to create an entity type! Here's what each of these properties mean:
 
 <dl>
-<dt>`name`</dt>
+<dt><code>name</code></dt>
 <dd>
-The name of the entity type, used by developers only. It should be unique across the module and is used to reference the entity type in queries, translations, and other places. It should be in snake_case and should not contain spaces or special characters.
+The name of the entity type, to be used by developers only. This should be unique across the module.
 </dd>
+
 <dt><code>source</code></dt>
 <dd>
-The `name` of the source this entity type will use, as defined above. This tells FQM Tools where to pull the data for this entity type from. It should match the `name` of a source defined in the `[[sources]]` block.
+
+The `name` of the source this entity type will use, as defined in the `[[sources]]` block.
+
+</dd>
+
+<dt><code>schema</code></dt>
+<dd>
+The path to the JSON (or YAML) schema file that defines the fields for this entity — these should be the same as your normal API schemas, to promote reuse.
+</dd>
+
+<dt><code>permissions</code></dt>
+<dd>
+An array of permissions that users must have to access this entity type, from your module descriptor.
+</dd>
+
+<dt><code>sort</code></dt>
+<dd>
+
+The default sort column and order for this entity type (do not read into this too much, `id` is fine for 99% of entity types).
+
 </dd>
 </dl>
-
-- `name`: the name of the entity type, used by developers only (should be unique across the module);
-- `source`: the `name` of the source this entity type will use, as defined above;
-- `schema`: the path to the JSON (or YAML) schema file that defines the fields for this entity — these should be the same as your normal API schemas, to promote reuse;
-- `permissions`: an array of permissions that users must have to access this entity type, from your module descriptor; and
-- `sort`: the default sort column and order for this entity type (do not read into this too much, `id` is fine for 99% of entity types).
 
 # Next steps
 
