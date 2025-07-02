@@ -32,10 +32,16 @@ Entity types consist of several key components:
   <dd>Information about where the data for the entity type comes from. For simple entity types, this is a database source; for composites, this is a set of child simple entity types.</dd>
 
   <dt>Fields</dt>
-  <dd>The individual data points that make up the entity type, such as `id`, <code>name</code>, <code>email</code>, etc. Each field has a name, data type, and other properties that define how it should be handled.</dd>
+  <dd>
+
+The individual data points that make up the entity type, such as `id`, <code>name</code>, <code>email</code>, etc. Each field has a name, data type, and other properties that define how it should be handled.
+
+  </dd>
 
   <dt>Translations</dt>
-  <dd>Human-readable labels for the entity type and its fields, allowing for localization and better user experience.</dd>
+  <dd>
+  `Human-readable` labels for the entity type and its fields, allowing for localization and better user experience.
+  </dd>
 </dl>
 
 Fields will be generated from your module's existing API schemas, enabling minimal duplication and overhead. The remainder will be defined in configuration and translation files, allowing for easy customization and updates.
