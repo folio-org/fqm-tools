@@ -19,6 +19,8 @@ git commit -m "a descriptive message"
 git push origin cool-team/testing
 ```
 
+If you do not have permissions to push to `mod-fqm-manager`, please reach out to Corsair.
+
 ## Deploying
 
 To deploy, use the [`deployModuleFromFeatureBranchEureka` Jenkins job](https://jenkins.ci.folio.org/job/folioDevTools/job/moduleDeployment/job/deployModuleFromFeatureBranchEureka/) ([wiki](https://folio-org.atlassian.net/wiki/x/ZIDFKQ)).
@@ -47,3 +49,5 @@ Doing this helps keep the repository clean and avoids confusion for other develo
 ## Next steps
 
 Congratulations, you are done with the guided tutorial! Next up, check out the other documentation files in this folder, such as the [configuration reference](config-schema.md) and the [field schema reference](field-schema.md). These will help you understand how to customize your entity types and fields further, unlocking the true potential of FQM!
+
+Once your entity types are in good shape, please submit them to Corsair. To do this, clone [FQMTOOL-9](https://folio-org.atlassian.net/browse/FQMTOOL-9), following all of the instructions in the ticket. Once it's ready, move it to `Open` and reach out to Corsair to get it scheduled!
