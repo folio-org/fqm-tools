@@ -61,6 +61,17 @@ sort = ["id", "ASC"]
 
 This is all it takes to create an entity type! Here's what each of these properties mean:
 
+<dl>
+<dt>`name`</dt>
+<dd>
+The name of the entity type, used by developers only. It should be unique across the module and is used to reference the entity type in queries, translations, and other places. It should be in snake_case and should not contain spaces or special characters.
+</dd>
+<dt><code>source</code></dt>
+<dd>
+The `name` of the source this entity type will use, as defined above. This tells FQM Tools where to pull the data for this entity type from. It should match the `name` of a source defined in the `[[sources]]` block.
+</dd>
+</dl>
+
 - `name`: the name of the entity type, used by developers only (should be unique across the module);
 - `source`: the `name` of the source this entity type will use, as defined above;
 - `schema`: the path to the JSON (or YAML) schema file that defines the fields for this entity — these should be the same as your normal API schemas, to promote reuse;
