@@ -175,7 +175,7 @@ export const EntityTypeGenerationConfigTemplate = z
     metadata: z
       .object({
         team: z.string(),
-        domain: z.enum(['acquisition', 'catalog', 'circulation', 'erm', 'users', 'other']),
+        domain: z.enum(['acquisition', 'catalog', 'circulation', 'erm', 'system', 'users', 'other']),
         module: z.string(),
       })
       .strict(),

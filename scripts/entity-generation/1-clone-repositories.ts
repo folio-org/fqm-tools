@@ -15,7 +15,7 @@ const config = yaml.parse(readFileSync(configPath, 'utf8')) as {
 
 log('Configuration loaded:', config);
 
-const outDir = resolve(__dirname, '../external');
+const outDir = resolve(__dirname, '../../external');
 await mkdir(outDir, { recursive: true });
 
 log('Cloning mod-fqm-manager');
