@@ -73,6 +73,18 @@ describe('getGetters', () => {
         valueFunction: 'value()',
       },
     ],
+    [
+      {
+        'x-fqm-value-getter': 'get(${source})',
+        'x-fqm-filter-value-getter': 'getFiltered(${source})',
+        'x-fqm-value-function': 'value(${source})',
+      },
+      {
+        valueGetter: 'get(:sauce)',
+        filterValueGetter: 'getFiltered(:sauce)',
+        valueFunction: 'value(:sauce)',
+      },
+    ],
   ])('handles overrides in %o as expected', (schema, expected) => {
     expect(
       getGetters('prop', schema as JSONSchema7, { dataType: DataTypeValue.integerType }, entityTypeConfig, config),

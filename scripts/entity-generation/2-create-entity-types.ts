@@ -93,12 +93,13 @@ if (configs.length === 0) {
 }
 
 for (const { config } of configs) {
-  config.sourceMap = { ...config.sourceMap };
+  const sourceMap: Record<string, string> = {};
   config.sources = await Promise.all(
     config.sources.map(async (source) => {
       const disambiguated = disambiguateSource(source, config);
 
-      config.sourceMap![source.name] = disambiguated.name;
+      sourceMap![source.name] = disambiguated.name;
+      source.name = disambiguated.name;
 
       const changeset = createLiquibaseChangeset(disambiguated, config);
 
@@ -113,6 +114,12 @@ for (const { config } of configs) {
       return disambiguated;
     }),
   );
+
+  for (const entityType of config.entityTypes) {
+    while (entityType.source in sourceMap) {
+      entityType.source = sourceMap[entityType.source];
+    }
+  }
 }
 
 const intermediateResults: {

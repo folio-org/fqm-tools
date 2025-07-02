@@ -358,9 +358,9 @@ await logCollapsable(
                 table.push([
                   DIFF_EMOJI[c.type].repeat(2),
                   field,
-                  `\`${c.path}\``,
-                  c.oldValue !== undefined ? `\`${JSON.stringify(c.oldValue)}\`` : '',
-                  c.value !== undefined ? `\`${JSON.stringify(c.value)}\`` : '',
+                  c.path,
+                  c.oldValue !== undefined ? JSON.stringify(c.oldValue) : '',
+                  c.value !== undefined ? JSON.stringify(c.value) : '',
                 ]);
               }
             }
