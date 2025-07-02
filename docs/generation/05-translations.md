@@ -88,7 +88,7 @@ The label of each field, as shown in the results, exports, and the query builder
 <dt><code>fqm.entityType.&lt;entityTypeName&gt;.&lt;fieldName&gt;.&lt;subFieldName&gt;</code></dt>
 <dd>
 
-The label of a sub-field, which is used when rendering the tables for object[] fields. For example, `coolness_matrix` is an object[] field, and its sub-fields are `factor_name` and `factor_value`.
+The label of a sub-field, which is used when rendering the tables for `object[]` fields. For example, `coolness_matrix` is an `object[]` field, and its sub-fields are `factor_name` and `factor_value`.
 
 </dd>
 
