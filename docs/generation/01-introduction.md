@@ -4,11 +4,11 @@ Thank you for joining us on our journey to make the FOLIO Query Machine (FQM) mo
 
 We **strongly** recommend reading through this section before starting on the others, as it will provide you with the necessary context and understanding of how FQM works and what entity types are.
 
-If you have any questions, or encounter something that seems harder/more confusing than it should be, please feel free to reach out to the FQM team via our [Slack channel](https://open-libr-foundation.slack.com/archives/C065XKBNARG). We want this to be as easy as possible for you, and we are here to help!
+If you have any questions — or encounter something that seems harder/more confusing than it should be — please feel free to reach out to the FQM team via our [Slack channel](https://open-libr-foundation.slack.com/archives/C065XKBNARG). We want this to be as easy as possible for you, and we are here to help!
 
 ## What is FQM? Why should my team/module care?
 
-FQM, the FOLIO Query Machine, is a an easy-to-use, high-performance query engine for all of FOLIO. It accepts queries, processes them, and provides answers in consistent formats, allowing FOLIO modules to be queried in real-time and synthesize data from multiple modules.
+FQM (the FOLIO Query Machine) is a an easy-to-use, high-performance query engine for all of FOLIO. It accepts queries, processes them, and provides answers in consistent formats, allowing FOLIO modules to be queried in real-time and synthesize data from multiple modules.
 
 By reading this guide, you are (hopefully) interested in adding entity types to FQM for your module. By doing this, FQM will be able to understand your module's data, allowing users to easily query it alongside other modules' data, unlocking powerful new use cases and workflows.
 
@@ -24,10 +24,19 @@ With entity type generation, we will only focus on simple entity types.
 
 Entity types consist of several key components:
 
-- **Metadata**: basic information about the entity type, such as its name, permissions required for users to access it, and default sorting;
-- **Sources**: information about where the data for the entity type comes from. For simple entity types, this is a database source; for composites, this is a set of child simple entity types;
-- **Fields**: the individual data points that make up the entity type, such as `id`, `name`, `email`, etc. Each field has a name, data type, and other properties that define how it should be handled; and
-- **Translations**: human-readable labels for the entity type and its fields, allowing for localization and better user experience.
+<dl>
+  <dt>Metadata</dt>
+  <dd>Basic information about the entity type, such as its name, permissions required for users to access it, and default sorting.</dd>
+
+  <dt>Sources</dt>
+  <dd>Information about where the data for the entity type comes from. For simple entity types, this is a database source; for composites, this is a set of child simple entity types.</dd>
+
+  <dt>Fields</dt>
+  <dd>The individual data points that make up the entity type, such as `id`, <code>name</code>, <code>email</code>, etc. Each field has a name, data type, and other properties that define how it should be handled.</dd>
+
+  <dt>Translations</dt>
+  <dd>Human-readable labels for the entity type and its fields, allowing for localization and better user experience.</dd>
+</dl>
 
 Fields will be generated from your module's existing API schemas, enabling minimal duplication and overhead. The remainder will be defined in configuration and translation files, allowing for easy customization and updates.
 

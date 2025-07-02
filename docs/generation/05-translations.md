@@ -72,7 +72,7 @@ Here's an example of how results might appear in the Lists app:
 
 There are a few different levels represented here, with the format `fqm.entityType.<entityTypeName>.<fieldName>[.<subFieldName>[._qualified]]`. Here's what each means:
 
-- `fqm.entityType.<entityTypeName>`: the entity type's label itself, which is used to display the entity type name in the Lists app. The name `cool_data` is the same name as the entity type defined in the configuration file.
+- `fqm.entityType.<entityTypeName>`: the entity type's label itself, displayed as "Record type" in the Lists app. The name `cool_data` is the same name as the entity type defined in the configuration file.
 - `fqm.entityType.<entityTypeName>.<fieldName>`: the label of each field, as shown in the results, exports, and the query builder.
 - `fqm.entityType.<entityTypeName>.<fieldName>.<subFieldName>`: the label of a sub-field, which is used when rendering the tables for object[] fields.
 - `fqm.entityType.<entityTypeName>.<fieldName>.<subFieldName>._qualified`: the label of a sub-field that is qualified. Currently, this is only for the query builder, where the context of the outer field name is not available.
