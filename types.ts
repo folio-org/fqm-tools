@@ -175,7 +175,7 @@ export const EntityTypeGenerationConfigTemplate = z
     metadata: z
       .object({
         team: z.string(),
-        domain: z.enum(['acquisition', 'catalog', 'circulation', 'erm', 'users', 'other']),
+        domain: z.enum(['acquisition', 'catalog', 'circulation', 'erm', 'system', 'users', 'other']),
         module: z.string(),
       })
       .strict(),
@@ -190,9 +190,9 @@ export const EntityTypeGenerationConfigTemplate = z
         .object({
           name: z.string(),
           private: z.boolean().optional(),
+          source: z.string(),
           schema: z.string(),
           permissions: z.array(z.string()),
-          source: z.string(),
           sort: z.tuple([z.string(), z.string()]),
           useRmbIndexStyle: z.boolean().optional(),
           includeJsonbField: z.boolean().optional(),

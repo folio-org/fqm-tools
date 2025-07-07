@@ -17,7 +17,7 @@ const args = parseArgs({
     'base-dir': {
       type: 'string',
       short: 'f',
-      default: '../mod-fqm-manager',
+      default: 'external/mod-fqm-manager',
     },
     'generated-dir': {
       type: 'string',

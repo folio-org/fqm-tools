@@ -159,26 +159,6 @@ for (const { dir, config } of configs) {
 
 const results = resolveEntityTypeJoins(intermediateResults, args.values['force-generate-joins']);
 
-for (const {
-  entityType,
-  metadata: { domain, module },
-} of results) {
-  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
-  await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
-  await write(
-    'csv',
-    domain,
-    module,
-    `${entityType.name}.csv`,
-    await entityTypeToCsv(
-      entityType,
-      memoize((searchId) =>
-        Promise.resolve(results.map((r) => r.entityType).find((et) => et.id === searchId) ?? ({} as EntityType)),
-      ),
-    ),
-  );
-}
-
 const translationsByLocale = new Map<string, Record<string, string>>();
 for (const locale of EXPECTED_LOCALES) {
   translationsByLocale.set(locale, {});
@@ -189,19 +169,24 @@ const expectedTranslationKeys = results
   .flatMap(Object.keys);
 
 for (const { dir, config } of configs) {
-  const translationFiles = (await readdir(path.resolve(dir, 'translations'), { recursive: true })).filter((p) =>
-    p.endsWith('.json'),
-  );
+  try {
+    const translationFiles = (await readdir(path.resolve(dir, 'translations'), { recursive: true })).filter((p) =>
+      p.endsWith('.json'),
+    );
 
-  for (const file of translationFiles) {
-    const locale = path.basename(file, '.json');
-    const filePath = path.resolve(dir, 'translations', file);
-    const incoming = await Bun.file(filePath).json();
+    for (const file of translationFiles) {
+      const locale = path.basename(file, '.json');
+      const filePath = path.resolve(dir, 'translations', file);
+      const incoming = await Bun.file(filePath).json();
 
-    translationsByLocale.set(locale, {
-      ...translationsByLocale.get(locale),
-      ...marshallExternalTranslations(incoming, config.metadata, expectedTranslationKeys),
-    });
+      translationsByLocale.set(locale, {
+        ...translationsByLocale.get(locale),
+        ...marshallExternalTranslations(incoming, config.metadata, expectedTranslationKeys),
+      });
+    }
+  } catch (e) {
+    // not using regular `error` facility as missing translations will already get reported later
+    console.error(`Error reading translations from ${dir}:`, e);
   }
 }
 
@@ -260,3 +245,34 @@ write(
   'module-team-map.json',
   JSON.stringify(Object.fromEntries(configs.map(({ config }) => [config.metadata.module, config.metadata.team]))),
 );
+
+for (const {
+  entityType,
+  metadata: { domain, module },
+} of results) {
+  for (const column of entityType.columns ?? []) {
+    column.labelAlias = translationsByLocale.get('en')![`entityType.${entityType.name}.${column.name}`];
+
+    for (const innerField of column.dataType.itemDataType?.properties ?? []) {
+      innerField.labelAlias =
+        translationsByLocale.get('en')![`entityType.${entityType.name}.${column.name}.${innerField.name}`];
+      innerField.labelAliasFullyQualified =
+        translationsByLocale.get('en')![`entityType.${entityType.name}.${column.name}.${innerField.name}._qualified`];
+    }
+  }
+
+  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
+  await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
+  await write(
+    'csv',
+    domain,
+    module,
+    `${entityType.name}.csv`,
+    await entityTypeToCsv(
+      entityType,
+      memoize((searchId) =>
+        Promise.resolve(results.map((r) => r.entityType).find((et) => et.id === searchId) ?? ({} as EntityType)),
+      ),
+    ),
+  );
+}

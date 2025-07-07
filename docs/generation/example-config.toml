@@ -1,0 +1,15 @@
+[metadata]
+team = "my-team"
+domain = "circulation"
+module = "mod-cool-circ"
+
+[[sources]]
+name = "coolness"
+table = "raw_coolness_values"
+
+[[entityTypes]]
+name = "user_coolness"
+source = "coolness"
+schema = "src/main/resources/openapi/coolStuff.json"
+permissions = ["my-module.cool.item.get"]
+sort = ["id", "ASC"]
