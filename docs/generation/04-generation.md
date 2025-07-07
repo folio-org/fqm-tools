@@ -52,9 +52,7 @@ For more details on these fields can be configured, please see [field-schema.md]
 
 ### This is too much information! What's the easiest way to read and share this?
 
-The `csv` folder. This contains one CSV file per entity type, summarizing the names of fields, their data, and any extra attributes. These are the best source of information for you to see what will be available to users and to share with your team, product owners, and SMEs. For a guide on reading these, please refer to [this wiki](tbd).
-
-<!-- TODO: LINK ABOVE -->
+The `csv` folder. This contains one CSV file per entity type, summarizing the names of fields, their data, and any extra attributes. These are the best source of information for you to see what will be available to users and to share with your team, product owners, and SMEs. For a guide on reading these, please refer to [this wiki](https://folio-org.atlassian.net/wiki/x/EYC2Q).
 
 ### What's in the report?
 
