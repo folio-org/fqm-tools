@@ -177,13 +177,12 @@ describe('getDataType', () => {
             dataType: {
               dataType: 'rangedUUIDType',
             },
-            filterValueGetter:
-              "(SELECT array_agg(lower(elems.value->>'bar')) FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
             name: 'bar',
             property: 'bar',
             queryable: true,
-            valueFunction: 'lower(:value)',
-            valueGetter: "(SELECT array_agg(elems.value->>'bar') FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
+            valueFunction: '(:value)::uuid',
+            valueGetter:
+              "(SELECT array_agg((elems.value->>'bar')::uuid) FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
             visibleByDefault: false,
           },
         ],
