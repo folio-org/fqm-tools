@@ -38,10 +38,11 @@ export function getGetterOverrides(schema: JSONSchema7): GetterOverrides {
   return overrides;
 }
 
-const CAST_OPTIONS = { [DataTypeValue.integerType]: 'integer', [DataTypeValue.numberType]: 'float' } as Record<
-  DataTypeValue,
-  string | undefined
->;
+const CAST_OPTIONS = {
+  [DataTypeValue.integerType]: 'integer',
+  [DataTypeValue.numberType]: 'float',
+  [DataTypeValue.rangedUUIDType]: 'uuid',
+} as Record<DataTypeValue, string | undefined>;
 
 function getCast(dataType: DataTypeValue) {
   return CAST_OPTIONS[dataType];
