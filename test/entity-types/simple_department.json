@@ -19,7 +19,8 @@
       "isIdColumn": true,
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.id"
+      "valueGetter": ":department.id",
+      "valueFunction": "(:value)::uuid"
     },
     {
       "name": "name",
@@ -83,7 +84,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'createdByUserId'"
+      "valueFunction": "(:value)::uuid",
+      "valueGetter": "(:department.jsonb->'metadata'->>'createdByUserId')::uuid"
     },
     {
       "name": "metadata_created_by_username",
@@ -110,7 +112,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'updatedByUserId'"
+      "valueFunction": "(:value)::uuid",
+      "valueGetter": "(:department.jsonb->'metadata'->>'updatedByUserId')::uuid"
     },
     {
       "name": "metadata_updated_by_username",

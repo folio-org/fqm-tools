@@ -250,6 +250,9 @@ for (const {
   entityType,
   metadata: { domain, module },
 } of results) {
+  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
+  await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
+
   for (const column of entityType.columns ?? []) {
     column.labelAlias = translationsByLocale.get('en')![`entityType.${entityType.name}.${column.name}`];
 
@@ -261,8 +264,6 @@ for (const {
     }
   }
 
-  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
-  await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
   await write(
     'csv',
     domain,
