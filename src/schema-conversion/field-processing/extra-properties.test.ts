@@ -80,9 +80,7 @@ describe('getExtraProperties', () => {
     } as JSONSchema7;
     const result = getExtraProperties(schema);
     expect(result.extraProperties.joinsToIntermediate).toBeEmpty();
-    expect(result.issues).toContain(
-      "Error parsing x-fqm-joins-to: Invalid discriminator value. Expected  | 'equality-simple' | 'equality-cast-uuid' | 'custom'",
-    );
+    expect(result.issues).toContain('Error parsing x-fqm-joins-to: Invalid input');
   });
 
   it('handles raw joins', () => {
@@ -100,7 +98,9 @@ describe('getExtraProperties', () => {
     } as JSONSchema7;
     const result = getExtraProperties(schema);
     expect(result.extraProperties.joinsTo).toBeEmpty();
-    expect(result.issues).toContain('Error parsing x-fqm-joins-to-raw: Required');
+    expect(result.issues).toContain(
+      'Error parsing x-fqm-joins-to-raw: Invalid input: expected string, received undefined',
+    );
   });
 
   it('should return an empty object when no relevant properties are present', () => {
