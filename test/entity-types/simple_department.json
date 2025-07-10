@@ -156,6 +156,9 @@
       "dataType": {
         "dataType": "stringType"
       },
+      "essential": true,
+      "hidden": true,
+      "isIdColumn": false,
       "queryable": false,
       "visibleByDefault": false,
       "valueGetter": ":department.jsonb::text"
