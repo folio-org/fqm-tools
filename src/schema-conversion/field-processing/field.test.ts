@@ -160,6 +160,7 @@ describe('getGetters', () => {
     });
   });
 });
+
 describe('markNestedArrayOfObjectsNonQueryable', () => {
   it('marks nested array of objects as non-queryable', () => {
     const columns: EntityTypeField[] = [
@@ -320,7 +321,7 @@ describe('getNestedGetters', () => {
 });
 
 describe('ensureNestedObjectsAreProperForm', () => {
-  it.only('converts jsonbArrayType to arrayType for nested objects', () => {
+  it('converts jsonbArrayType to arrayType for nested objects', () => {
     const columns: EntityTypeField[] = [
       {
         name: 'column1',
