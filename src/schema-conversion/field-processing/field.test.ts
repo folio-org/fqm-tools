@@ -2,7 +2,7 @@ import { DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/ty
 import { getGetters, getNestedGetters } from './getters';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
-import { inferFieldFromSchema, markNestedArrayOfObjectsNonQueryable } from './field';
+import { ensureNestedObjectsAreProperForm, inferFieldFromSchema, markNestedArrayOfObjectsNonQueryable } from './field';
 
 const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][number];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
@@ -160,6 +160,7 @@ describe('getGetters', () => {
     });
   });
 });
+
 describe('markNestedArrayOfObjectsNonQueryable', () => {
   it('marks nested array of objects as non-queryable', () => {
     const columns: EntityTypeField[] = [
@@ -316,5 +317,70 @@ describe('getNestedGetters', () => {
     ],
   ])('dataType %o yields %o in non-array context', (dataType, expected) => {
     expect(getNestedGetters('sauce', 'prop', '', dataType, false)).toEqual(expected);
+  });
+});
+
+describe('ensureNestedObjectsAreProperForm', () => {
+  it('converts jsonbArrayType to arrayType for nested objects', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: {
+          dataType: DataTypeValue.jsonbArrayType,
+          itemDataType: {
+            dataType: DataTypeValue.objectType,
+            properties: [
+              {
+                name: 'nestedField',
+                dataType: { dataType: DataTypeValue.stringType },
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    const result = ensureNestedObjectsAreProperForm(columns);
+
+    expect(result[0].dataType.dataType).toBe(DataTypeValue.arrayType);
+    expect(result[0].queryable).toBeFalse();
+    expect(result[0].dataType.itemDataType?.dataType).toBe(DataTypeValue.objectType);
+  });
+
+  it('does not modify non-jsonbArrayType->object fields', () => {
+    const columns: EntityTypeField[] = [
+      {
+        name: 'column1',
+        dataType: { dataType: DataTypeValue.stringType },
+      },
+      {
+        name: 'column2',
+        dataType: {
+          dataType: DataTypeValue.arrayType,
+          itemDataType: {
+            dataType: DataTypeValue.stringType,
+          },
+        },
+      },
+      {
+        name: 'column3',
+        dataType: {
+          dataType: DataTypeValue.arrayType,
+          itemDataType: {
+            dataType: DataTypeValue.objectType,
+            properties: [
+              {
+                name: 'nestedField',
+                dataType: { dataType: DataTypeValue.stringType },
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    const result = ensureNestedObjectsAreProperForm(columns);
+
+    expect(result).toEqual(columns);
   });
 });

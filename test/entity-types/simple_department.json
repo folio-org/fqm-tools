@@ -126,7 +126,7 @@
     },
     {
       "dataType": {
-        "dataType": "jsonbArrayType",
+        "dataType": "arrayType",
         "itemDataType": {
           "dataType": "objectType",
           "properties": [
@@ -146,7 +146,7 @@
       },
       "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'testArray'::text))",
       "name": "test_array",
-      "queryable": true,
+      "queryable": false,
       "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
       "valueGetter": ":department.jsonb->>'testArray'",
       "visibleByDefault": false
@@ -156,6 +156,9 @@
       "dataType": {
         "dataType": "stringType"
       },
+      "essential": true,
+      "hidden": true,
+      "isIdColumn": false,
       "queryable": false,
       "visibleByDefault": false,
       "valueGetter": ":department.jsonb::text"
