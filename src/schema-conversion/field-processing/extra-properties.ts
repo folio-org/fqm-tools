@@ -18,8 +18,67 @@ export function getIsIdColumn(name: string, propSchema: JSONSchema7) {
   return {};
 }
 
+function getVisibilityProps(visibility: string) {
+  switch (visibility) {
+    case 'all':
+      return {
+        queryable: true,
+        queryOnly: false,
+        hidden: false,
+      };
+    case 'query-only':
+      return {
+        queryable: true,
+        queryOnly: true,
+        hidden: false,
+      };
+    case 'results-only':
+      return {
+        queryable: false,
+        queryOnly: false,
+        hidden: false,
+      };
+    case 'hidden':
+      return {
+        hidden: true,
+      };
+    default:
+      throw new Error(`Invalid value for x-fqm-visibility: ${visibility}`);
+  }
+}
+
+function getJoinsTo(input: unknown[], issues: string[]) {
+  const joinsToIntermediate = [];
+
+  for (const raw of input) {
+    try {
+      const intermediateJoin = EntityTypeFieldJoinIntermediateTemplate.parse(raw);
+      joinsToIntermediate.push(intermediateJoin);
+    } catch (e) {
+      issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to: ${issue.message}`));
+    }
+  }
+
+  return joinsToIntermediate;
+}
+
+function getJoinsToRaw(input: unknown[], issues: string[]) {
+  const joinsTo = [];
+
+  for (const raw of input) {
+    try {
+      const join = EntityTypeFieldJoinTemplate.parse(raw);
+      joinsTo.push(join);
+    } catch (e) {
+      issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to-raw: ${issue.message}`));
+    }
+  }
+
+  return joinsTo;
+}
+
 export function getExtraProperties(propSchema: JSONSchema7) {
-  const extraProperties: Partial<EntityTypeField> = {};
+  let extraProperties: Partial<EntityTypeField> = {};
   const issues: string[] = [];
 
   if ('x-fqm-name' in propSchema) {
@@ -31,28 +90,7 @@ export function getExtraProperties(propSchema: JSONSchema7) {
   }
 
   if ('x-fqm-visibility' in propSchema) {
-    switch (propSchema['x-fqm-visibility']) {
-      case 'all':
-        extraProperties.queryable = true;
-        extraProperties.queryOnly = false;
-        extraProperties.hidden = false;
-        break;
-      case 'query-only':
-        extraProperties.queryable = true;
-        extraProperties.queryOnly = true;
-        extraProperties.hidden = false;
-        break;
-      case 'results-only':
-        extraProperties.queryable = false;
-        extraProperties.queryOnly = false;
-        extraProperties.hidden = false;
-        break;
-      case 'hidden':
-        extraProperties.hidden = true;
-        break;
-      default:
-        throw new Error(`Invalid value for x-fqm-visibility: ${propSchema['x-fqm-visibility']}`);
-    }
+    extraProperties = { ...extraProperties, ...getVisibilityProps(propSchema['x-fqm-visibility'] as string) };
   }
 
   if ('x-fqm-visibility-by-default' in propSchema) {
@@ -64,29 +102,11 @@ export function getExtraProperties(propSchema: JSONSchema7) {
   }
 
   if ('x-fqm-joins-to' in propSchema) {
-    extraProperties.joinsToIntermediate = [];
-
-    for (const raw of propSchema['x-fqm-joins-to'] as unknown[]) {
-      try {
-        const intermediateJoin = EntityTypeFieldJoinIntermediateTemplate.parse(raw);
-        extraProperties.joinsToIntermediate.push(intermediateJoin);
-      } catch (e) {
-        issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to: ${issue.message}`));
-      }
-    }
+    extraProperties.joinsToIntermediate = getJoinsTo(propSchema['x-fqm-joins-to'] as unknown[], issues);
   }
 
   if ('x-fqm-joins-to-raw' in propSchema) {
-    extraProperties.joinsTo = [];
-
-    for (const raw of propSchema['x-fqm-joins-to-raw'] as unknown[]) {
-      try {
-        const join = EntityTypeFieldJoinTemplate.parse(raw);
-        extraProperties.joinsTo.push(join);
-      } catch (e) {
-        issues.push(...(e as ZodError).issues.map((issue) => `Error parsing x-fqm-joins-to-raw: ${issue.message}`));
-      }
-    }
+    extraProperties.joinsTo = getJoinsToRaw(propSchema['x-fqm-joins-to-raw'] as unknown[], issues);
   }
 
   return { extraProperties, issues };

@@ -42,22 +42,15 @@ export type ErrorSerialized = {
 } & Error;
 
 export function getTitle(error: Error): string {
-  switch (error.type) {
-    case 'translations':
-      return 'Missing translations';
-    case 'translations-extra':
-      return 'Extra translations found';
-    case 'join':
-      return `Join issue`;
-    case 'schema':
-      return 'Schema issue';
-    case 'config-does-not-exist':
-      return `Configuration file does not exist`;
-    case 'config-schema':
-      return `Configuration schema error`;
-    case 'unknown-team':
-      return `Unknown team`;
-  }
+  return {
+    translations: 'Missing translations',
+    'translations-extra': 'Extra translations found',
+    join: 'Join issue',
+    schema: 'Schema issue',
+    'config-does-not-exist': 'Configuration file does not exist',
+    'config-schema': 'Configuration schema error',
+    'unknown-team': 'Unknown team',
+  }[error.type];
 }
 
 export function getDescription(error: Error, entityTypeName?: string): string {
