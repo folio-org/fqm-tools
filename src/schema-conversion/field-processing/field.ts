@@ -124,6 +124,26 @@ export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[])
   }));
 }
 
+export function ensureNestedObjectsAreWithinArrayFields(columns: EntityTypeField[]): EntityTypeField[] {
+  // all array->object fields must be arrayType->objectType, not jsonbArrayType->objectType
+  return columns.map((column) => {
+    if (
+      column.dataType.dataType === DataTypeValue.jsonbArrayType &&
+      column.dataType.itemDataType?.dataType === DataTypeValue.objectType
+    ) {
+      return {
+        ...column,
+        dataType: {
+          ...column.dataType,
+          dataType: DataTypeValue.arrayType,
+        },
+      };
+    } else {
+      return column;
+    }
+  });
+}
+
 export function removeNestedFieldDisallowedProperties(columns: EntityTypeField[]): EntityTypeField[] {
   // visibleByDefault is not allowed in nested fields, but we can't remove it sooner as some nested fields get flattened
   return columns.map((column) => ({

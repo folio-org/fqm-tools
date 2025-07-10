@@ -126,7 +126,7 @@
     },
     {
       "dataType": {
-        "dataType": "jsonbArrayType",
+        "dataType": "arrayType",
         "itemDataType": {
           "dataType": "objectType",
           "properties": [
