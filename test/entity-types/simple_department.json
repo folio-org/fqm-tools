@@ -146,7 +146,7 @@
       },
       "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'testArray'::text))",
       "name": "test_array",
-      "queryable": true,
+      "queryable": false,
       "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
       "valueGetter": ":department.jsonb->>'testArray'",
       "visibleByDefault": false

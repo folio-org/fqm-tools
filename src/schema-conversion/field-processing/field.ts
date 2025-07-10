@@ -124,8 +124,9 @@ export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[])
   }));
 }
 
-export function ensureNestedObjectsAreWithinArrayFields(columns: EntityTypeField[]): EntityTypeField[] {
-  // all array->object fields must be arrayType->objectType, not jsonbArrayType->objectType
+export function ensureNestedObjectsAreProperForm(columns: EntityTypeField[]): EntityTypeField[] {
+  // all array->object fields must be arrayType->objectType, not jsonbArrayType->objectType.
+  // generator currently spits out jsonbArrayType->objectType instead, so we must convert it.
   return columns.map((column) => {
     if (
       column.dataType.dataType === DataTypeValue.jsonbArrayType &&
@@ -137,6 +138,7 @@ export function ensureNestedObjectsAreWithinArrayFields(columns: EntityTypeField
           ...column.dataType,
           dataType: DataTypeValue.arrayType,
         },
+        queryable: false,
       };
     } else {
       return column;

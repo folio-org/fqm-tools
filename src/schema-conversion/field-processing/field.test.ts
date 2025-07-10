@@ -2,11 +2,7 @@ import { DataTypeValue, EntityTypeField, EntityTypeGenerationConfig } from '@/ty
 import { getGetters, getNestedGetters } from './getters';
 import { describe, expect, it } from 'bun:test';
 import { JSONSchema7 } from 'json-schema';
-import {
-  ensureNestedObjectsAreWithinArrayFields,
-  inferFieldFromSchema,
-  markNestedArrayOfObjectsNonQueryable,
-} from './field';
+import { ensureNestedObjectsAreProperForm, inferFieldFromSchema, markNestedArrayOfObjectsNonQueryable } from './field';
 
 const entityTypeConfig = { source: 'sauce' } as EntityTypeGenerationConfig['entityTypes'][number];
 const config = { metadata: { module: 'mod-foo' } } as EntityTypeGenerationConfig;
@@ -323,7 +319,7 @@ describe('getNestedGetters', () => {
   });
 });
 
-describe('ensureNestedObjectsAreWithinArrayFields', () => {
+describe('ensureNestedObjectsAreProperForm', () => {
   it.only('converts jsonbArrayType to arrayType for nested objects', () => {
     const columns: EntityTypeField[] = [
       {
@@ -343,9 +339,10 @@ describe('ensureNestedObjectsAreWithinArrayFields', () => {
       },
     ];
 
-    const result = ensureNestedObjectsAreWithinArrayFields(columns);
+    const result = ensureNestedObjectsAreProperForm(columns);
 
     expect(result[0].dataType.dataType).toBe(DataTypeValue.arrayType);
+    expect(result[0].queryable).toBeFalse();
     expect(result[0].dataType.itemDataType?.dataType).toBe(DataTypeValue.objectType);
   });
 
@@ -381,7 +378,7 @@ describe('ensureNestedObjectsAreWithinArrayFields', () => {
       },
     ];
 
-    const result = ensureNestedObjectsAreWithinArrayFields(columns);
+    const result = ensureNestedObjectsAreProperForm(columns);
 
     expect(result).toEqual(columns);
   });

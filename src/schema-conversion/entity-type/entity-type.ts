@@ -3,7 +3,7 @@ import { snakeCase } from 'change-case';
 import { JSONSchema7 } from 'json-schema';
 import { v5 } from 'uuid';
 import {
-  ensureNestedObjectsAreWithinArrayFields,
+  ensureNestedObjectsAreProperForm,
   getJsonbField,
   inferFieldFromSchema,
   markNestedArrayOfObjectsNonQueryable,
@@ -33,7 +33,7 @@ export default function createEntityTypeFromConfig(
     .filter((f): f is NonNullable<EntityTypeField> => !!f);
 
   const completedColumns = applyOverrides(
-    ensureNestedObjectsAreWithinArrayFields(
+    ensureNestedObjectsAreProperForm(
       markNestedArrayOfObjectsNonQueryable(
         removeNestedFieldDisallowedProperties(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
       ),
