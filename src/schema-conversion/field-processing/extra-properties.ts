@@ -65,7 +65,7 @@ function getJoinsTo(input: unknown[], issues: string[]) {
 function getJoinsToRaw(input: unknown[], issues: string[]) {
   const joinsTo = [];
 
-  for (const raw of input as unknown[]) {
+  for (const raw of input) {
     try {
       const join = EntityTypeFieldJoinTemplate.parse(raw);
       joinsTo.push(join);
