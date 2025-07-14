@@ -14,6 +14,11 @@ on:
         required: false
         default: false
         type: boolean
+      force-public:
+        description: 'If all entity types should be marked as public (visible in the Lists app)'
+        required: false
+        default: false
+        type: boolean
       base-branch:
         description: 'Branch of `mod-fqm-manager` to use as a base for the PR or `master` if empty'
         required: false
@@ -38,6 +43,7 @@ on:
         required: false
         default: true
         type: boolean
+
   workflow_call:
     inputs:
       repository-list:
@@ -45,6 +51,10 @@ on:
         default: ''
         type: string
       force-generate-joins:
+        required: false
+        default: false
+        type: boolean
+      force-public:
         required: false
         default: false
         type: boolean
@@ -58,7 +68,6 @@ on:
         required: true
         type: string
       send-slack:
-        description: If Slack messages should be sent alerting about the PR creation and any team's issues
         required: true
         type: boolean
 
@@ -87,7 +96,11 @@ jobs:
 
       - name: Force join generation (if enabled)
         if: ${{ inputs.force-generate-joins == 'true' }}
-        run: echo "--force-generate-joins" >> extra-params.txt
+        run: echo " --force-generate-joins " >> extra-params.txt
+
+      - name: Force public entity types (if enabled)
+        if: ${{ inputs.force-public == 'true' }}
+        run: echo " --force-public " >> extra-params.txt
 
       - name: Run generation
         run: |

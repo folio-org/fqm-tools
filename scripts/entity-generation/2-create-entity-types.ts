@@ -37,6 +37,10 @@ const args = parseArgs({
       type: 'boolean',
       default: false,
     },
+    'force-public': {
+      type: 'boolean',
+      default: false,
+    },
   },
   strict: true,
   allowPositionals: true,
@@ -53,6 +57,7 @@ if (args.values.help) {
   console.log('  -h, --help              Show this help message');
   console.log('  -o, --out               Output directory (default: out)');
   console.log('  --force-generate-joins  [dev only] Force generation of joins even if no matching target is found.');
+  console.log('  --force-public          [dev only] Mark all entity types as public (visible via the Lists app).');
   console.log('                          Will fill dummy data in for target ET/fields, to enable result verification.');
   process.exit(1);
 }
@@ -250,7 +255,10 @@ for (const {
   entityType,
   metadata: { domain, module },
 } of results) {
-  await mkdir(path.resolve(args.values.out, 'entity-types', domain, module), { recursive: true });
+  if (args.values['force-public']) {
+    entityType.private = false;
+  }
+
   await write('entity-types', domain, module, `${entityType.name}.json5`, json5.stringify(entityType, null, 2));
 
   for (const column of entityType.columns ?? []) {
