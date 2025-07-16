@@ -1,6 +1,6 @@
 import { DataType, DataTypeValue, EntityType, EntityTypeField } from '@/types';
 import { describe, expect, it, mock } from 'bun:test';
-import entityTypeToCsv, { getDataType, getOperators, getValues } from './csv';
+import entityTypeToCsv, { csvToMarkdownCompressed, getDataType, getOperators, getValues } from './csv';
 
 mock.module('papaparse', () => ({
   unparse: mock((data) => JSON.stringify(data)), // saner testing
@@ -352,5 +352,16 @@ describe('CSV generation', () => {
       const result = await getValues(column, explodingFetchEntityType);
       expect(result).toBe('');
     });
+  });
+});
+
+describe('csvToMarkdownCompressed', () => {
+  it('should convert a simple CSV to markdown, skipping first 3 columns', () => {
+    const csv = ['a,b,c,d,e', '1,2,3,4,5', 'x,y,z,w,v'].join('\n');
+
+    const result = csvToMarkdownCompressed(csv);
+
+    // Only columns d and e should remain
+    expect(result).toBe('|d|e|\n|-|-|\n|4|5|\n|w|v|');
   });
 });
