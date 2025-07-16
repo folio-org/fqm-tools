@@ -1,5 +1,5 @@
 name: Generate and submit entity types
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Generate entity types; PR={0}, repos={1}, args={2}', inputs.create-pr, tojson(inputs.repository-list), tojson(inputs)) || '' }}
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('Generate entity types: PR={0}, repos={1}, args={2}', inputs.create-pr, tojson(inputs.repository-list), tojson(inputs)) || '' }}"
 
 on:
   # these must be duplicated :(
@@ -92,8 +92,6 @@ jobs:
 
       - name: Clone repositories
         run: bun scripts/entity-generation/1-clone-repositories.ts | tee clone-list.txt
-        env:
-          DEBUG: '*'
 
       - name: Force join generation (if enabled)
         if: ${{ inputs.force-generate-joins == true }}
@@ -107,8 +105,6 @@ jobs:
         run: |
           touch extra-params.txt
           xargs bun scripts/entity-generation/2-create-entity-types.ts $(cat extra-params.txt) < clone-list.txt | tee generation.log
-        env:
-          DEBUG: '*'
 
       - name: Login as PR-creating app
         uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2
