@@ -1,5 +1,5 @@
 name: Generate and submit entity types
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Generate entity types; PR={0}, args={1}', inputs.create-pr, tojson(inputs)) || '' }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Generate entity types; PR={0}, repos={1}, args={2}', inputs.create-pr, tojson(inputs.repository-list), tojson(inputs)) || '' }}
 
 on:
   # these must be duplicated :(
