@@ -1,4 +1,4 @@
-import { csvToMarkdownCompressed } from '@/src/schema-conversion/csv';
+import { csvToMarkdownCompressed, ResultRowPretty } from '@/src/schema-conversion/csv';
 import { ErrorSerialized, getDescription, getTitle } from '@/src/schema-conversion/error';
 import { EntityType } from '@/types';
 import { WebClient } from '@slack/web-api';
@@ -7,6 +7,7 @@ import { $, Glob } from 'bun';
 import { readdir } from 'fs/promises';
 import json5 from 'json5';
 import diff from 'microdiff';
+import { parse } from 'papaparse';
 import path from 'path';
 import pluralize from 'pluralize';
 import { parseArgs } from 'util';
@@ -346,12 +347,14 @@ await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.valu
           ),
         ).scanSync(),
       ][0];
+      const csvContents = await Bun.file(csv).text();
+      const entityId = (parse(csvContents, { header: true }).data[0] as ResultRowPretty)['Entity ID'];
 
       console.log();
       console.log('<details>');
-      console.log(`<summary>${DIFF_EMOJI.CREATE} \`${entityType}\`</summary>`);
+      console.log(`<summary>${DIFF_EMOJI.CREATE} <code>${entityType}</code> (<code>${entityId}</code>)</summary>`);
       console.log();
-      console.log(csvToMarkdownCompressed(await Bun.file(csv).text()));
+      console.log(csvToMarkdownCompressed(csvContents));
       console.log();
       console.log('</details>');
       console.log();
