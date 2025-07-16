@@ -508,13 +508,11 @@ console.log('---');
 await logCollapsable('Run/debug information', async () => {
   console.log(`- **Job link**: [${args.values['run-url']}](${args.values['run-url']})`);
   console.log(`- **Run date**: \`${new Date().toISOString()}\``);
-  console.log(`- **FQM directory**: \`${args.values['base-dir']}\``);
   console.log(
     `- **FQM ref**: \`${(await $`git -C ${args.values['base-dir']} rev-parse HEAD`.nothrow().quiet().text()).trim()}\``,
   );
-  console.log(`- **Generation directory**: \`${args.values['generated-dir']}\``);
-  console.log(`- **Error log**: \`${args.values['error-log']}\``);
   console.log(`- **Affected teams**: \`${Array.from(affectedTeams).join('`, `')}\``);
+  console.log(`- **Report arguments**: \`${JSON.stringify(args.values)}\``);
   console.log('');
 
   await logCollapsable('`run-config.yaml` contents', async (p) => {
