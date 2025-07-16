@@ -1,11 +1,13 @@
+import { csvToMarkdownCompressed, ResultRowPretty } from '@/src/schema-conversion/csv';
 import { ErrorSerialized, getDescription, getTitle } from '@/src/schema-conversion/error';
 import { EntityType } from '@/types';
 import { WebClient } from '@slack/web-api';
 import { AsciiTable3 } from 'ascii-table3';
-import { $ } from 'bun';
+import { $, Glob } from 'bun';
 import { readdir } from 'fs/promises';
 import json5 from 'json5';
 import diff from 'microdiff';
+import { parse } from 'papaparse';
 import path from 'path';
 import pluralize from 'pluralize';
 import { parseArgs } from 'util';
@@ -55,6 +57,10 @@ const args = parseArgs({
       type: 'string',
       short: 'n',
     },
+    'run-url': {
+      type: 'string',
+      default: 'about:blank',
+    },
   },
   strict: true,
   allowPositionals: false,
@@ -76,6 +82,7 @@ if (args.values.help) {
   console.log('  -o, --generated-dir   Output directory from create-entity-types.ts (default: out)');
   console.log('  -i, --error-log       Where create-entity-types.ts stddout is saved (default: -, for stdin)');
   console.log('  -n, --pr-number       Send Slack notifications about this report and the provided PR number');
+  console.log('  --run-url             URL of the run, used in the report to link to the full files');
   process.exit(1);
 }
 
@@ -331,9 +338,34 @@ if (newIssues.length > 0) {
 console.log('# Change summary');
 console.log();
 
-await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.values(entityTypeDiff))}`, () => {
+await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.values(entityTypeDiff))}`, async () => {
   for (const [entityType, type] of Object.entries(entityTypeDiff)) {
-    console.log(`- ${DIFF_EMOJI[type]} \`${entityType}\``);
+    if (type === 'CREATE') {
+      const csv = [
+        ...new Glob(
+          path.resolve(
+            args.values['generated-dir'],
+            'csv',
+            '*',
+            entityType.split('__')[0].replaceAll('_', '-'),
+            `${entityType}.csv`,
+          ),
+        ).scanSync(),
+      ][0];
+      const csvContents = await Bun.file(csv).text();
+      const entityId = (parse(csvContents, { header: true }).data[0] as ResultRowPretty)['Entity ID'];
+
+      console.log();
+      console.log('<details>');
+      console.log(`<summary>${DIFF_EMOJI.CREATE} <code>${entityType}</code> (<code>${entityId}</code>)</summary>`);
+      console.log();
+      console.log(csvToMarkdownCompressed(csvContents));
+      console.log();
+      console.log('</details>');
+      console.log();
+    } else {
+      console.log(`- ${DIFF_EMOJI[type]} \`${entityType}\``);
+    }
   }
 });
 
@@ -474,14 +506,13 @@ for (const team of Object.keys(issuesByTeam).toSorted()) {
 
 console.log('---');
 await logCollapsable('Run/debug information', async () => {
+  console.log(`- **Job link**: [${args.values['run-url']}](${args.values['run-url']})`);
   console.log(`- **Run date**: \`${new Date().toISOString()}\``);
-  console.log(`- **FQM directory**: \`${args.values['base-dir']}\``);
   console.log(
     `- **FQM ref**: \`${(await $`git -C ${args.values['base-dir']} rev-parse HEAD`.nothrow().quiet().text()).trim()}\``,
   );
-  console.log(`- **Generation directory**: \`${args.values['generated-dir']}\``);
-  console.log(`- **Error log**: \`${args.values['error-log']}\``);
   console.log(`- **Affected teams**: \`${Array.from(affectedTeams).join('`, `')}\``);
+  console.log(`- **Report arguments**: \`${JSON.stringify(args.values)}\``);
   console.log('');
 
   await logCollapsable('`run-config.yaml` contents', async (p) => {
