@@ -136,6 +136,11 @@ jobs:
       - name: Stage changes
         run: bun scripts/entity-generation/4-stage-changes.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log
 
+      - name: Stage changes (git)
+        run: |
+          cd mod-fqm-manager
+          git add .
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7
         id: create-pr

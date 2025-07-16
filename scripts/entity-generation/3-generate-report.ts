@@ -1,8 +1,9 @@
+import csvToMarkdown from 'csv-to-markdown-table';
 import { ErrorSerialized, getDescription, getTitle } from '@/src/schema-conversion/error';
 import { EntityType } from '@/types';
 import { WebClient } from '@slack/web-api';
 import { AsciiTable3 } from 'ascii-table3';
-import { $ } from 'bun';
+import { $, Glob } from 'bun';
 import { readdir } from 'fs/promises';
 import json5 from 'json5';
 import diff from 'microdiff';
@@ -331,9 +332,32 @@ if (newIssues.length > 0) {
 console.log('# Change summary');
 console.log();
 
-await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.values(entityTypeDiff))}`, () => {
+await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.values(entityTypeDiff))}`, async () => {
   for (const [entityType, type] of Object.entries(entityTypeDiff)) {
-    console.log(`- ${DIFF_EMOJI[type]} \`${entityType}\``);
+    if (type === 'CREATE') {
+      const csv = [
+        ...new Glob(
+          path.resolve(
+            args.values['generated-dir'],
+            'csv',
+            '*',
+            entityType.split('__')[0].replaceAll('_', '-'),
+            `${entityType}.csv`,
+          ),
+        ).scanSync(),
+      ][0];
+
+      console.log();
+      console.log('<details>');
+      console.log(`<summary>${DIFF_EMOJI.CREATE} \`${entityType}\`</summary>`);
+      console.log();
+      console.log(csvToMarkdown(await Bun.file(csv).text(), ',', true));
+      console.log();
+      console.log('</details>');
+      console.log();
+    } else {
+      console.log(`- ${DIFF_EMOJI[type]} \`${entityType}\``);
+    }
   }
 });
 
