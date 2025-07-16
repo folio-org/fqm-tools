@@ -96,11 +96,11 @@ jobs:
           DEBUG: '*'
 
       - name: Force join generation (if enabled)
-        if: ${{ inputs.force-generate-joins == 'true' }}
+        if: ${{ inputs.force-generate-joins == true }}
         run: echo " --force-generate-joins " >> extra-params.txt
 
       - name: Force public entity types (if enabled)
-        if: ${{ inputs.force-public == 'true' }}
+        if: ${{ inputs.force-public == true }}
         run: echo " --force-public " >> extra-params.txt
 
       - name: Run generation
