@@ -57,6 +57,10 @@ const args = parseArgs({
       type: 'string',
       short: 'n',
     },
+    'run-url': {
+      type: 'string',
+      default: 'about:blank',
+    },
   },
   strict: true,
   allowPositionals: false,
@@ -78,6 +82,7 @@ if (args.values.help) {
   console.log('  -o, --generated-dir   Output directory from create-entity-types.ts (default: out)');
   console.log('  -i, --error-log       Where create-entity-types.ts stddout is saved (default: -, for stdin)');
   console.log('  -n, --pr-number       Send Slack notifications about this report and the provided PR number');
+  console.log('  --run-url             URL of the run, used in the report to link to the full files');
   process.exit(1);
 }
 
@@ -501,6 +506,7 @@ for (const team of Object.keys(issuesByTeam).toSorted()) {
 
 console.log('---');
 await logCollapsable('Run/debug information', async () => {
+  console.log(`- **Job link**: [${args.values['run-url']}](${args.values['run-url']})`);
   console.log(`- **Run date**: \`${new Date().toISOString()}\``);
   console.log(`- **FQM directory**: \`${args.values['base-dir']}\``);
   console.log(

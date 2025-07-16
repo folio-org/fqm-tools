@@ -128,7 +128,13 @@ jobs:
 
       - name: Generate report
         id: report
-        run: bun scripts/entity-generation/3-generate-report.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log | tee report.md
+        run: |
+          bun scripts/entity-generation/3-generate-report.ts \
+            --base-dir mod-fqm-manager \
+            --generated-dir out \
+            --error-log generation.log \
+            --run-url "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            | tee report.md
 
       - name: Send report to GitHub
         run: cat report.md >> $GITHUB_STEP_SUMMARY
