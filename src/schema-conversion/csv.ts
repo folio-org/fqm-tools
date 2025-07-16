@@ -1,5 +1,6 @@
 import { DataType, DataTypeValue, EntityType, EntityTypeField } from '@/types';
-import { unparse } from 'papaparse';
+import { markdownTable } from 'markdown-table';
+import { parse, unparse } from 'papaparse';
 
 export interface ResultRow {
   baseEntity: string;
@@ -213,4 +214,19 @@ export async function getOperators(
     default:
       return '?';
   }
+}
+
+export function csvToMarkdownCompressed(csv: string) {
+  const data = parse(csv, {
+    delimiter: ',',
+    header: false,
+  }).data as string[][];
+
+  return markdownTable(
+    data.map((r) => r.slice(3)),
+    {
+      padding: false,
+      alignDelimiters: false,
+    },
+  );
 }

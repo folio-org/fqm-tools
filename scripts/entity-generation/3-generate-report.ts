@@ -1,4 +1,4 @@
-import csvToMarkdown from 'csv-to-markdown-table';
+import { csvToMarkdownCompressed } from '@/src/schema-conversion/csv';
 import { ErrorSerialized, getDescription, getTitle } from '@/src/schema-conversion/error';
 import { EntityType } from '@/types';
 import { WebClient } from '@slack/web-api';
@@ -351,7 +351,7 @@ await logCollapsable(`Entity types (addition/removal): ${diffSummary(Object.valu
       console.log('<details>');
       console.log(`<summary>${DIFF_EMOJI.CREATE} \`${entityType}\`</summary>`);
       console.log();
-      console.log(csvToMarkdown(await Bun.file(csv).text(), ',', true));
+      console.log(csvToMarkdownCompressed(await Bun.file(csv).text()));
       console.log();
       console.log('</details>');
       console.log();
