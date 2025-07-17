@@ -211,6 +211,7 @@ for (const { entityType, metadata } of results) {
   for (const [locale, translations] of translationsByLocale.entries()) {
     translationsByLocale.set(locale, {
       ...inferredTranslations,
+      ...translationsByLocale.get('en'),
       ...translations,
     });
   }
