@@ -9,6 +9,7 @@ const ALLOWED_CUSTOM_PROPERTIES = [
   'x-fqm-value-function',
   'x-fqm-is-id-column',
   'x-fqm-value-source-api',
+  'x-fqm-values',
   'x-fqm-visible-by-default',
   'x-fqm-visibility',
   'x-fqm-essential',

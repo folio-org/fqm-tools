@@ -27,6 +27,12 @@ describe('getExtraProperties', () => {
     expect(result.extraProperties.valueSourceApi as unknown).toBe('api-source');
   });
 
+  it('should return values when x-fqm-values is present', () => {
+    const schema = { 'x-fqm-values': 'value-list' } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.values as unknown).toBe('value-list');
+  });
+
   it.each([
     ['all', { queryable: true, queryOnly: false, hidden: false }],
     ['query-only', { queryable: true, queryOnly: true, hidden: false }],
