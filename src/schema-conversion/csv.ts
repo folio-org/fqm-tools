@@ -170,7 +170,7 @@ export async function getValues(
   fetchEntityType: (entityTypeId: string) => Promise<EntityType>,
 ): Promise<string> {
   if (column.valueSourceApi) {
-    return `dropdown from API(${column.valueSourceApi.path})`;
+    return `dropdown from API (${column.valueSourceApi.path})`;
   } else if (column.values) {
     if (column.values.length === 2 && column.values[0].value === 'true' && column.values[1].value === 'false') {
       return 'true/false';
