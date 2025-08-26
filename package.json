@@ -76,7 +76,7 @@
     "eslint-config-next": "15.4.2",
     "eslint-config-prettier": "10.1.8",
     "husky": "9.1.7",
-    "lint-staged": "16.1.2",
+    "lint-staged": "16.1.5",
     "supports-color": "10.0.0",
     "typescript": "5.8.3"
   },
