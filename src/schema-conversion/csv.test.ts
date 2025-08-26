@@ -307,7 +307,7 @@ describe('CSV generation', () => {
       } as EntityTypeField;
 
       const result = await getValues(column, explodingFetchEntityType);
-      expect(result).toBe('dropdown from API(/api/path)');
+      expect(result).toBe('dropdown from API (/api/path)');
     });
 
     it('returns "true/false" when values are hardcoded as true and false', async () => {
