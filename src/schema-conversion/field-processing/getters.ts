@@ -139,7 +139,7 @@ export function getNestedGetters(
 
 export function stripGetters(field: EntityTypeField): Omit<EntityTypeField, keyof GetterOverrides> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { valueGetter, filterValueGetter, valueFunction, ...rest } = field;
+  const { valueGetter, filterValueGetter, valueFunction, sourceAlias, ...rest } = field;
 
   return rest;
 }
