@@ -88,11 +88,12 @@ describe('getGetters', () => {
   ])('handles overrides in %o as expected', (schema, expected) => {
     expect(
       getGetters('prop', schema as JSONSchema7, { dataType: DataTypeValue.integerType }, entityTypeConfig, config),
-    ).toEqual(expected);
+    ).toEqual({ ...expected, sourceAlias: 'sauce' });
   });
 
   it('handles array with no itemDataType', () => {
     expect(getGetters('prop', {}, { dataType: DataTypeValue.arrayType }, entityTypeConfig, config)).toEqual({
+      sourceAlias: 'sauce',
       filterValueGetter:
         "(SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sauce.jsonb->'prop') AS elems)",
       valueGetter: "(SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sauce.jsonb->'prop') AS elems)",
@@ -109,6 +110,7 @@ describe('getGetters', () => {
         config,
       ),
     ).toEqual({
+      sourceAlias: 'sauce',
       filterValueGetter:
         "(SELECT array_agg(lower(elems.value::text)) FROM jsonb_array_elements(:sauce.jsonb->'prop') AS elems)",
       valueGetter: "(SELECT array_agg(elems.value::text) FROM jsonb_array_elements(:sauce.jsonb->'prop') AS elems)",
@@ -135,11 +137,12 @@ describe('getGetters', () => {
       },
     ],
   ])('handles special data type %o', (dataType, expected) => {
-    expect(getGetters('prop', {}, dataType, entityTypeConfig, config)).toEqual(expected);
+    expect(getGetters('prop', {}, dataType, entityTypeConfig, config)).toEqual({ ...expected, sourceAlias: 'sauce' });
   });
 
   it('handles regular string without RMB index style', () => {
     expect(getGetters('prop', {}, { dataType: DataTypeValue.stringType }, entityTypeConfig, config)).toEqual({
+      sourceAlias: 'sauce',
       valueGetter: ":sauce.jsonb->>'prop'",
     });
   });
@@ -154,6 +157,7 @@ describe('getGetters', () => {
         config,
       ),
     ).toEqual({
+      sourceAlias: 'sauce',
       valueGetter: ":sauce.jsonb->>'prop'",
       filterValueGetter: "lower(${tenant_id}_mod_foo.f_unaccent(:sauce.jsonb->>'prop'::text))",
       valueFunction: 'lower(${tenant_id}_mod_foo.f_unaccent(:value))',

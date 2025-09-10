@@ -19,6 +19,7 @@
       "isIdColumn": true,
       "queryable": true,
       "visibleByDefault": false,
+      "sourceAlias": "department",
       "valueGetter": ":department.id",
       "valueFunction": "(:value)::uuid"
     },
@@ -30,6 +31,7 @@
       "queryable": true,
       "visibleByDefault": false,
       "valueGetter": ":department.jsonb->>'name'",
+      "sourceAlias": "department",
       "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'name'::text))",
       "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
       "valueSourceApi": {
@@ -46,6 +48,7 @@
       "queryable": true,
       "visibleByDefault": false,
       "valueGetter": ":department.jsonb->>'code'",
+      "sourceAlias": "department",
       "filterValueGetter": "lower(${tenant_id}_mod_users.f_unaccent(:department.jsonb->>'code'::text))",
       "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))"
     },
@@ -56,6 +59,7 @@
       },
       "queryable": true,
       "visibleByDefault": false,
+      "sourceAlias": "department",
       "valueGetter": ":department.jsonb->>'source'"
     },
     {
@@ -65,6 +69,7 @@
       },
       "queryable": true,
       "visibleByDefault": false,
+      "sourceAlias": "department",
       "valueGetter": "(:department.jsonb->>'usageNumber')::integer",
       "valueFunction": "(:value)::integer"
     },
@@ -148,6 +153,7 @@
       "name": "test_array",
       "queryable": false,
       "valueFunction": "lower(${tenant_id}_mod_users.f_unaccent(:value))",
+      "sourceAlias": "department",
       "valueGetter": ":department.jsonb->>'testArray'",
       "visibleByDefault": false
     },
