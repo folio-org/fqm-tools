@@ -9,7 +9,7 @@ interface GetterOverrides {
 }
 
 export function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides, source: string) {
-  const result = { ...getters };
+  const result = { ...getters, sourceAlias: source };
 
   for (const [key, value] of Object.entries(overrides) as [keyof GetterOverrides, string | null][]) {
     if (value === null) {
