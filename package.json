@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
-    "@types/bun": "1.2.21",
+    "@types/bun": "1.2.22",
     "@types/debug": "4.1.12",
     "@types/fast-stats": "0.0.35",
     "@types/lodash.memoize": "4.1.9",
