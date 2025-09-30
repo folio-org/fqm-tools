@@ -78,7 +78,7 @@
     "husky": "9.1.7",
     "lint-staged": "16.2.3",
     "supports-color": "10.2.2",
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   },
   "lint-staged": {
     "*.{json,json5,css,md}": "prettier --write",
