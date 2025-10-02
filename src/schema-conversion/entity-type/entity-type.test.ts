@@ -195,7 +195,7 @@ describe('createEntityTypeFromConfig', () => {
           permissions: ['perm1', 'perm2'],
           sort: ['id', 'ASC'],
           private: true,
-          fieldOverrides: [
+          fieldAdditions: [
             {
               name: 'jsonb',
               dataType: { dataType: DataTypeValue.stringType },
