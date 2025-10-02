@@ -142,7 +142,7 @@
               "filterValueGetter": "(SELECT array_agg(lower(elems.value->>'testString')) FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)",
               "name": "test_string",
               "property": "testString",
-              "queryable": false,
+              "queryable": true,
               "valueFunction": "lower(:value)",
               "valueGetter": "(SELECT array_agg(elems.value->>'testString') FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)"
             }

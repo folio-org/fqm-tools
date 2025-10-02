@@ -83,6 +83,9 @@ export function inferTranslationsFromField(
     translations[key] = sentenceCase(name);
     if (dt.dataType === DataTypeValue.rangedUUIDType) {
       translations[key] = translations[key].replace(/\bid\b/i, 'UUID');
+    } else {
+      translations[key] = translations[key].replace(/\bid\b/i, 'ID');
+      translations[key] = translations[key].replace(/\bids\b/i, 'IDs');
     }
     if (name === 'jsonb') {
       translations[key] = 'JSONB';
