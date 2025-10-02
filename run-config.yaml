@@ -4,5 +4,6 @@ modules:
   #        or "[module name][#(branch/tag/commit)]"
   # Using a repository name instead of the full git path will assume "https://github.com/folio-org/{module}.git".
   # Omitting the ref will use the default branch. Using an explicit ref is not recommended; it is only to be used short-term for testing or debugging.
-  - mod-patron-blocks
   - mod-feesfines
+  - mod-orders-storage
+  - mod-patron-blocks
