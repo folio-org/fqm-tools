@@ -39,7 +39,7 @@ export function inferFieldFromSchema(
   const issues: string[] = [];
 
   const name = snakeCase(prop);
-  Object.assign(propSchema, entityType.fieldOverrides?.[prop] ?? {});
+  Object.assign(propSchema, entityType.fieldOverrides?.[name] ?? {});
 
   issues.push(...validateField(prop, propSchema));
 
