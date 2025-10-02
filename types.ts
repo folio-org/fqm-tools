@@ -196,8 +196,9 @@ export const EntityTypeGenerationConfigTemplate = z
           sort: z.tuple([z.string(), z.string()]),
           useRmbIndexStyle: z.boolean().optional(),
           includeJsonbField: z.boolean().optional(),
-          fieldOverrides: z.array(z.lazy(() => EntityTypeFieldTemplate)).optional(),
+          fieldAdditions: z.array(z.lazy(() => EntityTypeFieldTemplate)).optional(),
           fieldExclusions: z.array(z.string()).optional(),
+          fieldOverrides: z.record(z.string(), z.any()).optional(),
         })
         .strict(),
     ),

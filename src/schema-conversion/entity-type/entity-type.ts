@@ -32,13 +32,13 @@ export default function createEntityTypeFromConfig(
     })
     .filter((f): f is NonNullable<EntityTypeField> => !!f);
 
-  const completedColumns = applyOverrides(
+  const completedColumns = applyAdditionReplacements(
     ensureNestedObjectsAreProperForm(
       markNestedArrayOfObjectsNonQueryable(
         removeNestedFieldDisallowedProperties(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
       ),
     ),
-    entityType['fieldOverrides'],
+    entityType['fieldAdditions'],
   );
 
   const [columns, exclusionIssues] = applyExclusions(completedColumns, entityType['fieldExclusions']);
@@ -84,9 +84,9 @@ function getSort(sort: [string, string]): NonNullable<EntityType['defaultSort']>
   };
 }
 
-function applyOverrides(
+function applyAdditionReplacements(
   fields: EntityTypeField[],
-  overrides?: EntityTypeGenerationConfig['entityTypes'][number]['fieldOverrides'],
+  overrides?: EntityTypeGenerationConfig['entityTypes'][number]['fieldAdditions'],
 ): EntityTypeField[] {
   const withOverrides = [...fields, ...(overrides || [])];
 
