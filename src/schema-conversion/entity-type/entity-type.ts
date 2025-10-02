@@ -6,6 +6,7 @@ import {
   ensureNestedObjectsAreProperForm,
   getJsonbField,
   inferFieldFromSchema,
+  markNestedArrayOfObjectsNonQueryable,
   removeNestedFieldDisallowedProperties,
   unpackObjectColumns,
 } from '../field-processing/field';
@@ -33,7 +34,9 @@ export default function createEntityTypeFromConfig(
 
   const completedColumns = applyOverrides(
     ensureNestedObjectsAreProperForm(
-      removeNestedFieldDisallowedProperties(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
+      markNestedArrayOfObjectsNonQueryable(
+        removeNestedFieldDisallowedProperties(unpackObjectColumns([...baseColumns, ...getJsonbField(entityType)])),
+      ),
     ),
     entityType['fieldOverrides'],
   );

@@ -106,6 +106,28 @@ function recursiveFieldApplier(
   return result;
 }
 
+export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[]): EntityTypeField[] {
+  // temporarily mark all nested array of objects (of number/integers) as non-queryable; see UXPROD-4858
+  return columns.map((column) => ({
+    ...column,
+    dataType: recursiveFieldApplier(column.dataType, [], (field, path) => {
+      // this will always be array->object as object->array gets flattened in unpackObjectColumns
+      if (
+        path.includes('array') &&
+        path.includes('object') &&
+        [DataTypeValue.numberType, DataTypeValue.integerType].includes(field.dataType.dataType)
+      ) {
+        return {
+          ...field,
+          queryable: false,
+        };
+      } else {
+        return field;
+      }
+    }),
+  }));
+}
+
 export function ensureNestedObjectsAreProperForm(columns: EntityTypeField[]): EntityTypeField[] {
   // all array->object fields must be arrayType->objectType, not jsonbArrayType->objectType.
   // generator currently spits out jsonbArrayType->objectType instead, so we must convert it.
