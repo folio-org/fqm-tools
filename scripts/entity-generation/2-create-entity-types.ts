@@ -186,7 +186,7 @@ for (const { dir, config } of configs) {
 
       translationsByLocale.set(locale, {
         ...translationsByLocale.get(locale),
-        ...marshallExternalTranslations(incoming, config.metadata, expectedTranslationKeys),
+        ...marshallExternalTranslations(incoming, config.metadata, expectedTranslationKeys, locale === 'en'),
       });
     }
   } catch (e) {

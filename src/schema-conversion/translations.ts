@@ -112,6 +112,7 @@ export function marshallExternalTranslations(
   translations: Record<string, string>,
   metadata: EntityTypeGenerationConfig['metadata'],
   expectedTranslationKeys: string[],
+  warnOnExtra = false,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   const extraTranslations: string[] = [];
@@ -130,7 +131,7 @@ export function marshallExternalTranslations(
     }
   }
 
-  if (extraTranslations.length > 0) {
+  if (extraTranslations.length > 0 && warnOnExtra) {
     warn(metadata, undefined, {
       type: 'translations-extra',
       extraTranslations,

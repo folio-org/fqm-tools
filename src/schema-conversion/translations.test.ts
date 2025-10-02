@@ -178,7 +178,7 @@ describe('marshallExternalTranslations', () => {
     });
   });
 
-  it('warns if extra translations are found', () => {
+  it('warns if extra translations are found and warning is enabled', () => {
     const translations = {
       'fqm.entityType.test_entity.field1': 'Field 1',
       'fqm.entityType.test_entity.field2': 'Field 2',
@@ -186,16 +186,41 @@ describe('marshallExternalTranslations', () => {
     };
     const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
 
-    const result = marshallExternalTranslations(translations, metadata, [
-      'entityType.mod_test__test_entity.field1',
-      'entityType.mod_test__test_entity.field2',
-    ]);
+    const result = marshallExternalTranslations(
+      translations,
+      metadata,
+      ['entityType.mod_test__test_entity.field1', 'entityType.mod_test__test_entity.field2'],
+      true,
+    );
 
     expect(error).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledWith(metadata, undefined, {
       type: 'translations-extra',
       extraTranslations: ['fqm.entityType.extra_entity.field3'],
     });
+    expect(result).toEqual({
+      'entityType.mod_test__test_entity.field1': 'Field 1',
+      'entityType.mod_test__test_entity.field2': 'Field 2',
+    });
+  });
+
+  it('warns if extra translations are found and warning is enabled', () => {
+    const translations = {
+      'fqm.entityType.test_entity.field1': 'Field 1',
+      'fqm.entityType.test_entity.field2': 'Field 2',
+      'fqm.entityType.extra_entity.field3': 'Extra Field',
+    };
+    const metadata = { module: 'mod-test', team: 'foo', domain: 'circulation' } as const;
+
+    const result = marshallExternalTranslations(
+      translations,
+      metadata,
+      ['entityType.mod_test__test_entity.field1', 'entityType.mod_test__test_entity.field2'],
+      false,
+    );
+
+    expect(error).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     expect(result).toEqual({
       'entityType.mod_test__test_entity.field1': 'Field 1',
       'entityType.mod_test__test_entity.field2': 'Field 2',
