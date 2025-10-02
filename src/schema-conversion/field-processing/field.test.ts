@@ -180,6 +180,11 @@ describe('markNestedArrayOfObjectsNonQueryable', () => {
                 dataType: { dataType: DataTypeValue.stringType },
                 queryable: true,
               },
+              {
+                name: 'nestedField2',
+                dataType: { dataType: DataTypeValue.integerType },
+                queryable: true,
+              },
             ],
           },
         },
@@ -189,7 +194,8 @@ describe('markNestedArrayOfObjectsNonQueryable', () => {
 
     const result = markNestedArrayOfObjectsNonQueryable(columns);
 
-    expect(result[0].dataType.itemDataType?.properties?.[0].queryable).toBe(false);
+    expect(result[0].dataType.itemDataType?.properties?.[0].queryable).toBeTrue();
+    expect(result[0].dataType.itemDataType?.properties?.[1].queryable).toBeFalse();
   });
 
   it('does not modify non-array or non-object fields', () => {
@@ -224,7 +230,7 @@ describe('markNestedArrayOfObjectsNonQueryable', () => {
                     properties: [
                       {
                         name: 'deepField',
-                        dataType: { dataType: DataTypeValue.stringType },
+                        dataType: { dataType: DataTypeValue.integerType },
                         queryable: true,
                       },
                     ],
@@ -255,7 +261,7 @@ describe('markNestedArrayOfObjectsNonQueryable', () => {
           properties: [
             {
               name: 'nestedField',
-              dataType: { dataType: DataTypeValue.stringType },
+              dataType: { dataType: DataTypeValue.integerType },
               queryable: true,
             },
           ],
