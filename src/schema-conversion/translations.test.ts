@@ -204,7 +204,7 @@ describe('marshallExternalTranslations', () => {
     });
   });
 
-  it('warns if extra translations are found and warning is enabled', () => {
+  it('does not warn if extra translations are found and warning is disabled', () => {
     const translations = {
       'fqm.entityType.test_entity.field1': 'Field 1',
       'fqm.entityType.test_entity.field2': 'Field 2',
