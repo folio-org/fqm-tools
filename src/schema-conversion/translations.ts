@@ -81,12 +81,18 @@ export function inferTranslationsFromField(
     const { key, name, dt } = stack.pop()!;
 
     translations[key] = sentenceCase(name);
+
     if (dt.dataType === DataTypeValue.rangedUUIDType) {
       translations[key] = translations[key].replace(/\bid\b/i, 'UUID');
     } else {
       translations[key] = translations[key].replace(/\bid\b/i, 'ID');
       translations[key] = translations[key].replace(/\bids\b/i, 'IDs');
     }
+
+    translations[key] = translations[key].replace(/\bpo\b/i, 'PO');
+    translations[key] = translations[key].replace(/\bpol\b/i, 'POL');
+    translations[key] = translations[key].replace(/\bhrid\b/i, 'HRID');
+
     if (name === 'jsonb') {
       translations[key] = 'JSONB';
     }
