@@ -43,7 +43,7 @@ export function inferFieldFromSchema(
 
   issues.push(...validateField(prop, propSchema));
 
-  const [dataType, dtIssues] = getDataType(propSchema, `->'${prop}'`, entityType, config);
+  const [dataType, dtIssues] = getDataType(propSchema, prop.includes('->') ? prop : `->'${prop}'`, entityType, config);
   issues.push(...dtIssues.map((i) => `${prop}: ${i}`));
 
   const { extraProperties, issues: extraIssues } = getExtraProperties(propSchema);
