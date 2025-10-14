@@ -80,7 +80,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'createdDate'"
+      "valueGetter": ":department.jsonb->'metadata'->>'createdDate'",
+      "sourceAlias": "department"
     },
     {
       "name": "metadata_created_by_user_id",
@@ -90,7 +91,8 @@
       "queryable": true,
       "visibleByDefault": false,
       "valueFunction": "(:value)::uuid",
-      "valueGetter": "(:department.jsonb->'metadata'->>'createdByUserId')::uuid"
+      "valueGetter": "(:department.jsonb->'metadata'->>'createdByUserId')::uuid",
+      "sourceAlias": "department"
     },
     {
       "name": "metadata_created_by_username",
@@ -99,7 +101,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'createdByUsername'"
+      "valueGetter": ":department.jsonb->'metadata'->>'createdByUsername'",
+      "sourceAlias": "department"
     },
     {
       "name": "metadata_updated_date",
@@ -108,7 +111,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'updatedDate'"
+      "valueGetter": ":department.jsonb->'metadata'->>'updatedDate'",
+      "sourceAlias": "department"
     },
     {
       "name": "metadata_updated_by_user_id",
@@ -118,7 +122,8 @@
       "queryable": true,
       "visibleByDefault": false,
       "valueFunction": "(:value)::uuid",
-      "valueGetter": "(:department.jsonb->'metadata'->>'updatedByUserId')::uuid"
+      "valueGetter": "(:department.jsonb->'metadata'->>'updatedByUserId')::uuid",
+      "sourceAlias": "department"
     },
     {
       "name": "metadata_updated_by_username",
@@ -127,7 +132,8 @@
       },
       "queryable": true,
       "visibleByDefault": false,
-      "valueGetter": ":department.jsonb->'metadata'->>'updatedByUsername'"
+      "valueGetter": ":department.jsonb->'metadata'->>'updatedByUsername'",
+      "sourceAlias": "department"
     },
     {
       "dataType": {

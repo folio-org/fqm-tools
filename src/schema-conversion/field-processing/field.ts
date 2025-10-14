@@ -78,6 +78,7 @@ export function unpackObjectColumns(columns: EntityTypeField[]): EntityTypeField
     return column.dataType.properties.map(({ property, ...prop }) => ({
       ...prop,
       name: `${column.name}_${snakeCase(prop.name)}`,
+      sourceAlias: column.sourceAlias ?? null,
     }));
   });
 
