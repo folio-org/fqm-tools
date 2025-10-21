@@ -146,6 +146,8 @@ export function getDataType(dataType: DataType): string {
       return 'boolean';
     case DataTypeValue.dateType:
       return 'date';
+    case DataTypeValue.dateTimeType:
+      return 'datetime';
     case DataTypeValue.enumType:
       return 'enum';
     case DataTypeValue.integerType:

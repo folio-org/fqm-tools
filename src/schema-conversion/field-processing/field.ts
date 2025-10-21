@@ -117,7 +117,12 @@ export function markNestedArrayOfObjectsNonQueryable(columns: EntityTypeField[])
       if (
         path.includes('array') &&
         path.includes('object') &&
-        [DataTypeValue.numberType, DataTypeValue.integerType].includes(field.dataType.dataType)
+        [
+          DataTypeValue.numberType,
+          DataTypeValue.integerType,
+          DataTypeValue.dateType,
+          DataTypeValue.dateTimeType,
+        ].includes(field.dataType.dataType)
       ) {
         return {
           ...field,
