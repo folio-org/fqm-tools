@@ -28,7 +28,7 @@ Data types control how the field is handled by FQM and how it may be queried. A 
 The most common ones you will use are:
 
 - `stringType`: basic text fields
-- `dateType`: date/time fields
+- `dateTimeType`: date/time fields
 - `rangedUUIDType`: standard UUID type
 - `booleanType`: boolean true/false
 - `numberType`: float numbers
