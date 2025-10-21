@@ -12,7 +12,7 @@ const log = {
 
 enum SimpleGuessedType {
   STRING = 'string',
-  DATE = 'date',
+  DATETIME = 'datetime',
   UUID = 'uuid',
   BOOLEAN = 'boolean',
   NUMBER = 'number',
@@ -39,10 +39,8 @@ function getSimpleTypeFromSimpleSchema(schema: JSONSchema7): SimpleGuessedType {
     case 'string,null':
     case 'string':
       if ('format' in schema) {
-        if (schema.format === 'date-time') {
-          return SimpleGuessedType.DATE;
-        } else if (schema.format === 'date') {
-          return SimpleGuessedType.DATE;
+        if (schema.format === 'date-time' || schema.format === 'date') {
+          return SimpleGuessedType.DATETIME;
         } else if (schema.format === 'uuid') {
           return SimpleGuessedType.UUID;
         }
@@ -129,7 +127,7 @@ export function getDataType(
     case SimpleGuessedType.UNKNOWN:
     case SimpleGuessedType.UNKNOWN_REF:
       return [{ dataType: DataTypeValue.stringType }, issues];
-    case SimpleGuessedType.DATE:
+    case SimpleGuessedType.DATETIME:
       return [{ dataType: DataTypeValue.dateType }, issues];
     case SimpleGuessedType.UUID:
       return [{ dataType: DataTypeValue.rangedUUIDType }, issues];

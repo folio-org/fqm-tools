@@ -120,7 +120,7 @@ export default function DBColumnInspector({
                     case 'date':
                     case 'timestamp without time zone':
                     case 'timestamp with time zone':
-                      return DataTypeValue.dateType;
+                      return DataTypeValue.dateTimeType;
                     case 'boolean':
                       return DataTypeValue.booleanType;
                     default:

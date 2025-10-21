@@ -22,6 +22,7 @@ export enum DataTypeValue {
   jsonbArrayType = 'jsonbArrayType',
   booleanType = 'booleanType',
   dateType = 'dateType',
+  dateTimeType = 'dateTimeType',
   enumType = 'enumType',
   integerType = 'integerType',
   numberType = 'numberType',
