@@ -128,7 +128,7 @@ export function getDataType(
     case SimpleGuessedType.UNKNOWN_REF:
       return [{ dataType: DataTypeValue.stringType }, issues];
     case SimpleGuessedType.DATETIME:
-      return [{ dataType: DataTypeValue.dateType }, issues];
+      return [{ dataType: DataTypeValue.dateTimeType }, issues];
     case SimpleGuessedType.UUID:
       return [{ dataType: DataTypeValue.rangedUUIDType }, issues];
     case SimpleGuessedType.BOOLEAN:

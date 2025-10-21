@@ -240,6 +240,7 @@ describe('CSV generation', () => {
       [{ dataType: DataTypeValue.arrayType }, 'unknown[]'],
       [{ dataType: DataTypeValue.booleanType }, 'boolean'],
       [{ dataType: DataTypeValue.dateType }, 'date'],
+      [{ dataType: DataTypeValue.dateTimeType }, 'datetime'],
       [{ dataType: DataTypeValue.enumType }, 'enum'],
       [{ dataType: DataTypeValue.integerType }, 'integer'],
       [{ dataType: DataTypeValue.numberType }, 'number'],

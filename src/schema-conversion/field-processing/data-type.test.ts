@@ -45,11 +45,11 @@ describe('getDataType', () => {
   it.each([
     { type: 'string', format: 'date-time' },
     { type: 'string', format: 'date' },
-  ])('converts %o to dateType', (schema) => {
+  ])('converts %o to dateTimeType', (schema) => {
     const [dataType, issues] = getDataType(schema as JSONSchema7, 'outer', entityTypeConfig, config);
 
     expect(issues).toBeEmpty();
-    expect(dataType.dataType).toBe(DataTypeValue.dateType);
+    expect(dataType.dataType).toBe(DataTypeValue.dateTimeType);
     expect(dataType.itemDataType).toBeUndefined();
     expect(dataType.properties).toBeUndefined();
   });
