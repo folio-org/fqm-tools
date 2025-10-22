@@ -71,6 +71,14 @@ describe('getExtraProperties', () => {
     expect(result.issues).toBeEmpty();
   });
 
+  it('should set source when x-fqm-source is present', () => {
+    const source = { entityTypeId: 'customEntityTypeId', columnName: 'customColumnName' };
+    const schema = { 'x-fqm-source': source } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.source).toBe(source);
+    expect(result.issues).toBeEmpty();
+  });
+
   it('should pass intermediate join information', () => {
     const schema = {
       'x-fqm-joins-to': [{ targetModule: 'mod-target', targetEntity: 'entity', targetField: 'field1' }],
