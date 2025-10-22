@@ -113,5 +113,9 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties.joinsTo = getJoinsToRaw(propSchema['x-fqm-joins-to-raw'] as unknown[], issues);
   }
 
+  if ('x-fqm-source' in propSchema) {
+    extraProperties.source = propSchema['x-fqm-source'] as string;
+  }
+
   return { extraProperties, issues };
 }

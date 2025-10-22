@@ -172,6 +172,7 @@ describe('getDataType', () => {
             valueFunction: 'lower(:value)',
             valueGetter: "(SELECT array_agg(elems.value->>'foo') FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
             visibleByDefault: false,
+            sourceAlias: 'sauce',
           },
           {
             dataType: {
@@ -184,6 +185,7 @@ describe('getDataType', () => {
             valueGetter:
               "(SELECT array_agg((elems.value->>'bar')::uuid) FROM jsonb_array_elements(:sauce.jsonb) AS elems)",
             visibleByDefault: false,
+            sourceAlias: 'sauce',
           },
         ],
       },

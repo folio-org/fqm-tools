@@ -18,6 +18,7 @@ Custom properties may be added to your existing JSON/YAML schemas to customize t
 | `x-fqm-value-function`      | string (SQL)                                     | inferred                                                  | How the field should be queried from the database; [see below](#getters)                                                                                            |
 | `x-fqm-values`              | array of object `{value: string, label: string}` | none                                                      | Values to be presented in the query builder dropdown, should match an enum used in code.                                                                            |
 | `x-fqm-value-source-api`    | object                                           | none                                                      | APIs that can provide values for queries; [see below](#value-source-apis)                                                                                           |
+| `x-fqm-source`              | object                                           | none                                                      | Reference to an entity type field that defines properties (valueGetter, valueSourceApi, etc.) for this field; [see below](#sources)                                 |
 | `x-fqm-joins-to`            | array                                            | `[]`                                                      | Defines how this field can join to other entity types; [see below](#joins)                                                                                          |
 | `x-fqm-joins-to-raw`        | array                                            | `[]`                                                      | Defines how this field can join to other non-generated entity types; [see below](#joins)                                                                            |
 
@@ -81,6 +82,21 @@ The `valueJsonPath` and `labelJsonPath` describe the values being used for the q
 > [!NOTE]
 >
 > Any permissions required for these APIs **must** be included in the `permissions` set for the entity type. Changes to these permission lists also **must** be communicated to Corsair.
+
+### Sources
+
+`Source` is an optional field that can be provided to indicate that this field's values are derived from another entity type's field. By using `source` to reference an existing field in another entity type, the properties for that field (valueGetter, valueSourceApi, etc.) can be reused without having to redefine the properties in the new entity type. For example:
+
+```json5
+{
+  'x-fqm-source': {
+    entityTypeId: '12345678-1234-1234-1234-123456789012', // the UUID of the entity type
+    columnName: 'created_by', // the internal name of the field in that entity type
+  },
+}
+```
+
+In the above example, the `x-fqm-source` property indicates that this field's values are derived from the `created_by` field of the entity type with the specified UUID. When this field is used in FQM, it will use the valueGetter, valueSourceApi, and other properties defined for the `created_by` field in the referenced entity type.
 
 ### Joins
 
