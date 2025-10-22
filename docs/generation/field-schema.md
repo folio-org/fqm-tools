@@ -85,7 +85,7 @@ The `valueJsonPath` and `labelJsonPath` describe the values being used for the q
 
 ### Sources
 
-`Source` is an optional field that can be provided to indicate that this field's values are derived from another entity type's field. By using `source` to reference an existing field in another entity type, the properties for that field (valueGetter, valueSourceApi, etc) can be reused without having to redefine the properties in the new entity type. For example:
+`Source` is an optional field that can be provided to indicate that this field's values are derived from another entity type's field. By using `source` to reference an existing field in another entity type, the properties for that field (valueGetter, valueSourceApi, etc.) can be reused without having to redefine the properties in the new entity type. For example:
 
 ```json5
 {
