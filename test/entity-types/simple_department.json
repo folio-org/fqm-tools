@@ -150,7 +150,8 @@
               "property": "testString",
               "queryable": true,
               "valueFunction": "lower(:value)",
-              "valueGetter": "(SELECT array_agg(elems.value->>'testString') FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)"
+              "valueGetter": "(SELECT array_agg(elems.value->>'testString') FROM jsonb_array_elements(:department.jsonb->'testArray') AS elems)",
+              "sourceAlias": "department"
             }
           ]
         }
