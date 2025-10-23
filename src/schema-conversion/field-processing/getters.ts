@@ -8,8 +8,16 @@ interface GetterOverrides {
   valueFunction?: string | null;
 }
 
-export function handleGetterOverrides(getters: Partial<EntityTypeField>, overrides: GetterOverrides, source: string) {
-  const result = { ...getters, sourceAlias: source };
+export function handleGetterOverrides(
+  getters: Partial<EntityTypeField>,
+  overrides: GetterOverrides,
+  source: string,
+  includeSourceAlias = true,
+) {
+  const result = { ...getters };
+  if (includeSourceAlias) {
+    result.sourceAlias = source;
+  }
 
   for (const [key, value] of Object.entries(overrides) as [keyof GetterOverrides, string | null][]) {
     if (value === null) {

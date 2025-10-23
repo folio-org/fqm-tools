@@ -177,7 +177,7 @@ export function getDataType(
 
           return {
             ...stripGetters(result),
-            ...handleGetterOverrides(nestedDefaults, overrides, entityType.source),
+            ...handleGetterOverrides(nestedDefaults, overrides, entityType.source, false),
             name: snakeCase(prop),
             property: prop,
           };
