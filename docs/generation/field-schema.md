@@ -159,15 +159,3 @@ Optionally, we can define a `direction` (works as SQL JOIN directions, with our 
 | `custom`             | custom                          | Used for any other use case. If you use this, an additional property `sql` must be provided to be used as the join condition, with `:this` and `:that` as placeholders for each side's value getters. |
 
 `:this` and `:that` refer to the value getters from each field and will be interpolated at runtime.
-
-## RAML validation errors
-
-Occasionally, [api-lint](https://github.com/folio-org/folio-tools/tree/master/api-lint) may produce validation errors after adding these properties. This is only an issue with RAML and can be resolved by adding `annotationTypes` to the RAML file, as shown below for `x-fqm-values` usage:
-
-```yaml
-annotationTypes:
-  fqm-values:
-    type: array
-```
-
-These should be added to each RAML file which is experiencing errors. Nothing more is necessary than a simple type (array, object, string, etc) and the property name (without the `x-`).
