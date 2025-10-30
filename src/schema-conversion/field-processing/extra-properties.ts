@@ -97,8 +97,8 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties = { ...extraProperties, ...getVisibilityProps(propSchema['x-fqm-visibility'] as string) };
   }
 
-  if ('x-fqm-visibility-by-default' in propSchema) {
-    extraProperties.visibleByDefault = propSchema['x-fqm-visibility-by-default'] === true;
+  if ('x-fqm-visible-by-default' in propSchema) {
+    extraProperties.visibleByDefault = propSchema['x-fqm-visible-by-default'] === true;
   }
 
   if ('x-fqm-essential' in propSchema) {
