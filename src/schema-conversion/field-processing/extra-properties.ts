@@ -98,7 +98,6 @@ export function getExtraProperties(propSchema: JSONSchema7) {
   }
 
   if ('x-fqm-visible-by-default' in propSchema) {
-    console.log('x-fqm-visible-by-default', propSchema['x-fqm-visible-by-default']);
     extraProperties.visibleByDefault = propSchema['x-fqm-visible-by-default'] === true;
   }
 
