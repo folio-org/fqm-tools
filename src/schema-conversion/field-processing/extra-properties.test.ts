@@ -50,8 +50,8 @@ describe('getExtraProperties', () => {
     expect(() => getExtraProperties(schema)).toThrow('Invalid value for x-fqm-visibility: invalid');
   });
 
-  it('should set visibleByDefault when x-fqm-visibility-by-default is present', () => {
-    const schema = { 'x-fqm-visibility-by-default': true } as JSONSchema7;
+  it('should set visibleByDefault when x-fqm-visible-by-default is present', () => {
+    const schema = { 'x-fqm-visible-by-default': true } as JSONSchema7;
     const result = getExtraProperties(schema);
     expect(result.extraProperties.visibleByDefault).toBe(true);
     expect(result.issues).toBeEmpty();
