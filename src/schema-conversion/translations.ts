@@ -55,6 +55,7 @@ export function inferTranslationsFromEntityType(entityType: EntityType): Record<
   const translations: Record<string, string> = {};
 
   translations[`entityType.${entityType.name}`] = sentenceCase(entityType.name.split('__').pop()!);
+  translations[`entityType.${entityType.name}._description`] = entityType.description ?? '';
 
   entityType.columns?.forEach((column) => {
     const columnTranslations = inferTranslationsFromField(column, entityType.name);
