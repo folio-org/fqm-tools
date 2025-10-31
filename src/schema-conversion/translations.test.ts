@@ -28,6 +28,7 @@ describe('inferTranslationsFromEntityType', () => {
       'entityType.test_entity': 'Test entity',
       'entityType.test_entity.my_date': 'My date',
       'entityType.test_entity.cool_id': 'Cool UUID',
+      'entityType.test_entity._description': '<Please fill in a description for this entity type>',
     });
   });
 });
