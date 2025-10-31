@@ -18,6 +18,7 @@ describe('inferTranslationsFromEntityType', () => {
     const result = inferTranslationsFromEntityType({
       id: 'zzz',
       name: 'test_entity',
+      description: 'test_description',
       columns: [
         { name: 'my_date', dataType: { dataType: DataTypeValue.stringType } },
         { name: 'cool_id', dataType: { dataType: DataTypeValue.rangedUUIDType } },
@@ -28,6 +29,7 @@ describe('inferTranslationsFromEntityType', () => {
       'entityType.test_entity': 'Test entity',
       'entityType.test_entity.my_date': 'My date',
       'entityType.test_entity.cool_id': 'Cool UUID',
+      'entityType.test_entity._description': 'test_description',
     });
   });
 });
