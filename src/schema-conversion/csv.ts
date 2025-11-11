@@ -194,7 +194,11 @@ export async function getOperators(
     return 'not queryable';
   }
   if (getDataType(column.dataType).endsWith('[]')) {
-    return 'contains all/any, not contains all/any, empty';
+    if (/* no values */ (await getValues(column, fetchEntityType)) === '') {
+      return 'contains all/any, not contains all/any, empty';
+    } else {
+      return '=, !=, contains, starts, empty';
+    }
   }
   switch (getDataType(column.dataType)) {
     case 'string':

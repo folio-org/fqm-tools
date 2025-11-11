@@ -259,13 +259,22 @@ describe('CSV generation', () => {
     it.each([
       // Non-queryable column
       [{ queryable: false, dataType: { dataType: DataTypeValue.stringType } } as EntityTypeField, 'not queryable'],
-      // Array data type
+      // Array data type without values
       [
         {
           queryable: true,
           dataType: { dataType: DataTypeValue.arrayType, itemDataType: { dataType: DataTypeValue.stringType } },
         } as EntityTypeField,
         'contains all/any, not contains all/any, empty',
+      ],
+      // Array data type with values
+      [
+        {
+          queryable: true,
+          dataType: { dataType: DataTypeValue.arrayType, itemDataType: { dataType: DataTypeValue.stringType } },
+          valueSourceApi: { path: '/api/path' },
+        } as EntityTypeField,
+        '=, !=, contains, starts, empty',
       ],
       // String data type with no values
       [
