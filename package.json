@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@apidevtools/json-schema-ref-parser": "^14.2.0",
+    "@apidevtools/json-schema-ref-parser": "^15.0.0",
     "@codemirror/lang-java": "^6.0.2",
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-sql": "^6.9.1",
