@@ -195,9 +195,9 @@ export async function getOperators(
   }
   if (getDataType(column.dataType).endsWith('[]')) {
     if (/* no values */ (await getValues(column, fetchEntityType)) === '') {
-      return 'contains all/any, not contains all/any, empty';
-    } else {
       return '=, !=, contains, starts, empty';
+    } else {
+      return 'contains all/any, not contains all/any, empty';
     }
   }
   switch (getDataType(column.dataType)) {

@@ -164,7 +164,7 @@ describe('CSV generation', () => {
           'Joins to': '',
           Label: 'Recursive Column',
           Name: 'recursive_column',
-          Operators: 'contains all/any, not contains all/any, empty',
+          Operators: '=, !=, contains, starts, empty',
           Queryable: true,
           'Simple entity': '',
           'Table (nested)': '',
@@ -265,7 +265,7 @@ describe('CSV generation', () => {
           queryable: true,
           dataType: { dataType: DataTypeValue.arrayType, itemDataType: { dataType: DataTypeValue.stringType } },
         } as EntityTypeField,
-        'contains all/any, not contains all/any, empty',
+        '=, !=, contains, starts, empty',
       ],
       // Array data type with values
       [
@@ -274,7 +274,7 @@ describe('CSV generation', () => {
           dataType: { dataType: DataTypeValue.arrayType, itemDataType: { dataType: DataTypeValue.stringType } },
           valueSourceApi: { path: '/api/path' },
         } as EntityTypeField,
-        '=, !=, contains, starts, empty',
+        'contains all/any, not contains all/any, empty',
       ],
       // String data type with no values
       [
