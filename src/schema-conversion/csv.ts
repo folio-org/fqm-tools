@@ -213,6 +213,7 @@ export async function getOperators(
     case 'integer':
     case 'number':
     case 'date':
+    case 'datetime':
     case 'object':
       return '=, !=, >, >=, <, <=, empty';
     case 'boolean':
