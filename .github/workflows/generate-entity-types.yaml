@@ -79,7 +79,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
       - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2
 
       - name: Set config (if custom run)
@@ -120,7 +120,7 @@ jobs:
           repositories: mod-fqm-manager
 
       - name: Checkout mod-fqm-manager
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           repository: folio-org/mod-fqm-manager
           token: ${{ steps.generate-token.outputs.token }}
