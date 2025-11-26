@@ -183,7 +183,7 @@ export const EntityTypeGenerationConfigTemplate = z
     sources: z.array(
       z.union([
         z.object({ name: z.string(), table: z.string() }).strict(),
-        z.object({ name: z.string(), sql: z.string() }).strict(),
+        z.object({ name: z.string(), sql: z.string(), deps: z.array(z.string()) }).strict(),
       ]),
     ),
     entityTypes: z.array(

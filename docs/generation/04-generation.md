@@ -22,9 +22,9 @@ This creates a lot of files in the `out` folder!
 <dd>
 Contains the generated entity types as JSON5 files. We'll look more into this more in a minute...
 </dd>
-<dt><code>out/liquibase</code></dt>
+<dt><code>out/db</code></dt>
 <dd>
-Contains the Liquibase changelogs that will create the necessary database views based on the provided sources.
+Contains the source view definitions based on the provided sources.
 </dd>
 <dt><code>out/translations</code></dt>
 <dd>

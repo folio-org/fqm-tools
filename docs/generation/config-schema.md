@@ -25,11 +25,12 @@ module = "mod-cool-circ"
 
 Each source block represents a database view that will be used to back entity types. At least one block must be defined, and each block must have a unique `name`.
 
-| Property | Type    | Description                                                                                                                                       |
-| -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`   | string  | The name of the source. Must be unique across all sources.                                                                                        |
-| `table`  | string? | The name of the table to use as the source. Only one of `table` or `sql` may be provided.                                                         |
-| `sql`    | string? | The SQL query to use as the source. Only one of `table` or `sql` may be provided. `${tenant_id} may be used as a placeholder inside schema names. |
+| Property | Type      | Description                                                                                                                                                                 |
+| -------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | string    | The name of the source. Must be unique across all sources.                                                                                                                  |
+| `table`  | string?   | The name of the table to use as the source. Only one of `table` or (`sql` and `deps`) may be provided.                                                                      |
+| `sql`    | string?   | The full SQL SELECT query to use as the source. Only one of `table` or (`sql` and `deps`) may be provided. `${tenant_id}` may be used as a placeholder inside schema names. |
+| `deps`   | string[]? | A list of tables used in the SQL query. Only one of `table` or (`sql` and `deps`) may be provided.                                                                          |
 
 ### Example
 
@@ -42,6 +43,7 @@ table = "raw_coolness_values"
 [[sources]]
 name = "coolness"
 sql = "SELECT * FROM ${tenant_id}_mod_cool_circ.raw_coolness_values"
+tables = ["raw_coolness_values"]
 ```
 
 ## Entity Types

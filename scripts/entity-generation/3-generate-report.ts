@@ -74,7 +74,7 @@ if (args.positionals.length !== 0) {
 if (args.values.help) {
   console.log('Usage: bun 3-generate-report.ts [options]');
   console.log(
-    'Generates a summary and error report based on the changes to entity types, liquibase changelogs, and translations.',
+    'Generates a summary and error report based on the changes to entity types, source views, and translations.',
   );
   console.log('Options:');
   console.log('  -h, --help            Show this help message');
@@ -95,40 +95,36 @@ const teamInfo = await Bun.file(path.resolve(__dirname, '../../team-info.yaml'))
 
 const affectedTeams = new Set<string>(['corsair']);
 
-// liquibase and translations are sufficient to determine summary ± across versions, as all ETs and their fields are catalogued via translation keys
-async function readChangelogsFromDirectory(
-  dir: string,
-): Promise<Record<string, { module: string; selectQuery: string }>> {
+// db and translations are sufficient to determine summary ± across versions, as all ETs and their fields are catalogued via translation keys
+async function readSourceViewsFromDirectory(dir: string): Promise<Record<string, { module: string; sql: string }>> {
   return Object.fromEntries(
-    (
-      await Promise.all(
-        (
-          await readdir(dir, { recursive: true }).catch((e) => {
-            console.error(`Failed to read directory ${dir}:`, e);
-            return [];
-          })
-        )
-          .filter((f) => f.endsWith('.yaml'))
-          .map((f) => path.resolve(dir, f))
-          .map((f) =>
-            Bun.file(f)
-              .text()
-              .then(YAML.parse)
-              .then((c): [string, { module: string; selectQuery: string }] | [null, null] => {
-                if (!('createView' in (c.databaseChangeLog[0].changeSet.changes[0] ?? {}))) {
-                  return [null, null];
-                }
-                return [
-                  c.databaseChangeLog[0].changeSet.changes[0].createView.viewName,
-                  {
-                    module: c.databaseChangeLog[0].changeSet.author.split('--').slice(-1)[0].trim(),
-                    selectQuery: c.databaseChangeLog[0].changeSet.changes[0].createView.selectQuery,
-                  },
-                ];
-              }),
-          ),
+    await Promise.all(
+      (
+        await readdir(dir, { recursive: true }).catch((e) => {
+          console.error(`Failed to read directory ${dir}:`, e);
+          return [];
+        })
       )
-    ).filter((c) => c[0] !== null),
+        .filter((f) => f.endsWith('.json5'))
+        .map((f) => path.resolve(dir, f))
+        .map((f) =>
+          Bun.file(f)
+            .text()
+            .then(json5.parse)
+            .then((c): [string, { module: string; sql: string }] => {
+              return [
+                c.name,
+                {
+                  module: f
+                    .split('/')
+                    .filter((s) => s.startsWith('mod-'))
+                    .reverse()[0],
+                  sql: c.sql,
+                },
+              ];
+            }),
+        ),
+    ),
   );
 }
 
@@ -153,16 +149,16 @@ async function readEntityTypesFromDirectory(dir: string): Promise<Record<string,
   );
 }
 
-const originalViews = await readChangelogsFromDirectory(
-  path.resolve(args.values['base-dir'], 'src', 'main', 'resources', 'db', 'changelog', 'external', 'changesets'),
+const originalViews = await readSourceViewsFromDirectory(
+  path.resolve(args.values['base-dir'], 'src', 'main', 'resources', 'db', 'source-views', 'external'),
 );
-const newViews = await readChangelogsFromDirectory(path.resolve(args.values['generated-dir'], 'liquibase'));
+const newViews = await readSourceViewsFromDirectory(path.resolve(args.values['generated-dir'], 'db'));
 
-const liquibaseDiff = diff(originalViews, newViews, {
+const sourceViewDiff = diff(originalViews, newViews, {
   cyclesFix: false,
 }).toSorted((a, b) => DIFF_SORT[a.type] - DIFF_SORT[b.type]);
 
-liquibaseDiff.forEach((change) => {
+sourceViewDiff.forEach((change) => {
   const key = change.path[0] as string;
   if (key in newViews) {
     affectedTeams.add(moduleToTeamMap[newViews[key].module] || 'corsair');
@@ -419,8 +415,8 @@ await logCollapsable(
   1,
 );
 
-await logCollapsable(`Liquibase: ${diffSummary(liquibaseDiff.map((c) => c.type))}`, () => {
-  for (const change of liquibaseDiff) {
+await logCollapsable(`Source views: ${diffSummary(sourceViewDiff.map((c) => c.type))}`, () => {
+  for (const change of sourceViewDiff) {
     console.log(`- ${DIFF_EMOJI[change.type]} \`${change.path[0]}\``);
   }
 });
@@ -565,8 +561,8 @@ if (args.values['pr-number']) {
             short: true,
           },
           {
-            title: 'Liquibase',
-            value: diffSummary(liquibaseDiff.map((c) => c.type)),
+            title: 'Source views',
+            value: diffSummary(sourceViewDiff.map((c) => c.type)),
             short: true,
           },
         ],
