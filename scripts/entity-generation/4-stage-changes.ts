@@ -1,10 +1,7 @@
-import { mkdir } from 'fs/promises';
-import { readdir } from 'fs/promises';
-import { rm } from 'fs/promises';
+import { ErrorSerialized } from '@/src/schema-conversion/error';
+import { mkdir, readdir, rm } from 'fs/promises';
 import path from 'path';
 import { parseArgs } from 'util';
-import YAML from 'yaml';
-import { ErrorSerialized } from '@/src/schema-conversion/error';
 
 const args = parseArgs({
   args: Bun.argv.slice(2),
@@ -87,88 +84,31 @@ for (const file of (await readdir(translationGeneratedDir, { recursive: true }))
   console.log('[Translations] Copied', file.name, 'to', targetFile);
 }
 
-const liquibaseDir = path.resolve(
+const sourceViewsDir = path.resolve(
   args.values['base-dir'],
   'src',
   'main',
   'resources',
   'db',
-  'changelog',
+  'source-views',
   'external',
-  'changesets',
 );
-const liquibaseGeneratedDir = path.resolve(args.values['generated-dir'], 'liquibase');
-console.log('[Liquibase] Deleting existing changesets in', liquibaseDir);
-await rm(liquibaseDir, { recursive: true, force: true });
-console.log('[Liquibase] Creating new changeset directory', liquibaseDir);
-await mkdir(liquibaseDir, { recursive: true });
-console.log('[Liquibase] Copying generated changesets from', liquibaseGeneratedDir, 'to', liquibaseDir);
+const sourceViewsGeneratedDir = path.resolve(args.values['generated-dir'], 'db');
+console.log('[Source views] Deleting existing source view definitions in', sourceViewsDir);
+await rm(sourceViewsDir, { recursive: true, force: true });
+console.log('[Source views] Creating new source view definitions directory', sourceViewsDir);
+await mkdir(sourceViewsDir, { recursive: true });
+console.log('[Source views] Copying generated source view defs from', sourceViewsGeneratedDir, 'to', sourceViewsDir);
 
-for (const file of (await readdir(liquibaseGeneratedDir, { recursive: true }))
-  .filter((f) => f.endsWith('.yaml'))
-  .map((f) => path.resolve(liquibaseGeneratedDir, f))
+for (const file of (await readdir(sourceViewsGeneratedDir, { recursive: true }))
+  .filter((f) => f.endsWith('.json5'))
+  .map((f) => path.resolve(sourceViewsGeneratedDir, f))
   .map((f) => Bun.file(f))) {
-  const targetFile = path.resolve(liquibaseDir, path.relative(liquibaseGeneratedDir, file.name!));
+  const targetFile = path.resolve(sourceViewsDir, path.relative(sourceViewsGeneratedDir, file.name!));
   await mkdir(path.dirname(targetFile), { recursive: true });
   Bun.write(targetFile, file);
-  console.log('[Liquibase] Copied', file.name, 'to', targetFile);
+  console.log('[Source views] Copied', file.name, 'to', targetFile);
 }
-
-const historicViewsPath = path.resolve(
-  args.values['base-dir'],
-  'src',
-  'main',
-  'resources',
-  'db',
-  'changelog',
-  'external',
-  'provided-views.json',
-);
-const historicViews = new Set<string>((await Bun.file(historicViewsPath).json()) as string[]);
-const currentViews = (
-  await Promise.all(
-    (await readdir(liquibaseDir, { recursive: true }))
-      .filter((f) => f.endsWith('.yaml'))
-      .map((f) => path.resolve(liquibaseDir, f))
-      .map((f) =>
-        Bun.file(f)
-          .text()
-          .then(YAML.parse)
-          .then((c) => c.databaseChangeLog[0].changeSet.changes[0]?.createView?.viewName as string),
-      ),
-  )
-).filter((c) => c !== null);
-
-currentViews.forEach((v) => historicViews.add(v));
-
-console.log('[Liquibase cleanup] Writing list of', historicViews.size, 'historic views to', historicViewsPath);
-await Bun.write(historicViewsPath, JSON.stringify(Array.from(historicViews), null, 2));
-
-const viewsRemoved = historicViews.difference(new Set(currentViews));
-console.log('[Liquibase cleanup] Found', viewsRemoved.size, 'views that have been removed over time:', viewsRemoved);
-
-const removedViewsChangesetPath = path.resolve(liquibaseDir, 'remove-old-views.yaml');
-console.log('[Liquibase cleanup] Writing removed views to', removedViewsChangesetPath);
-await Bun.write(
-  removedViewsChangesetPath,
-  YAML.stringify({
-    databaseChangeLog: [
-      {
-        changeSet: {
-          id: `drop_old_generated_views`,
-          author: `generated-by-fqm-tools`,
-          runAlways: true,
-          changes: [...viewsRemoved].map((viewName) => ({
-            dropView: {
-              ifExists: true,
-              viewName,
-            },
-          })),
-        },
-      },
-    ],
-  }),
-);
 
 const issueLogFile = args.values['error-log'] === '-' ? Bun.stdin : Bun.file(args.values['error-log']);
 const issues = (await issueLogFile.text())
