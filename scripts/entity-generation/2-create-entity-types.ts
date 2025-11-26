@@ -7,7 +7,7 @@ import {
   marshallExternalTranslations,
   unmarshallTranslationKey,
 } from '@/src/schema-conversion/translations';
-import createLiquibaseChangeset, { disambiguateSource } from '@/src/schema-conversion/liquibase/changeset';
+import createSourceViewDefinition, { disambiguateSource } from '@/src/schema-conversion/source-view';
 import { EntityType, EntityTypeGenerationConfig, EntityTypeGenerationConfigTemplate } from '@/types';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
 import { TOML } from 'bun';
@@ -65,7 +65,7 @@ if (args.values.help) {
 async function write(category: string, domain: string, module: string, filename: string, data: string) {
   const fullPath = path.resolve(args.values.out, category, domain, module, filename);
   await mkdir(path.dirname(fullPath), { recursive: true });
-  await Bun.write(Bun.file(fullPath), data);
+  await Bun.write(Bun.file(fullPath), data.trim() + '\n');
   await Bun.write(Bun.stderr, `Wrote ${fullPath}\n`);
 }
 
@@ -106,14 +106,14 @@ for (const { config } of configs) {
       sourceMap![source.name] = disambiguated.name;
       source.name = disambiguated.name;
 
-      const changeset = createLiquibaseChangeset(disambiguated, config);
+      const sourceViewDefinition = createSourceViewDefinition(disambiguated, config);
 
       await write(
-        'liquibase',
+        'db',
         config.metadata.domain,
         config.metadata.module,
-        `${disambiguated.name}.yaml`,
-        YAML.stringify(changeset),
+        `${disambiguated.name}.json5`,
+        json5.stringify(sourceViewDefinition, null, 2),
       );
 
       return disambiguated;
