@@ -34,6 +34,7 @@ If you need more control, you can define a source with custom `sql` instead:
 [[sources]]
 name = "data"
 sql = "SELECT * FROM ${tenant_id}_mod_cool_module.data_table"
+deps = ["data_table"]
 ```
 
 > [!WARNING]
