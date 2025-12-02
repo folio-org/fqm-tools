@@ -79,7 +79,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
       - uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2
 
       - name: Set config (if custom run)
@@ -111,7 +111,7 @@ jobs:
           DEBUG: ${{ runner.debug == 1 && '*' || '' }}
 
       - name: Login as PR-creating app
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2
         id: generate-token
         with:
           app-id: ${{ secrets.GH_APP_ID }}
@@ -120,7 +120,7 @@ jobs:
           repositories: mod-fqm-manager
 
       - name: Checkout mod-fqm-manager
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
         with:
           repository: folio-org/mod-fqm-manager
           token: ${{ steps.generate-token.outputs.token }}
@@ -150,7 +150,7 @@ jobs:
         run: bun scripts/entity-generation/4-stage-changes.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7
+        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7
         id: create-pr
         if: ${{ inputs.create-pr != 'no' }}
         with:
