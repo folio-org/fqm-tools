@@ -150,7 +150,7 @@ jobs:
         run: bun scripts/entity-generation/4-stage-changes.ts --base-dir mod-fqm-manager --generated-dir out --error-log generation.log
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412 # v7
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8
         id: create-pr
         if: ${{ inputs.create-pr != 'no' }}
         with:
