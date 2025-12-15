@@ -72,7 +72,7 @@
     "@types/pluralize": "0.0.33",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "eslint": "9.39.1",
+    "eslint": "9.39.2",
     "eslint-config-next": "15.5.9",
     "eslint-config-prettier": "10.1.8",
     "husky": "9.1.7",
