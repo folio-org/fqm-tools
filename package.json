@@ -68,7 +68,7 @@
     "@types/fast-stats": "0.0.35",
     "@types/lodash.memoize": "4.1.9",
     "@types/node": "24.10.3",
-    "@types/papaparse": "5.5.1",
+    "@types/papaparse": "5.5.2",
     "@types/pluralize": "0.0.33",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
