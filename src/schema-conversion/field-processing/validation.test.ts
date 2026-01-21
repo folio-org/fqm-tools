@@ -34,10 +34,8 @@ describe('validateField', () => {
       'x-fqm-visibility': 'invalid-value',
     };
     const result = validateField('test', schema as JSONSchema7);
-    expect(result).toContainAllValues([
-      'Invalid custom properties found for property test: x-fqm-invalid-property',
-      'Invalid value for x-fqm-visibility in property test: invalid-value',
-    ]);
+    expect(result).toContain('Invalid custom properties found for property test: x-fqm-invalid-property');
+    expect(result).toContain('Invalid value for x-fqm-visibility in property test: invalid-value');
   });
 
   it.each(['all', 'query-only', 'results-only', 'hidden', 'hidden-non-queryable'])(

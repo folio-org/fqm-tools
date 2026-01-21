@@ -39,7 +39,10 @@ export function inferFieldFromSchema(
   const issues: string[] = [];
 
   const name = snakeCase(prop);
-  Object.assign(propSchema, entityType.fieldOverrides?.[name] ?? {});
+
+  // NOTE: propSchema objects may be shared across multiple fields (e.g. via $ref). Never mutate in-place,
+  // otherwise overrides will "leak" to every other field that references the same schema object.
+  propSchema = { ...(propSchema as JSONSchema7), ...(entityType.fieldOverrides?.[name] ?? {}) };
 
   issues.push(...validateField(prop, propSchema));
 
