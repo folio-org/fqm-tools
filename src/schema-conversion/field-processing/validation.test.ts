@@ -40,7 +40,7 @@ describe('validateField', () => {
     ]);
   });
 
-  it.each(['all', 'query-only', 'results-only', 'hidden'])(
+  it.each(['all', 'query-only', 'results-only', 'hidden', 'hidden-non-queryable'])(
     'handles schemas with valid x-fqm-visibility value: %s',
     (visibility) => {
       const schema = {
