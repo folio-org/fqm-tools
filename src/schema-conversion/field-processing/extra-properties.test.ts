@@ -38,6 +38,7 @@ describe('getExtraProperties', () => {
     ['query-only', { queryable: true, queryOnly: true, hidden: false }],
     ['results-only', { queryable: false, queryOnly: false, hidden: false }],
     ['hidden', { hidden: true }],
+    ['hidden-non-queryable', { hidden: true, queryable: false }],
   ])('should handle x-fqm-visibility=%s correctly', (visibility, expected) => {
     const schema = { 'x-fqm-visibility': visibility } as JSONSchema7;
     const result = getExtraProperties(schema);

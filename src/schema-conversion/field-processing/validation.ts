@@ -32,7 +32,7 @@ export function validateField(name: string, schema: JSONSchema7): string[] {
 
   if (
     rawSchema['x-fqm-visibility'] &&
-    !['all', 'query-only', 'results-only', 'hidden'].includes(rawSchema['x-fqm-visibility'])
+    !['all', 'query-only', 'results-only', 'hidden', 'hidden-non-queryable'].includes(rawSchema['x-fqm-visibility'])
   ) {
     issues.push(`Invalid value for x-fqm-visibility in property ${name}: ${rawSchema['x-fqm-visibility']}`);
   }
