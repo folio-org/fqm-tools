@@ -44,8 +44,8 @@ function getVisibilityProps(visibility: string) {
       };
     case 'hidden-non-queryable':
       return {
-        hidden: true,
         queryable: false,
+        hidden: true,
       };
     default:
       throw new Error(`Invalid value for x-fqm-visibility: ${visibility}`);
