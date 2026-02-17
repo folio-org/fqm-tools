@@ -168,7 +168,6 @@ export function getDataType(
           issues.push(...innerIssues.map((e) => `in object property ${prop}: ${e}`));
 
           if (!result) {
-            issues.push(`in object property ${prop}: unable to generate field`);
             return null;
           }
 
