@@ -80,6 +80,13 @@ describe('getExtraProperties', () => {
     expect(result.issues).toBeEmpty();
   });
 
+  it('should set idColumnName when x-fqm-id-column-name is present', () => {
+    const schema = { 'x-fqm-id-column-name': 'customIdColumn' } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.idColumnName).toBe('customIdColumn');
+    expect(result.issues).toBeEmpty();
+  });
+
   it('should pass intermediate join information', () => {
     const schema = {
       'x-fqm-joins-to': [{ targetModule: 'mod-target', targetEntity: 'entity', targetField: 'field1' }],

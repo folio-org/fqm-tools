@@ -119,7 +119,11 @@ export function getExtraProperties(propSchema: JSONSchema7) {
   }
 
   if ('x-fqm-source' in propSchema) {
-    extraProperties.source = propSchema['x-fqm-source'] as string;
+    extraProperties.source = propSchema['x-fqm-source'] as { entityTypeId: string; columnName: string };
+  }
+
+  if ('x-fqm-id-column-name' in propSchema) {
+    extraProperties.idColumnName = propSchema['x-fqm-id-column-name'] as string;
   }
 
   return { extraProperties, issues };
