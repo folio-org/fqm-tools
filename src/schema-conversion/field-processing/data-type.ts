@@ -178,7 +178,7 @@ export function getDataType(
             ...stripGetters(result),
             ...handleGetterOverrides(nestedDefaults, overrides, entityType.source, false),
             name: snakeCase(prop),
-            property: prop,
+            property: result.property ?? prop,
           };
         })
         .filter((f): f is EntityTypeField => f !== null);

@@ -189,4 +189,29 @@ describe('getDataType', () => {
       },
     });
   });
+
+  it('respects x-fqm-property on nested object properties', () => {
+    const [dataType, issues] = getDataType(
+      {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            feeFineTypeId: {
+              type: 'string',
+              format: 'uuid',
+              'x-fqm-property': 'feeFineType',
+            } as unknown as JSONSchema7,
+          },
+        },
+      },
+      '',
+      entityTypeConfig,
+      config,
+    );
+
+    expect(issues).toBeEmpty();
+    const nestedField = (dataType.itemDataType as { properties: { property: string }[] }).properties[0];
+    expect(nestedField.property).toBe('feeFineType');
+  });
 });
