@@ -200,7 +200,7 @@ describe('getDataType', () => {
             feeFineTypeId: {
               type: 'string',
               format: 'uuid',
-              'x-fqm-property': 'feeFineType',
+              'x-fqm-property': 'customPropertyName',
             } as unknown as JSONSchema7,
           },
         },
@@ -212,6 +212,6 @@ describe('getDataType', () => {
 
     expect(issues).toBeEmpty();
     const nestedField = (dataType.itemDataType as { properties: { property: string }[] }).properties[0];
-    expect(nestedField.property).toBe('feeFineType');
+    expect(nestedField.property).toBe('customPropertyName');
   });
 });

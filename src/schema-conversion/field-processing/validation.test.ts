@@ -22,7 +22,7 @@ describe('validateField', () => {
 
   it('accepts x-fqm-property as a valid custom property', () => {
     const schema = {
-      'x-fqm-property': 'feeFineType',
+      'x-fqm-property': 'customPropertyName',
     };
     const result = validateField('test', schema as JSONSchema7);
     expect(result).toBeEmpty();
