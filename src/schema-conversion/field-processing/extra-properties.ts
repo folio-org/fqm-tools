@@ -122,6 +122,10 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties.source = propSchema['x-fqm-source'] as { entityTypeId: string; columnName: string };
   }
 
+  if ('x-fqm-property' in propSchema) {
+    extraProperties.property = propSchema['x-fqm-property'] as string;
+  }
+
   if ('x-fqm-id-column-name' in propSchema) {
     extraProperties.idColumnName = propSchema['x-fqm-id-column-name'] as string;
   }
