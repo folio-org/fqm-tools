@@ -17,6 +17,7 @@ const ALLOWED_CUSTOM_PROPERTIES = [
   'x-fqm-joins-to-raw',
   'x-fqm-source',
   'x-fqm-id-column-name',
+  'x-fqm-property',
 ];
 
 export function validateField(name: string, schema: JSONSchema7): string[] {

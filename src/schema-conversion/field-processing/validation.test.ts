@@ -20,6 +20,14 @@ describe('validateField', () => {
     expect(result).toContain('Invalid custom properties found for property test: x-fqm-invalid-property');
   });
 
+  it('accepts x-fqm-property as a valid custom property', () => {
+    const schema = {
+      'x-fqm-property': 'customPropertyName',
+    };
+    const result = validateField('test', schema as JSONSchema7);
+    expect(result).toBeEmpty();
+  });
+
   it('returns an issue for invalid x-fqm-visibility value', () => {
     const schema = {
       'x-fqm-visibility': 'invalid-value',

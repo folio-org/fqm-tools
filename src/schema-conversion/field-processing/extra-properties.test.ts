@@ -80,6 +80,13 @@ describe('getExtraProperties', () => {
     expect(result.issues).toBeEmpty();
   });
 
+  it('should set property when x-fqm-property is present', () => {
+    const schema = { 'x-fqm-property': 'customPropertyName' } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.property).toBe('customPropertyName');
+    expect(result.issues).toBeEmpty();
+  });
+
   it('should set idColumnName when x-fqm-id-column-name is present', () => {
     const schema = { 'x-fqm-id-column-name': 'customIdColumn' } as JSONSchema7;
     const result = getExtraProperties(schema);
