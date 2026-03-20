@@ -20,6 +20,7 @@ Custom properties may be added to your existing JSON/YAML schemas to customize t
 | `x-fqm-value-source-api`    | object                                                                   | none                                                      | APIs that can provide values for queries; [see below](#value-source-apis)                                                                                                                                              |
 | `x-fqm-source`              | object                                                                   | none                                                      | Reference to an entity type field that defines properties (valueGetter, valueSourceApi, etc.) for this field; [see below](#sources)                                                                                    |
 | `x-fqm-id-column-name`      | string                                                                   | none                                                      | Reference to another field that should be used as the ID column; [see below](#sources)                                                                                                                                 |
+| `x-fqm-property`            | string                                                                   | schema property key                                       | The JSON property name used to look up this field in the source document; [see below](#property)                                                                                                                       |
 | `x-fqm-joins-to`            | array                                                                    | `[]`                                                      | Defines how this field can join to other entity types; [see below](#joins)                                                                                                                                             |
 | `x-fqm-joins-to-raw`        | array                                                                    | `[]`                                                      | Defines how this field can join to other non-generated entity types; [see below](#joins)                                                                                                                               |
 
@@ -100,6 +101,29 @@ The `valueJsonPath` and `labelJsonPath` describe the values being used for the q
 In the above example, the `x-fqm-source` property indicates that this field's values are derived from the `location_name` field of the entity type with the specified UUID. When this field is used in FQM, it will use the valueGetter, valueSourceApi, and other properties defined for the `location_name` field in the referenced entity type.
 
 This is typically used in conjunction with `x-fqm-id-column-name` to point to the column that should be used internally for queries. This is commonly used when the field is a human-readable value that should be shown to users, but the actual queries should be made against a corresponding ID column.
+
+### Property
+
+For fields nested inside array-of-object types, the generator automatically sets `property` to the schema key name — the JSON property name used to look up the field in each array element. In most cases this is correct, but when the schema key differs from the actual JSON property name in the source document, `x-fqm-property` lets you override it.
+
+A common scenario is when a UUID field is named differently from its human-readable counterpart. For example, a schema may define a `feeFineTypeId` property whose value getter targets `feeFineType` (the type name, not the ID):
+
+```json5
+// inside an array item's properties
+{
+  feeFineTypeId: {
+    type: 'string',
+    $ref: 'raml-util/schemas/uuid.schema',
+    'x-fqm-value-getter': "(SELECT array_agg(elems.value->>'feeFineTypeId') FROM jsonb_array_elements(:source.jsonb->'openFeesFines') AS elems)",
+    'x-fqm-property': 'feeFineType', // <-- overrides the default of "feeFineTypeId"
+  },
+}
+```
+
+Without `x-fqm-property`, the generated field would have `property: "feeFineTypeId"`. With it, the generated field will have `property: "feeFineType"`, which is the correct key FQM will use when reading values out of the source document.
+
+> [!NOTE]
+> `x-fqm-property` is only meaningful on fields that are **nested inside an object within an array**. On top-level fields the `property` attribute is not emitted, so this override has no effect there.
 
 ### Joins
 
