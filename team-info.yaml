@@ -2,6 +2,10 @@ corsair:
   github: folio-org/corsair
   slack: C065XKBNARG
 
+spitfire:
+  github: folio-org/spitfire
+  slack: CD37PQHGD
+
 thunderjet:
   github: folio-org/acquisitions
   slack: GD1QUNW1W
