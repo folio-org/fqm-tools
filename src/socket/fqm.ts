@@ -55,7 +55,7 @@ export async function authenticate(fqmConnection: FqmConnection) {
 }
 
 export function getRefreshableAuthenticator(fqmConnection: FqmConnection) {
-  const REAUTH_INTERVAL_SECONDS = parseInt(process.env['REAUTH_INTERVAL_SECONDS'] ?? '300', 10);
+  const REAUTH_INTERVAL_SECONDS = Number.parseInt(process.env['REAUTH_INTERVAL_SECONDS'] ?? '300', 10);
   const refreshableToken = {
     token: '',
     refreshedAt: 0,
