@@ -2,6 +2,10 @@ import { EntityType, FqmConnection } from '@/types';
 
 let token: { 'x-okapi-token'?: string } = {};
 
+export function url(fqmConnection: FqmConnection) {
+  return `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}`;
+}
+
 export async function authenticate(fqmConnection: FqmConnection) {
   if (!fqmConnection.user) {
     console.error('Cannot authenticate to FQM, no user provided');
@@ -9,29 +13,7 @@ export async function authenticate(fqmConnection: FqmConnection) {
 
   token = {
     'x-okapi-token': (
-      await fetch(
-        `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/authn/login`,
-        {
-          method: 'POST',
-          headers: {
-            'x-okapi-tenant': fqmConnection.tenant,
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: fqmConnection.user,
-            password: fqmConnection.password,
-            tenant: fqmConnection.tenant,
-          }),
-        },
-      )
-    ).headers.get('x-okapi-token')!,
-  };
-
-  if (token['x-okapi-token'] === null) {
-    console.error('Traditional token login failed, trying with expiry');
-    const response = await fetch(
-      `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/authn/login-with-expiry`,
-      {
+      await fetch(`${url(fqmConnection)}/authn/login`, {
         method: 'POST',
         headers: {
           'x-okapi-tenant': fqmConnection.tenant,
@@ -42,8 +24,24 @@ export async function authenticate(fqmConnection: FqmConnection) {
           password: fqmConnection.password,
           tenant: fqmConnection.tenant,
         }),
+      })
+    ).headers.get('x-okapi-token')!,
+  };
+
+  if (token['x-okapi-token'] === null) {
+    console.error('Traditional token login failed, trying with expiry');
+    const response = await fetch(`${url(fqmConnection)}/authn/login-with-expiry`, {
+      method: 'POST',
+      headers: {
+        'x-okapi-tenant': fqmConnection.tenant,
+        'content-type': 'application/json',
       },
-    );
+      body: JSON.stringify({
+        username: fqmConnection.user,
+        password: fqmConnection.password,
+        tenant: fqmConnection.tenant,
+      }),
+    });
     token = {
       'x-okapi-token': response.headers
         .get('set-cookie')
@@ -56,19 +54,34 @@ export async function authenticate(fqmConnection: FqmConnection) {
   console.log('Successfully grabbed authentication token');
 }
 
+export function getRefreshableAuthenticator(fqmConnection: FqmConnection) {
+  const REAUTH_INTERVAL_SECONDS = parseInt(process.env['REAUTH_INTERVAL_SECONDS'] ?? '300', 10);
+  const refreshableToken = {
+    token: '',
+    refreshedAt: 0,
+  };
+
+  return async () => {
+    if (Date.now() - refreshableToken.refreshedAt > REAUTH_INTERVAL_SECONDS * 1000) {
+      console.log(`${new Date().toISOString()} Refreshing token...`);
+      await authenticate(fqmConnection);
+      refreshableToken.token = token['x-okapi-token']!;
+      refreshableToken.refreshedAt = Date.now();
+    }
+    return refreshableToken.token;
+  };
+}
+
 export async function verifyFqmConnection(fqmConnection: FqmConnection) {
   console.log('Attempting to verify FQM connection', fqmConnection);
 
   try {
-    const response = await fetch(
-      `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types`,
-      {
-        headers: {
-          'x-okapi-tenant': fqmConnection.tenant,
-          ...token,
-        },
+    const response = await fetch(`${url(fqmConnection)}/entity-types`, {
+      headers: {
+        'x-okapi-tenant': fqmConnection.tenant,
+        ...token,
       },
-    );
+    });
 
     if (response.status !== 200) {
       const text = await response.text();
@@ -89,15 +102,12 @@ export async function verifyFqmConnection(fqmConnection: FqmConnection) {
 }
 
 export async function fetchAllEntityTypes(fqmConnection: FqmConnection) {
-  const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types`,
-    {
-      headers: {
-        'x-okapi-tenant': fqmConnection.tenant,
-        ...token,
-      },
+  const response = await fetch(`${url(fqmConnection)}/entity-types`, {
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      ...token,
     },
-  );
+  });
 
   if (response.status !== 200) {
     const text = await response.text();
@@ -113,7 +123,7 @@ export async function fetchAllEntityTypes(fqmConnection: FqmConnection) {
 
 export async function fetchEntityType(fqmConnection: FqmConnection, entityTypeId: string, includeHidden = false) {
   const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityTypeId}?includeHidden=${includeHidden ? 'true' : 'false'}`,
+    `${url(fqmConnection)}/entity-types/${entityTypeId}?includeHidden=${includeHidden ? 'true' : 'false'}`,
     {
       headers: {
         'x-okapi-tenant': fqmConnection.tenant,
@@ -154,14 +164,12 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
   console.log('Resolved fields for', entityType.name, ':', fields);
 
   const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/query?${new URLSearchParams(
-      {
-        query,
-        entityTypeId: entityType.id,
-        fields: fields.join(','),
-        limit: `${fqmConnection.limit}`,
-      },
-    )}`,
+    `${url(fqmConnection)}/query?${new URLSearchParams({
+      query,
+      entityTypeId: entityType.id,
+      fields: fields.join(','),
+      limit: `${fqmConnection.limit}`,
+    })}`,
     {
       method: 'GET',
       headers: {
@@ -184,16 +192,13 @@ export async function runQuery(fqmConnection: FqmConnection, entityType: EntityT
 }
 
 export async function runQueryForValues(fqmConnection: FqmConnection, entityType: EntityType, field: string) {
-  const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/entity-types/${entityType.id}/columns/${field}/values`,
-    {
-      method: 'GET',
-      headers: {
-        'x-okapi-tenant': fqmConnection.tenant,
-        ...token,
-      },
+  const response = await fetch(`${url(fqmConnection)}/entity-types/${entityType.id}/columns/${field}/values`, {
+    method: 'GET',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      ...token,
     },
-  );
+  });
 
   if (response.status !== 200) {
     const text = await response.text();
@@ -208,20 +213,17 @@ export async function runQueryForValues(fqmConnection: FqmConnection, entityType
 }
 
 export async function install(fqmConnection: FqmConnection) {
-  const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/_/tenant`,
-    {
-      method: 'POST',
-      headers: {
-        'x-okapi-tenant': fqmConnection.tenant,
-        'content-type': 'application/json',
-        ...token,
-      },
-      body: JSON.stringify({
-        module_to: 'foo',
-      }),
+  const response = await fetch(`${url(fqmConnection)}/_/tenant`, {
+    method: 'POST',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      'content-type': 'application/json',
+      ...token,
     },
-  );
+    body: JSON.stringify({
+      module_to: 'foo',
+    }),
+  });
 
   const status = `${response.status} ${response.statusText}`;
   console.log('Installing mod-fqm-manager yielded', status);
@@ -230,20 +232,17 @@ export async function install(fqmConnection: FqmConnection) {
 }
 
 export async function uninstall(fqmConnection: FqmConnection) {
-  const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/_/tenant`,
-    {
-      method: 'POST',
-      headers: {
-        'x-okapi-tenant': fqmConnection.tenant,
-        'content-type': 'application/json',
-        ...token,
-      },
-      body: JSON.stringify({
-        module_from: 'foo',
-      }),
+  const response = await fetch(`${url(fqmConnection)}/_/tenant`, {
+    method: 'POST',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      'content-type': 'application/json',
+      ...token,
     },
-  );
+    body: JSON.stringify({
+      module_from: 'foo',
+    }),
+  });
 
   const status = `${response.status} ${response.statusText}`;
   console.log('Uninstalling mod-fqm-manager yielded', status);
@@ -262,22 +261,19 @@ export async function migrate(
   fields: string[];
   warnings: { description: string; type: string }[];
 }> {
-  const response = await fetch(
-    `http${fqmConnection.port === 443 ? 's' : ''}://${fqmConnection.host}:${fqmConnection.port}/fqm/migrate`,
-    {
-      method: 'post',
-      headers: {
-        'x-okapi-tenant': fqmConnection.tenant,
-        'content-type': 'application/json',
-        ...token,
-      },
-      body: JSON.stringify({
-        entityTypeId,
-        fqlQuery,
-        fields,
-      }),
+  const response = await fetch(`${url(fqmConnection)}/fqm/migrate`, {
+    method: 'post',
+    headers: {
+      'x-okapi-tenant': fqmConnection.tenant,
+      'content-type': 'application/json',
+      ...token,
     },
-  );
+    body: JSON.stringify({
+      entityTypeId,
+      fqlQuery,
+      fields,
+    }),
+  });
 
   if (response.status !== 200) {
     const text = await response.text();
