@@ -88,5 +88,8 @@
       "prettier --write",
       "eslint --fix --max-warnings 0"
     ]
+  },
+  "resolutions": {
+    "axios": "1.14.0"
   }
 }
