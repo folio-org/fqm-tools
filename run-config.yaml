@@ -7,5 +7,6 @@ modules:
   - mod-circulation-storage
   - mod-entities-links
   - mod-feesfines
+  - mod-notes
   - mod-orders-storage
   - mod-patron-blocks
