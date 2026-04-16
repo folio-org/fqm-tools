@@ -280,18 +280,25 @@ const newIssues = issues.filter(
   (i) => !aliveAndKnownIssues.some((ki) => diff(i, ki, { cyclesFix: false }).length === 0),
 );
 
-const issuesByTeam = issues.reduce(
+const issuesByTeam = newIssues.reduce(
   (acc, issue) => {
     const team = issue.metadata?.team || '';
     if (!acc[team]) {
       acc[team] = [];
-      affectedTeams.add(team || 'corsair');
     }
+    affectedTeams.add(team || 'corsair');
     acc[team].push(issue);
     return acc;
   },
   {} as Record<string, ErrorSerialized[]>,
 );
+aliveAndKnownIssues.forEach((issue) => {
+  const team = issue.metadata?.team || '';
+  if (!issuesByTeam[team]) {
+    issuesByTeam[team] = [];
+  }
+  issuesByTeam[team].push(issue);
+});
 
 async function logCollapsable(
   title: string,
