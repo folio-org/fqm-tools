@@ -3,7 +3,8 @@ import { fetchAllEntityTypes, fetchEntityType } from '@/src/socket/fqm';
 import { EntityType, FqmConnection } from '@/types';
 import json5 from 'json5';
 import memoize from 'lodash.memoize';
-import { mkdir, readdir, readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { mkdir, readdir } from 'node:fs/promises';
 
 if (process.argv.length < 3) {
   console.error('Usage:');
@@ -32,22 +33,20 @@ let entityTypes: { id: string; label?: string }[];
 if (process.argv[3] === 'all') {
   const ENTITY_TYPE_FILE_PATH = './external/mod-fqm-manager/src/main/resources/entity-types/';
   console.log('Looking for entity types in', ENTITY_TYPE_FILE_PATH);
-  entityTypes = (
-    await Promise.all(
-      (await readdir(ENTITY_TYPE_FILE_PATH, { recursive: true }))
-        .filter((f) => f.endsWith('.json5'))
-        .filter((f) => !f.startsWith('external/'))
-        .map(async (f) => {
-          try {
-            const data = json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString());
-            return { id: data.id, label: f };
-          } catch (e) {
-            console.error('Error reading entity type file', `${ENTITY_TYPE_FILE_PATH}${f}`, e);
-            return null;
-          }
-        }),
-    )
-  ).filter((e) => e !== null);
+  entityTypes = (await readdir(ENTITY_TYPE_FILE_PATH, { recursive: true }))
+    .filter((f) => f.endsWith('.json5'))
+    .filter((f) => !f.startsWith('external/'))
+    .map((f) => {
+      try {
+        return { f, data: json5.parse<EntityType>(readFileSync(ENTITY_TYPE_FILE_PATH + f).toString()) };
+      } catch (e) {
+        console.error('Error reading entity type file', `${ENTITY_TYPE_FILE_PATH}${f}`, e);
+        return null;
+      }
+    })
+    .filter((e) => e !== null)
+    .filter(({ data }) => data?.sources?.every((s) => s.type === 'db'))
+    .map(({ f, data }) => ({ id: data.id, label: f }));
 } else if (process.argv[3] === 'public') {
   const response = JSON.parse(await fetchAllEntityTypes(FQM_CONNECTION));
   if (Array.isArray(response)) {
