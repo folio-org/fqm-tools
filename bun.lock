@@ -34,7 +34,7 @@
         "json-schema-to-typescript": "^15.0.4",
         "json5": "^2.2.3",
         "ky": "^2.0.0",
-        "ky-universal": "^0.12.0",
+        "ky-universal": "^1.0.0",
         "lodash.memoize": "^4.1.2",
         "markdown-table": "^3.0.4",
         "microdiff": "^1.5.0",
@@ -859,7 +859,7 @@
 
     "ky": ["ky@2.0.1", "", {}, "sha512-HJPEjEpQPZQ5M3G5eu90/LWZDwysCnvqcfbLvq9FUvfizBZRi58WEixswyyI32LOLcFQd43w7kcfgkCPFxDt/Q=="],
 
-    "ky-universal": ["ky-universal@0.12.0", "", { "dependencies": { "node-fetch": "^3.3.2" }, "peerDependencies": { "ky": ">=0.33.0", "web-streams-polyfill": ">=3.2.1" }, "optionalPeers": ["web-streams-polyfill"] }, "sha512-dGXoWBaHXIkiph3871I9H3KAgTE+fGOTAfTdO3wxb+Mg7seBa9rmWZmK29R38s8bZMDKulyELnwusOI8odCBvQ=="],
+    "ky-universal": ["ky-universal@1.0.0", "", { "dependencies": { "node-fetch": "^3.3.2" }, "peerDependencies": { "ky": ">=0.33.0", "web-streams-polyfill": ">=3.2.1" }, "optionalPeers": ["web-streams-polyfill"] }, "sha512-pWikiCD7CRRz3jopuLMRKThrSDDCYjUS5Z68g/qhdUDktL8JolN3rBwEwEwCuDPAK+1nuhXyqHBe2NGR6DMWqg=="],
 
     "language-subtag-registry": ["language-subtag-registry@0.3.23", "", {}, "sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ=="],
 
