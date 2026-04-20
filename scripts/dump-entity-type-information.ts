@@ -40,7 +40,7 @@ if (process.argv[3] === 'all') {
         .map(async (f) => {
           try {
             const data = json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString());
-            return { id: data.id, label: data.name };
+            return { id: data.id, label: f };
           } catch (e) {
             console.error('Error reading entity type file', `${ENTITY_TYPE_FILE_PATH}${f}`, e);
             return null;
