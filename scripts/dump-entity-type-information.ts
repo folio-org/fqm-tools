@@ -36,6 +36,7 @@ if (process.argv[3] === 'all') {
     await Promise.all(
       (await readdir(ENTITY_TYPE_FILE_PATH, { recursive: true }))
         .filter((f) => f.endsWith('.json5'))
+        .filter((f) => !f.startsWith('external/'))
         .map(async (f) => {
           try {
             const data = json5.parse((await readFile(ENTITY_TYPE_FILE_PATH + f)).toString());
@@ -76,7 +77,10 @@ for (const { id, label } of entityTypes) {
   console.log('Dumping information for entity type', label ?? id);
 
   const entityType = await fetcher(id);
-  const filename = `${dir}/${(label ?? entityType.name).replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`;
+  const filename = `${dir}/${(label ?? entityType.name)
+    .replace(/\//g, '.')
+    .replace(/[^a-z0-9.]+/gi, '-')
+    .toLowerCase()}.csv`;
 
   await Bun.write(Bun.file(filename), await entityTypeToCsv(entityType, fetcher));
 }
