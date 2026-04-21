@@ -63,7 +63,7 @@
         "@types/node": "25.5.2",
         "@types/papaparse": "5.5.2",
         "@types/pluralize": "0.0.33",
-        "@types/progress": "^2.0.7",
+        "@types/progress": "2.0.7",
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
         "eslint": "9.39.4",
