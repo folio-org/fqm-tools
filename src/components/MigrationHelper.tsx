@@ -1,11 +1,15 @@
-import { EntityType } from '@/types';
+import { DataTypeValue, EntityType } from '@/types';
 import { java } from '@codemirror/lang-java';
 import { json } from '@codemirror/lang-json';
 import { Button, Container, FormControlLabel, Grid, Switch } from '@mui/material';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror';
 import { constantCase } from 'change-case';
 import json5 from 'json5';
+import { parse } from 'papaparse';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ResultRowPretty } from '../schema-conversion/csv';
+import Link from 'next/link';
+import { Mapping } from '@/scripts/get-column-mapping';
 
 export default function MigrationHelper() {
   const [oldEntityType, setOldEntityType] = useState<EntityType | null>(null);
@@ -19,7 +23,7 @@ export default function MigrationHelper() {
   const [clicked, setClicked] = useState<string | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  const result = useMemo(() => {
+  const { result, fieldMappingForComparison } = useMemo(() => {
     let result = '';
 
     const oldAndNewAreSame = oldEntityType?.id === newEntityType?.id;
@@ -78,7 +82,18 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
 }
 `;
 
-    return result.trimStart();
+    return {
+      result: result.trimStart(),
+      fieldMappingForComparison: JSON.stringify(
+        Object.entries(columnMapping).map(
+          ([oldName, newName]): Mapping => ({
+            src: { entityType: oldEntityType?.id ?? '', column: oldName },
+            dest: { entityType: newEntityType?.id ?? '', column: newName },
+            warnings: [],
+          }),
+        ),
+      ),
+    };
   }, [oldEntityType, newEntityType, columnMapping]);
 
   useEffect(() => {
@@ -200,6 +215,19 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
     };
   }, [oldEntityType, newEntityType, columnMapping, mousePosition, clicked, showMatched, showOnlyMatchingDataTypes]);
 
+  useEffect(() => {
+    if (oldEntityType === null || newEntityType === null) {
+      return;
+    }
+
+    const obviousMappings = oldEntityType.columns
+      ?.filter((c) =>
+        newEntityType.columns?.find((nc) => nc.name === c.name && nc.dataType.dataType === c.dataType.dataType),
+      )
+      .reduce((acc, c) => ({ ...acc, [c.name]: c.name }), {});
+    setColumnMapping(obviousMappings ?? {});
+  }, [oldEntityType, newEntityType]);
+
   return (
     <Grid container spacing={2}>
       <Grid size={{ xs: 6 }} sx={{ height: 300, overflow: 'auto' }}>
@@ -210,7 +238,23 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
           id="old-entity-type"
           onChange={(s) => {
             try {
-              setOldEntityType(json5.parse(s));
+              if (s.startsWith('{')) {
+                setOldEntityType(json5.parse(s));
+              } else {
+                const csv = parse<ResultRowPretty>(s, { header: true });
+                if (csv.data.length > 0 && 'Name' in csv.data[0]) {
+                  setOldEntityType({
+                    id: csv.data[0]['Entity ID'],
+                    name: csv.data[0]['Base entity'],
+                    columns: csv.data.map((r) => ({
+                      name: r['Name'],
+                      dataType: { dataType: r['Datatype'] as DataTypeValue },
+                    })),
+                  });
+                } else {
+                  throw new Error('not a valid CSV?');
+                }
+              }
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e: unknown) {
               setOldEntityType(null);
@@ -227,7 +271,23 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
           id="new-entity-type"
           onChange={(s) => {
             try {
-              setNewEntityType(json5.parse(s));
+              if (s.startsWith('{')) {
+                setNewEntityType(json5.parse(s));
+              } else {
+                const csv = parse<ResultRowPretty>(s, { header: true });
+                if (csv.data.length > 0 && 'Name' in csv.data[0]) {
+                  setNewEntityType({
+                    id: csv.data[0]['Entity ID'],
+                    name: csv.data[0]['Base entity'],
+                    columns: csv.data.map((r) => ({
+                      name: r['Name'],
+                      dataType: { dataType: r['Datatype'] as DataTypeValue },
+                    })),
+                  });
+                } else {
+                  throw new Error('not a valid CSV?');
+                }
+              }
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e: unknown) {
               setNewEntityType(null);
@@ -277,7 +337,32 @@ protected Map<UUID, Map<String, String>> getFieldChanges() {
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <CodeMirror value={result} readOnly extensions={[java(), EditorView.lineWrapping]} />
+              <fieldset>
+                <legend>Migration code</legend>
+                <CodeMirror value={result} readOnly extensions={[java(), EditorView.lineWrapping]} />
+              </fieldset>
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <fieldset>
+                <legend>
+                  Mapping (for use <Link href="/field-comparison">here</Link>;{' '}
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([fieldMappingForComparison], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'mapping.json';
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    download
+                  </button>
+                  )
+                </legend>
+                <CodeMirror value={fieldMappingForComparison} readOnly extensions={[json(), EditorView.lineWrapping]} />
+              </fieldset>
             </Grid>
           </Grid>
         </Container>

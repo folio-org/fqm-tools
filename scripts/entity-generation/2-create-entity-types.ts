@@ -175,6 +175,7 @@ const expectedTranslationKeys = results
 
 for (const { dir, config } of configs) {
   try {
+    await mkdir(path.resolve(dir, 'translations'), { recursive: true });
     const translationFiles = (await readdir(path.resolve(dir, 'translations'), { recursive: true })).filter((p) =>
       p.endsWith('.json'),
     );

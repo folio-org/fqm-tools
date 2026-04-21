@@ -11,7 +11,7 @@ export interface Mapping {
 }
 
 if (process.argv.length < 4) {
-  console.error('Usage: bun scripts/compare-across-time.ts <start-version> <start>');
+  console.error('Usage: bun scripts/compare-across-time.ts <start-version> <starting-csv>');
   process.exit(1);
 }
 
