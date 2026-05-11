@@ -90,6 +90,6 @@
     ]
   },
   "resolutions": {
-    "axios": "1.15.2"
+    "axios": "1.16.0"
   }
 }
