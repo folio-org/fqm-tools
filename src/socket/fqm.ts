@@ -42,6 +42,10 @@ export async function authenticate(fqmConnection: FqmConnection) {
         tenant: fqmConnection.tenant,
       }),
     });
+    if (response.status >= 400) {
+      const text = await response.text();
+      throw new Error(`Failed to authenticate: got ${response.status} ${response.statusText} (${text})`);
+    }
     token = {
       'x-okapi-token': response.headers
         .get('set-cookie')
