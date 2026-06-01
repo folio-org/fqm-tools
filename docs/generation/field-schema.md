@@ -18,7 +18,7 @@ Custom properties may be added to your existing JSON/YAML schemas to customize t
 | `x-fqm-value-function`      | string (SQL)                                                             | inferred                                                  | How the field should be queried from the database; [see below](#getters)                                                                                                                                               |
 | `x-fqm-values`              | array of object `{value: string, label: string}`                         | none                                                      | Values to be presented in the query builder dropdown, should match an enum used in code.                                                                                                                               |
 | `x-fqm-value-source-api`    | object                                                                   | none                                                      | APIs that can provide values for queries; [see below](#value-source-apis)                                                                                                                                              |
-| `x-fqm-source`              | object                                                                   | none                                                      | Reference to an entity type field that defines properties (valueGetter, valueSourceApi, etc.) for this field; [see below](#sources)                                                                                    |
+| `x-fqm-source`              | object                                                                   | none                                                      | Reference to an entity type field that supplies source values for this field; [see below](#sources)                                                                                                                    |
 | `x-fqm-id-column-name`      | string                                                                   | none                                                      | Reference to another field that should be used as the ID column; [see below](#sources)                                                                                                                                 |
 | `x-fqm-property`            | string                                                                   | schema property key                                       | The JSON property name used to look up this field in the source document; [see below](#property)                                                                                                                       |
 | `x-fqm-joins-to`            | array                                                                    | `[]`                                                      | Defines how this field can join to other entity types; [see below](#joins)                                                                                                                                             |
@@ -87,7 +87,7 @@ The `valueJsonPath` and `labelJsonPath` describe the values being used for the q
 
 ### Sources
 
-`Source` is an optional field that can be provided to indicate that this field's values are derived from another entity type's field. By using `source` to reference an existing field in another entity type, the properties for that field (valueGetter, valueSourceApi, etc.) can be reused without having to redefine the properties in the new entity type. For example:
+`Source` is an optional field that can be provided to indicate that this field's values are derived from another entity type's field. By using `source` to reference an existing field in another entity type, FQM can use the referenced field as the source of values without redefining that relationship in the new entity type. For example:
 
 ```json5
 {
@@ -98,7 +98,7 @@ The `valueJsonPath` and `labelJsonPath` describe the values being used for the q
 }
 ```
 
-In the above example, the `x-fqm-source` property indicates that this field's values are derived from the `location_name` field of the entity type with the specified UUID. When this field is used in FQM, it will use the valueGetter, valueSourceApi, and other properties defined for the `location_name` field in the referenced entity type.
+In the above example, the `x-fqm-source` property indicates that this field's values are derived from the `location_name` field of the entity type with the specified UUID. When `x-fqm-source` is present, the generator does not emit a local `valueSourceApi` for the field; value sourcing should come through the referenced field.
 
 This is typically used in conjunction with `x-fqm-id-column-name` to point to the column that should be used internally for queries. This is commonly used when the field is a human-readable value that should be shown to users, but the actual queries should be made against a corresponding ID column.
 
