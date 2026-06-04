@@ -27,6 +27,14 @@ describe('getExtraProperties', () => {
     expect(result.extraProperties.valueSourceApi as unknown).toBe('api-source');
   });
 
+  it('should not return valueSourceApi when x-fqm-source is present', () => {
+    const source = { entityTypeId: 'customEntityTypeId', columnName: 'customColumnName' };
+    const schema = { 'x-fqm-source': source, 'x-fqm-value-source-api': 'api-source' } as JSONSchema7;
+    const result = getExtraProperties(schema);
+    expect(result.extraProperties.source).toBe(source);
+    expect(result.extraProperties.valueSourceApi).toBeUndefined();
+  });
+
   it('should return values when x-fqm-values is present', () => {
     const schema = { 'x-fqm-values': 'value-list' } as JSONSchema7;
     const result = getExtraProperties(schema);

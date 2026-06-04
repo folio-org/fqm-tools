@@ -94,7 +94,7 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties.values = propSchema['x-fqm-values'] as EntityTypeField['values'];
   }
 
-  if ('x-fqm-value-source-api' in propSchema) {
+  if ('x-fqm-value-source-api' in propSchema && !('x-fqm-source' in propSchema)) {
     extraProperties.valueSourceApi = propSchema['x-fqm-value-source-api'] as EntityTypeField['valueSourceApi'];
   }
 
