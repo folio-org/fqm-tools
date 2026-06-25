@@ -185,6 +185,75 @@ describe('createEntityTypeFromConfig', () => {
     expect(issues).toContainEqual('Excluded field test does not exist in the entity type');
   });
 
+  const SOURCE = { columnName: 'foo', entityTypeId: '00000000-0000-0000-0000-000000000000' };
+  const VALUE_SOURCE_API = { path: 'p', valueJsonPath: '$.id', labelJsonPath: '$.name' };
+
+  function generateWithFieldAdditions(fieldAdditions: object[]) {
+    return createEntityTypeFromConfig(
+      {
+        name: 'simple_department',
+        source: 'department',
+        schema: 'test/schemas/department.json',
+        permissions: ['perm1', 'perm2'],
+        sort: ['id', 'ASC'],
+        private: true,
+        includeJsonbField: false,
+        fieldAdditions,
+      } as EntityTypeGenerationConfig['entityTypes'][number],
+      { type: 'object', properties: {} } as JSONSchema7,
+      {
+        metadata: { module: 'foo' },
+        sources: [{ name: 'department', view: 'marinara' }],
+      } as unknown as EntityTypeGenerationConfig,
+    );
+  }
+
+  it('fails when a top-level field defines both source and valueSourceApi', () => {
+    expect(() =>
+      generateWithFieldAdditions([
+        {
+          name: 'conflicting',
+          dataType: { dataType: DataTypeValue.stringType },
+          source: SOURCE,
+          valueSourceApi: VALUE_SOURCE_API,
+        },
+      ]),
+    ).toThrowError(/simple_department.*\bconflicting\b/);
+  });
+
+  it('fails when a nested field defines both, reporting the full path', () => {
+    expect(() =>
+      generateWithFieldAdditions([
+        {
+          name: 'parent',
+          dataType: {
+            dataType: DataTypeValue.arrayType,
+            itemDataType: {
+              dataType: DataTypeValue.objectType,
+              properties: [
+                {
+                  name: 'child',
+                  dataType: { dataType: DataTypeValue.stringType },
+                  source: SOURCE,
+                  valueSourceApi: VALUE_SOURCE_API,
+                },
+              ],
+            },
+          },
+        },
+      ]),
+    ).toThrowError(/simple_department.*\bparent\.child\b/);
+  });
+
+  it('passes when fields define only source or only valueSourceApi', () => {
+    expect(() =>
+      generateWithFieldAdditions([
+        { name: 'only_source', dataType: { dataType: DataTypeValue.stringType }, source: SOURCE },
+        { name: 'only_api', dataType: { dataType: DataTypeValue.stringType }, valueSourceApi: VALUE_SOURCE_API },
+      ]),
+    ).not.toThrow();
+  });
+
   it('overrides add and update fields as applicable', async () => {
     expect(
       createEntityTypeFromConfig(

@@ -1,4 +1,4 @@
-import { EntityType, EntityTypeField, EntityTypeGenerationConfig, EntityTypeSource } from '@/types';
+import { DataType, EntityType, EntityTypeField, EntityTypeGenerationConfig, EntityTypeSource } from '@/types';
 import { snakeCase } from 'change-case';
 import { JSONSchema7 } from 'json-schema';
 import { v5 } from 'uuid';
@@ -43,6 +43,8 @@ export default function createEntityTypeFromConfig(
 
   const [columns, exclusionIssues] = applyExclusions(completedColumns, entityType['fieldExclusions']);
   issues.push(...exclusionIssues);
+
+  validateNoSourceValueSourceApiConflict(entityType.name, columns);
 
   return {
     entityType: {
@@ -107,4 +109,34 @@ function applyExclusions(fields: EntityTypeField[], exclusions?: string[]): [Ent
   });
 
   return [Array.from(fieldMap.values()), issues];
+}
+
+/** Collects all nested fields of a data type, descending through object and array data types. */
+function nestedFieldsOf(dataType: DataType): EntityTypeField[] {
+  return [...(dataType.properties ?? []), ...(dataType.itemDataType ? nestedFieldsOf(dataType.itemDataType) : [])];
+}
+
+/**
+ * Rejects any field (top-level or nested) defining both `source` and `valueSourceApi`, which is
+ * ambiguous: each owns value retrieval on its own, so a field should define at most one.
+ *
+ * @throws Error identifying the entity type and field path of the first violation.
+ */
+function validateNoSourceValueSourceApiConflict(
+  entityTypeName: string,
+  fields: EntityTypeField[],
+  path: string[] = [],
+): void {
+  for (const field of fields) {
+    const fieldPath = [...path, field.name];
+
+    if (field.source && field.valueSourceApi) {
+      throw new Error(
+        `Entity type ${entityTypeName} field ${fieldPath.join('.')} defines both source and valueSourceApi; ` +
+          'a field may define at most one of these.',
+      );
+    }
+
+    validateNoSourceValueSourceApiConflict(entityTypeName, nestedFieldsOf(field.dataType), fieldPath);
+  }
 }
