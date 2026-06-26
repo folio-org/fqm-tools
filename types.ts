@@ -75,6 +75,8 @@ export const EntityTypeFieldTemplate = z
       .object({
         columnName: z.string(),
         entityTypeId: z.string(),
+        type: z.string().optional(),
+        name: z.string().optional(),
       })
       .optional(),
     valueSourceApi: z
@@ -92,6 +94,7 @@ export const EntityTypeFieldTemplate = z
         }),
       )
       .optional(),
+    ecsOnly: z.boolean().optional(),
     joinsTo: z.array(z.lazy(() => EntityTypeFieldJoinTemplate)).optional(), // Reference to EntityTypeFieldJoinTemplate
     joinsToIntermediate: z.array(z.lazy(() => EntityTypeFieldJoinIntermediateTemplate)).optional(),
   })
