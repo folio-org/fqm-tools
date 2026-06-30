@@ -21,18 +21,20 @@ describe('getIsIdColumn', () => {
 });
 
 describe('getExtraProperties', () => {
+  const valueSourceApi = { path: 'some/path', valueJsonPath: '$.id', labelJsonPath: '$.name' };
+
   it('should return valueSourceApi when x-fqm-value-source-api is present', () => {
-    const schema = { 'x-fqm-value-source-api': 'api-source' } as JSONSchema7;
+    const schema = { 'x-fqm-value-source-api': valueSourceApi } as JSONSchema7;
     const result = getExtraProperties(schema);
-    expect(result.extraProperties.valueSourceApi as unknown).toBe('api-source');
+    expect(result.extraProperties.valueSourceApi).toBe(valueSourceApi);
   });
 
-  it('should not return valueSourceApi when x-fqm-source is present', () => {
+  it('should return both source and valueSourceApi when both are present (rejected later at the ET level)', () => {
     const source = { entityTypeId: 'customEntityTypeId', columnName: 'customColumnName' };
-    const schema = { 'x-fqm-source': source, 'x-fqm-value-source-api': 'api-source' } as JSONSchema7;
+    const schema = { 'x-fqm-source': source, 'x-fqm-value-source-api': valueSourceApi } as JSONSchema7;
     const result = getExtraProperties(schema);
     expect(result.extraProperties.source).toBe(source);
-    expect(result.extraProperties.valueSourceApi).toBeUndefined();
+    expect(result.extraProperties.valueSourceApi).toBe(valueSourceApi);
   });
 
   it('should return values when x-fqm-values is present', () => {

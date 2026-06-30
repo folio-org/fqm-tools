@@ -254,6 +254,34 @@ describe('createEntityTypeFromConfig', () => {
     ).not.toThrow();
   });
 
+  it('fails when a schema property defines both x-fqm-source and x-fqm-value-source-api', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        conflicting: { type: 'string', 'x-fqm-source': SOURCE, 'x-fqm-value-source-api': VALUE_SOURCE_API },
+      },
+    } as JSONSchema7;
+
+    const entityType = {
+      name: 'simple_department',
+      source: 'department',
+      schema: 'inline',
+      permissions: ['perm1', 'perm2'],
+      sort: ['id', 'ASC'],
+      private: true,
+    } satisfies EntityTypeGenerationConfig['entityTypes'][number];
+
+    const config = {
+      metadata: { team: 'corsair', domain: 'users', module: 'foo' },
+      sources: [{ name: 'department', table: 'marinara' }],
+      entityTypes: [entityType],
+    } satisfies EntityTypeGenerationConfig;
+
+    expect(() => createEntityTypeFromConfig(entityType, schema, config)).toThrowError(
+      /simple_department.*\bconflicting\b/,
+    );
+  });
+
   it('overrides add and update fields as applicable', async () => {
     expect(
       createEntityTypeFromConfig(
