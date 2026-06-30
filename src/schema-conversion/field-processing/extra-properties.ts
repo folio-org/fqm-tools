@@ -94,7 +94,9 @@ export function getExtraProperties(propSchema: JSONSchema7) {
     extraProperties.values = propSchema['x-fqm-values'] as EntityTypeField['values'];
   }
 
-  if ('x-fqm-value-source-api' in propSchema && !('x-fqm-source' in propSchema)) {
+  if ('x-fqm-value-source-api' in propSchema) {
+    // passed through even alongside source; ET generation rejects that combination via
+    // validateNoSourceValueSourceApiConflict (other callers, e.g. the importer preview, do not)
     extraProperties.valueSourceApi = propSchema['x-fqm-value-source-api'] as EntityTypeField['valueSourceApi'];
   }
 
